@@ -66,6 +66,9 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+  const trackContainerRef = useRef<HTMLDivElement | null>(null);
+  const isScrubbingRef = useRef<boolean>(false);
+  const wasPlayingBeforeScrubRef = useRef<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
@@ -94,9 +97,26 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     }
   }, [currentClip?.speed]);
 
+  // Sync video time when selected clip changes during scrubbing or navigation
+  useEffect(() => {
+    if (videoRef.current && currentClip?.mediaType === 'video') {
+      const ranges = getClipTimeRanges();
+      const range = ranges[selectedIdx];
+      if (range) {
+        const localOffset = Math.max(0, currentTime - range.start);
+        const targetVideoTime = (currentClip.trimStart || 0) + localOffset;
+        if (!isNaN(targetVideoTime) && isFinite(targetVideoTime)) {
+          try {
+            videoRef.current.currentTime = targetVideoTime;
+          } catch {}
+        }
+      }
+    }
+  }, [selectedIdx]);
+
   // Video time update handler
   const handleTimeUpdate = () => {
-    if (!videoRef.current) return;
+    if (isScrubbingRef.current || !videoRef.current) return;
     const clipStart = clipRanges[selectedIdx]?.start || 0;
     const currentVideoTime = videoRef.current.currentTime;
     setCurrentTime(clipStart + currentVideoTime);
@@ -275,21 +295,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
           isMuted: false,
           volume: 100,
           kidsStickers: [],
-          customSubtitles: [
-            {
-              id: `sub-${Date.now()}-${idx}`,
-              text: cleanName,
-              x: 50,
-              y: 82,
-              fontSizeScale: 1.0,
-              textColor: '#FFFFFF',
-              bgColor: '#0F172A',
-              boxStyle: 'dark' as const,
-              textAlign: 'center' as const,
-              fontFamily: 'Pretendard' as const,
-              rotation: 0,
-            }
-          ]
+          customSubtitles: [],
         });
       }
 
@@ -309,21 +315,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             isMuted: false,
             volume: 100,
             kidsStickers: [],
-            customSubtitles: [
-              {
-                id: `sub-${Date.now()}-${idx}`,
-                text: cleanName,
-                x: 50,
-                y: 82,
-                fontSizeScale: 1.0,
-                textColor: '#FFFFFF',
-                bgColor: '#0F172A',
-                boxStyle: 'dark' as const,
-                textAlign: 'center' as const,
-                fontFamily: 'Pretendard' as const,
-                rotation: 0,
-              }
-            ]
+            customSubtitles: [],
           });
         };
         reader.onerror = () => {
@@ -340,21 +332,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             isMuted: false,
             volume: 100,
             kidsStickers: [],
-            customSubtitles: [
-              {
-                id: `sub-${Date.now()}-${idx}`,
-                text: cleanName,
-                x: 50,
-                y: 82,
-                fontSizeScale: 1.0,
-                textColor: '#FFFFFF',
-                bgColor: '#0F172A',
-                boxStyle: 'dark' as const,
-                textAlign: 'center' as const,
-                fontFamily: 'Pretendard' as const,
-                rotation: 0,
-              }
-            ]
+            customSubtitles: [],
           });
         };
         reader.readAsDataURL(file);
@@ -399,30 +377,140 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     setSelectedIdx((prev) => Math.min(prev, nextClips.length - 1));
   };
 
-  const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!timelineRef.current || totalDuration <= 0) return;
-    const rect = timelineRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left + timelineRef.current.scrollLeft;
-    const progress = Math.max(0, Math.min(1, clickX / rect.width));
-    const targetTime = progress * totalDuration;
-    setCurrentTime(targetTime);
+  // 🎯 하단 영상 바 실시간 탐색 & 재생 위치 정밀 조절 (Scrubbing / Seeking)
+  const seekToTime = (targetTime: number) => {
+    if (totalDuration <= 0) return;
+    const clampedTime = Math.max(0, Math.min(totalDuration, targetTime));
+    setCurrentTime(clampedTime);
+
     const ranges = getClipTimeRanges();
-    const targetIdx = ranges.findIndex((r) => targetTime >= r.start && targetTime <= r.end);
-    if (targetIdx >= 0) {
+    let targetIdx = ranges.findIndex((r) => clampedTime >= r.start && clampedTime <= r.end);
+    if (targetIdx < 0) {
+      targetIdx = clampedTime <= 0 ? 0 : clips.length - 1;
+    }
+
+    if (targetIdx !== selectedIdx) {
       setSelectedIdx(targetIdx);
+    }
+
+    const activeClip = clips[targetIdx];
+    const range = ranges[targetIdx];
+    if (videoRef.current && activeClip?.mediaType === 'video' && range) {
+      const localOffset = Math.max(0, clampedTime - range.start);
+      const targetVideoTime = (activeClip.trimStart || 0) + localOffset;
+      if (!isNaN(targetVideoTime) && isFinite(targetVideoTime)) {
+        try {
+          videoRef.current.currentTime = targetVideoTime;
+        } catch {}
+      }
     }
   };
 
+  const seekFromPointerEvent = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!trackContainerRef.current || totalDuration <= 0) return;
+    const rect = trackContainerRef.current.getBoundingClientRect();
+    const progress = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const targetTime = Number((progress * totalDuration).toFixed(2));
+    seekToTime(targetTime);
+  };
+
+  const handleScrubberPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    isScrubbingRef.current = true;
+    wasPlayingBeforeScrubRef.current = isPlaying;
+    if (isPlaying) {
+      setIsPlaying(false);
+      if (videoRef.current) videoRef.current.pause();
+    }
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+    seekFromPointerEvent(e);
+  };
+
+  const handleScrubberPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isScrubbingRef.current) return;
+    e.preventDefault();
+    seekFromPointerEvent(e);
+  };
+
+  const handleScrubberPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isScrubbingRef.current) {
+      isScrubbingRef.current = false;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {}
+      if (wasPlayingBeforeScrubRef.current) {
+        setIsPlaying(true);
+        if (videoRef.current) videoRef.current.play().catch(() => {});
+      }
+    }
+  };
+
+  // 클립 직접 탭 시 정확한 지점으로 탐색
+  const handleClipClick = (e: React.MouseEvent<HTMLDivElement>, idx: number) => {
+    const range = clipRanges[idx];
+    if (!range) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const targetTime = Number((range.start + ratio * (range.duration || 4)).toFixed(2));
+    seekToTime(targetTime);
+  };
+
+  // ✏️ 자막 내용 및 스타일 수정 (빈 문자열 허용, 제목 복원 방지)
   const updateCurrentClipSubtitle = (updates: Partial<CustomSubtitle>) => {
     setClips((prev) => {
       const next = [...prev];
       if (!next[selectedIdx]) return prev;
       const clip = { ...next[selectedIdx] };
-      const currentSubs = clip.customSubtitles && clip.customSubtitles.length > 0
-        ? [...clip.customSubtitles]
-        : [{
+      let currentSubs = clip.customSubtitles ? [...clip.customSubtitles] : [];
+      if (currentSubs.length === 0) {
+        currentSubs = [{
+          id: `sub-${Date.now()}`,
+          text: '',
+          x: 50,
+          y: 82,
+          fontSizeScale: 1.0,
+          textColor: '#FFFFFF',
+          bgColor: '#0F172A',
+          bgOpacity: 75,
+          boxStyle: 'dark' as const,
+          textAlign: 'center' as const,
+          fontFamily: 'Pretendard' as const,
+          rotation: 0,
+        }];
+      }
+      currentSubs[0] = { ...currentSubs[0], ...updates };
+      clip.customSubtitles = currentSubs;
+      next[selectedIdx] = clip;
+      return next;
+    });
+  };
+
+  // 🗑️ 자막 완전 삭제 핸들러 (클립에서 자막 즉시 제거)
+  const handleDeleteCurrentSubtitle = () => {
+    setClips((prev) => {
+      const next = [...prev];
+      if (!next[selectedIdx]) return prev;
+      next[selectedIdx] = {
+        ...next[selectedIdx],
+        customSubtitles: [],
+      };
+      return next;
+    });
+  };
+
+  // ➕ 새 자막 추가 핸들러
+  const handleAddSubtitleToCurrentClip = () => {
+    setClips((prev) => {
+      const next = [...prev];
+      if (!next[selectedIdx]) return prev;
+      next[selectedIdx] = {
+        ...next[selectedIdx],
+        customSubtitles: [
+          {
             id: `sub-${Date.now()}`,
-            text: clip.title || '',
+            text: '새 자막',
             x: 50,
             y: 82,
             fontSizeScale: 1.0,
@@ -433,10 +521,9 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             textAlign: 'center' as const,
             fontFamily: 'Pretendard' as const,
             rotation: 0,
-          }];
-      currentSubs[0] = { ...currentSubs[0], ...updates };
-      clip.customSubtitles = currentSubs;
-      next[selectedIdx] = clip;
+          }
+        ],
+      };
       return next;
     });
   };
@@ -702,31 +789,44 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                 />
               )}
 
-              {/* Subtitles Preview Overlay */}
-              {currentClip?.customSubtitles?.map((sub) => {
-                const subOpacity = (sub.bgOpacity !== undefined ? sub.bgOpacity : 75) / 100;
-                const isCompletelyTransparent = sub.boxStyle === 'none' && subOpacity === 0;
-                return (
-                  <div
-                    key={sub.id}
-                    style={{
-                      left: `${sub.x}%`,
-                      top: `${sub.y}%`,
-                      transform: `translate(-50%, -50%) rotate(${sub.rotation || 0}deg)`,
-                      backgroundColor: getClipSubBg(sub),
-                      color: sub.textColor || '#FFFFFF',
-                      fontFamily: sub.fontFamily || 'Pretendard',
-                      fontSize: `${14 * (sub.fontSizeScale || 1.0)}px`,
-                      whiteSpace: 'nowrap',
-                      width: 'max-content',
-                      border: isCompletelyTransparent ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
-                    }}
-                    className="absolute z-20 px-3 py-1.5 rounded-xl shadow-lg font-bold pointer-events-none drop-shadow-sm"
-                  >
-                    {sub.text}
-                  </div>
-                );
-              })}
+              {/* Subtitles Preview Overlay (빈 자막 필터링 및 직접 삭제 지원) */}
+              {currentClip?.customSubtitles
+                ?.filter((sub) => sub.text && sub.text.trim().length > 0)
+                .map((sub) => {
+                  const subOpacity = (sub.bgOpacity !== undefined ? sub.bgOpacity : 75) / 100;
+                  const isCompletelyTransparent = sub.boxStyle === 'none' && subOpacity === 0;
+                  return (
+                    <div
+                      key={sub.id}
+                      style={{
+                        left: `${sub.x}%`,
+                        top: `${sub.y}%`,
+                        transform: `translate(-50%, -50%) rotate(${sub.rotation || 0}deg)`,
+                        backgroundColor: getClipSubBg(sub),
+                        color: sub.textColor || '#FFFFFF',
+                        fontFamily: sub.fontFamily || 'Pretendard',
+                        fontSize: `${14 * (sub.fontSizeScale || 1.0)}px`,
+                        whiteSpace: 'nowrap',
+                        width: 'max-content',
+                        border: isCompletelyTransparent ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
+                      }}
+                      className="absolute z-20 px-3 py-1.5 rounded-xl shadow-lg font-bold pointer-events-auto drop-shadow-sm flex items-center gap-1.5 group/sub"
+                    >
+                      <span>{sub.text}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCurrentSubtitle();
+                        }}
+                        className="w-4 h-4 rounded-full bg-black/60 hover:bg-red-600 text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-[10px]"
+                        title="자막 삭제"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
             </div>
           </div>
 
@@ -910,183 +1010,225 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {/* TAB: Subtitles with Background Opacity Control */}
             {activeInspectorTab === 'subtitle' && (
               <div className="space-y-4">
-                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-2">
-                  <span className="text-neutral-400 font-medium block">클립 자막 문구</span>
-                  <input
-                    type="text"
-                    value={currentClip?.customSubtitles?.[0]?.text || currentClip?.title || ''}
-                    onChange={(e) => updateCurrentClipSubtitle({ text: e.target.value })}
-                    placeholder="자막 내용을 입력하세요"
-                    className="w-full px-3 py-2 bg-[#191919] border border-[#3F4448] rounded-lg text-white text-xs focus:outline-none focus:border-white"
-                  />
-                </div>
-
-                {/* Subtitle Background Box Style & Opacity */}
                 {(() => {
-                  const clipSub = currentClip?.customSubtitles?.[0] || {
-                    id: 'sub-default',
-                    text: currentClip?.title || '',
-                    x: 50,
-                    y: 82,
-                    boxStyle: 'dark' as const,
-                    bgColor: '#0F172A',
-                    bgOpacity: 75,
-                    textColor: '#FFFFFF',
-                  };
+                  const clipSub = currentClip?.customSubtitles?.[0];
+                  const hasSub = !!clipSub;
+                  const currentSubText = clipSub?.text ?? '';
+
+                  if (!hasSub) {
+                    return (
+                      <div className="p-6 bg-[#23272A] rounded-xl border border-[#2F3437] text-center space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#191919] border border-[#3F4448] flex items-center justify-center mx-auto text-neutral-400">
+                          <Type className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-semibold text-white">현재 클립에 자막이 없습니다</h4>
+                          <p className="text-[11px] text-neutral-400 mt-0.5">자막을 추가하여 동영상에 텍스트를 표시해보세요.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddSubtitleToCurrentClip}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition-colors cursor-pointer shadow-xs"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>자막 추가하기</span>
+                        </button>
+                      </div>
+                    );
+                  }
+
                   const currentOpacity = clipSub.boxStyle === 'none' && (clipSub.bgOpacity ?? 0) === 0 ? 0 : (clipSub.bgOpacity ?? 75);
 
                   return (
-                    <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-3">
-                      <div className="flex items-center justify-between">
-                        <label className="font-medium text-neutral-300">자막 배경 스타일</label>
-                        <span className="text-[11px] font-mono text-neutral-400">
-                          투명도: {currentOpacity}%
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-1.5 text-xs font-medium">
-                        {[
-                          { id: 'dark', label: '다크 블러' },
-                          { id: 'glass', label: '글래스' },
-                          { id: 'cream', label: '크림 옐로우' },
-                          { id: 'none', label: '투명 (없음)' },
-                        ].map((box) => (
+                    <>
+                      <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-300 font-medium text-xs">클립 자막 문구</span>
                           <button
-                            key={box.id}
                             type="button"
-                            onClick={() =>
-                              updateCurrentClipSubtitle({
-                                boxStyle: box.id as any,
-                                ...(box.id === 'cream' ? { bgColor: '#FEF3C7', textColor: '#0F172A', bgOpacity: 90 } : {}),
-                                ...(box.id === 'glass' ? { bgColor: '#FFFFFF', textColor: '#0F172A', bgOpacity: 40 } : {}),
-                                ...(box.id === 'dark' ? { bgColor: '#0F172A', textColor: '#FFFFFF', bgOpacity: 75 } : {}),
-                                ...(box.id === 'none' ? { bgOpacity: 0 } : {}),
-                              })
-                            }
-                            className={`py-1.5 rounded-lg border text-center transition-colors leading-none cursor-pointer text-[11px] ${
-                              clipSub.boxStyle === box.id
-                                ? 'bg-white text-black font-semibold border-white shadow-xs'
-                                : 'bg-[#191919] border-[#3F4448] text-neutral-300 hover:bg-[#2F3437]'
-                            }`}
+                            onClick={handleDeleteCurrentSubtitle}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-950/70 border border-red-900/60 transition-colors cursor-pointer"
+                            title="현재 클립의 자막을 완전히 삭제합니다"
                           >
-                            {box.label}
+                            <Trash2 className="w-3 h-3" />
+                            <span>자막 삭제</span>
                           </button>
-                        ))}
+                        </div>
+
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={currentSubText}
+                            onChange={(e) => updateCurrentClipSubtitle({ text: e.target.value })}
+                            placeholder="자막 내용을 입력하세요"
+                            className="w-full pl-3 pr-8 py-2 bg-[#191919] border border-[#3F4448] rounded-lg text-white text-xs focus:outline-none focus:border-white"
+                          />
+                          {currentSubText.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => updateCurrentClipSubtitle({ text: '' })}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-white rounded cursor-pointer"
+                              title="텍스트 비우기"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
 
-                      {/* 배경 컬러 선택 */}
-                      {clipSub.boxStyle !== 'none' && (
-                        <div>
-                          <span className="text-[11px] font-medium text-neutral-400 block mb-1.5">배경 컬러</span>
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                      {/* Subtitle Background Box Style & Opacity */}
+                      <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="font-medium text-neutral-300">자막 배경 스타일</label>
+                          <span className="text-[11px] font-mono text-neutral-400">
+                            투명도: {currentOpacity}%
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-1.5 text-xs font-medium">
+                          {[
+                            { id: 'dark', label: '다크 블러' },
+                            { id: 'glass', label: '글래스' },
+                            { id: 'cream', label: '크림 옐로우' },
+                            { id: 'none', label: '투명 (없음)' },
+                          ].map((box) => (
+                            <button
+                              key={box.id}
+                              type="button"
+                              onClick={() =>
+                                updateCurrentClipSubtitle({
+                                  boxStyle: box.id as any,
+                                  ...(box.id === 'cream' ? { bgColor: '#FEF3C7', textColor: '#0F172A', bgOpacity: 90 } : {}),
+                                  ...(box.id === 'glass' ? { bgColor: '#FFFFFF', textColor: '#0F172A', bgOpacity: 40 } : {}),
+                                  ...(box.id === 'dark' ? { bgColor: '#0F172A', textColor: '#FFFFFF', bgOpacity: 75 } : {}),
+                                  ...(box.id === 'none' ? { bgOpacity: 0 } : {}),
+                                })
+                              }
+                              className={`py-1.5 rounded-lg border text-center transition-colors leading-none cursor-pointer text-[11px] ${
+                                clipSub.boxStyle === box.id
+                                  ? 'bg-white text-black font-semibold border-white shadow-xs'
+                                  : 'bg-[#191919] border-[#3F4448] text-neutral-300 hover:bg-[#2F3437]'
+                              }`}
+                            >
+                              {box.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* 배경 컬러 선택 */}
+                        {clipSub.boxStyle !== 'none' && (
+                          <div>
+                            <span className="text-[11px] font-medium text-neutral-400 block mb-1.5">배경 컬러</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {[
+                                { hex: '#0F172A', label: '다크 차콜' },
+                                { hex: '#FFFFFF', label: '화이트' },
+                                { hex: '#FEF3C7', label: '버터 크림' },
+                                { hex: '#3F4448', label: '그레이' },
+                                { hex: '#0284C7', label: '블루' },
+                                { hex: '#059669', label: '에메랄드' },
+                                { hex: '#D97706', label: '앰버' },
+                              ].map((c) => (
+                                <button
+                                  key={c.hex}
+                                  type="button"
+                                  onClick={() => updateCurrentClipSubtitle({ bgColor: c.hex, boxStyle: 'custom' })}
+                                  style={{ backgroundColor: c.hex }}
+                                  title={c.label}
+                                  className={`w-5 h-5 rounded-full border transition-transform hover:scale-105 cursor-pointer ${
+                                    clipSub.bgColor === c.hex
+                                      ? 'border-white ring-2 ring-white/50 scale-105'
+                                      : 'border-[#3F4448]'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 자막 상자 투명도 조절 슬라이더 & 원클릭 버튼 */}
+                        <div className="pt-2 border-t border-[#3F4448]/60 space-y-2">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="font-medium text-neutral-300">자막 상자 불투명도 조절</span>
+                            <span className="font-mono text-white font-semibold">{currentOpacity}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={currentOpacity}
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              if (val === 0) {
+                                updateCurrentClipSubtitle({ bgOpacity: 0, boxStyle: 'none' });
+                              } else {
+                                updateCurrentClipSubtitle({
+                                  bgOpacity: val,
+                                  boxStyle: clipSub.boxStyle === 'none' ? 'dark' : clipSub.boxStyle,
+                                  bgColor: clipSub.boxStyle === 'none' && !clipSub.bgColor ? '#0F172A' : clipSub.bgColor,
+                                });
+                              }
+                            }}
+                            className="w-full accent-white"
+                          />
+                          <div className="flex items-center gap-1">
                             {[
-                              { hex: '#0F172A', label: '다크 차콜' },
-                              { hex: '#FFFFFF', label: '화이트' },
-                              { hex: '#FEF3C7', label: '버터 크림' },
-                              { hex: '#3F4448', label: '그레이' },
-                              { hex: '#0284C7', label: '블루' },
-                              { hex: '#059669', label: '에메랄드' },
-                              { hex: '#D97706', label: '앰버' },
-                            ].map((c) => (
+                              { val: 0, label: '0%' },
+                              { val: 25, label: '25%' },
+                              { val: 50, label: '50%' },
+                              { val: 75, label: '75%' },
+                              { val: 90, label: '90%' },
+                              { val: 100, label: '100%' },
+                            ].map((p) => (
                               <button
-                                key={c.hex}
+                                key={p.val}
                                 type="button"
-                                onClick={() => updateCurrentClipSubtitle({ bgColor: c.hex, boxStyle: 'custom' })}
-                                style={{ backgroundColor: c.hex }}
-                                title={c.label}
+                                onClick={() => {
+                                  if (p.val === 0) {
+                                    updateCurrentClipSubtitle({ bgOpacity: 0, boxStyle: 'none' });
+                                  } else {
+                                    updateCurrentClipSubtitle({
+                                      bgOpacity: p.val,
+                                      boxStyle: clipSub.boxStyle === 'none' ? 'dark' : clipSub.boxStyle,
+                                      bgColor: clipSub.boxStyle === 'none' && !clipSub.bgColor ? '#0F172A' : clipSub.bgColor,
+                                    });
+                                  }
+                                }}
+                                className={`flex-1 py-1 rounded text-[10px] font-mono border transition-colors cursor-pointer leading-none text-center ${
+                                  currentOpacity === p.val
+                                    ? 'bg-white text-black border-white font-semibold'
+                                    : 'bg-[#191919] text-neutral-400 border-[#3F4448] hover:bg-[#2F3437]'
+                                }`}
+                              >
+                                {p.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 글자 색상 & 크기 */}
+                        <div className="pt-2 border-t border-[#3F4448]/60 space-y-2">
+                          <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                            <span>글자 색상</span>
+                            <span className="font-mono text-neutral-300">{clipSub.textColor || '#FFFFFF'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            {['#FFFFFF', '#0F172A', '#FEF3C7', '#60A5FA', '#34D399', '#FBBF24'].map((col) => (
+                              <button
+                                key={col}
+                                type="button"
+                                onClick={() => updateCurrentClipSubtitle({ textColor: col })}
+                                style={{ backgroundColor: col }}
                                 className={`w-5 h-5 rounded-full border transition-transform hover:scale-105 cursor-pointer ${
-                                  clipSub.bgColor === c.hex
-                                    ? 'border-white ring-2 ring-white/50 scale-105'
-                                    : 'border-[#3F4448]'
+                                  (clipSub.textColor || '#FFFFFF') === col ? 'border-white ring-2 ring-white/50 scale-105' : 'border-[#3F4448]'
                                 }`}
                               />
                             ))}
                           </div>
                         </div>
-                      )}
-
-                      {/* 자막 상자 투명도 조절 슬라이더 & 원클릭 버튼 */}
-                      <div className="pt-2 border-t border-[#3F4448]/60 space-y-2">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-medium text-neutral-300">자막 상자 불투명도 조절</span>
-                          <span className="font-mono text-white font-semibold">{currentOpacity}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={0}
-                          max={100}
-                          step={5}
-                          value={currentOpacity}
-                          onChange={(e) => {
-                            const val = Number(e.target.value);
-                            if (val === 0) {
-                              updateCurrentClipSubtitle({ bgOpacity: 0, boxStyle: 'none' });
-                            } else {
-                              updateCurrentClipSubtitle({
-                                bgOpacity: val,
-                                boxStyle: clipSub.boxStyle === 'none' ? 'dark' : clipSub.boxStyle,
-                                bgColor: clipSub.boxStyle === 'none' && !clipSub.bgColor ? '#0F172A' : clipSub.bgColor,
-                              });
-                            }
-                          }}
-                          className="w-full accent-white"
-                        />
-                        <div className="flex items-center gap-1">
-                          {[
-                            { val: 0, label: '0%' },
-                            { val: 25, label: '25%' },
-                            { val: 50, label: '50%' },
-                            { val: 75, label: '75%' },
-                            { val: 90, label: '90%' },
-                            { val: 100, label: '100%' },
-                          ].map((p) => (
-                            <button
-                              key={p.val}
-                              type="button"
-                              onClick={() => {
-                                if (p.val === 0) {
-                                  updateCurrentClipSubtitle({ bgOpacity: 0, boxStyle: 'none' });
-                                } else {
-                                  updateCurrentClipSubtitle({
-                                    bgOpacity: p.val,
-                                    boxStyle: clipSub.boxStyle === 'none' ? 'dark' : clipSub.boxStyle,
-                                    bgColor: clipSub.boxStyle === 'none' && !clipSub.bgColor ? '#0F172A' : clipSub.bgColor,
-                                  });
-                                }
-                              }}
-                              className={`flex-1 py-1 rounded text-[10px] font-mono border transition-colors cursor-pointer leading-none text-center ${
-                                currentOpacity === p.val
-                                  ? 'bg-white text-black border-white font-semibold'
-                                  : 'bg-[#191919] text-neutral-400 border-[#3F4448] hover:bg-[#2F3437]'
-                              }`}
-                            >
-                              {p.label}
-                            </button>
-                          ))}
-                        </div>
                       </div>
-
-                      {/* 글자 색상 & 크기 */}
-                      <div className="pt-2 border-t border-[#3F4448]/60 space-y-2">
-                        <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                          <span>글자 색상</span>
-                          <span className="font-mono text-neutral-300">{clipSub.textColor || '#FFFFFF'}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          {['#FFFFFF', '#0F172A', '#FEF3C7', '#60A5FA', '#34D399', '#FBBF24'].map((col) => (
-                            <button
-                              key={col}
-                              type="button"
-                              onClick={() => updateCurrentClipSubtitle({ textColor: col })}
-                              style={{ backgroundColor: col }}
-                              className={`w-5 h-5 rounded-full border transition-transform hover:scale-105 cursor-pointer ${
-                                (clipSub.textColor || '#FFFFFF') === col ? 'border-white ring-2 ring-white/50 scale-105' : 'border-[#3F4448]'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    </>
                   );
                 })()}
               </div>
@@ -1300,122 +1442,139 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         {/* Timeline Tracks Area */}
         <div 
           ref={timelineRef}
-          onClick={handleTimelineClick}
-          className="flex-1 relative overflow-x-auto p-4 cursor-pointer bg-[#141414] space-y-3"
+          className="flex-1 relative overflow-x-auto p-4 bg-[#141414] select-none"
         >
-          {/* Time Ruler */}
-          {(() => {
-            const step = totalDuration > 30 ? 10 : totalDuration > 10 ? 5 : totalDuration > 5 ? 2 : 1;
-            return (
-              <div className="h-4 flex items-center text-[9px] font-mono text-neutral-500 border-b border-[#2F3437] pb-1">
-                {Array.from({ length: Math.ceil(totalDuration) + 1 }).map((_, sec) => {
-                  const showLabel = sec % step === 0 || sec === Math.ceil(totalDuration);
-                  return (
-                    <div 
-                      key={sec} 
-                      style={{ width: `${(1 / Math.max(1, totalDuration)) * 100}%` }}
-                      className={`shrink-0 border-l ${sec % step === 0 ? 'border-neutral-500 h-3' : 'border-neutral-800 h-1.5'} pl-1 overflow-visible relative`}
-                    >
-                      {showLabel && (
-                        <span className="absolute -top-0.5 left-1 whitespace-nowrap font-mono text-[9px] text-neutral-400 select-none">
-                          {sec}s
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
-
-          {/* Video Clips Track */}
-          <div className="h-20 flex items-center gap-1.5">
-            {clips.map((clip, idx) => {
-              const isSelected = selectedIdx === idx;
-              const range = clipRanges[idx];
-              const widthPct = Math.max(12, ((range?.duration || 4) / Math.max(1, totalDuration)) * 100);
-
-              return (
-                <div
-                  key={clip.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedIdx(idx);
-                    setCurrentTime(range?.start || 0);
-                  }}
-                  style={{ width: `${widthPct}%`, minWidth: '90px' }}
-                  className={`h-full relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all group shrink-0 bg-neutral-900 ${
-                    isSelected
-                      ? 'border-white ring-1 ring-white/50 shadow-xl scale-102 z-10'
-                      : 'border-[#2F3437] hover:border-neutral-500 opacity-80 hover:opacity-100'
-                  }`}
-                >
-                  {clip.url ? (
-                    <img 
-                      src={clip.url} 
-                      alt="" 
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                      className="w-full h-full object-cover" 
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-neutral-900 text-neutral-600">
-                      <Film className="w-6 h-6" />
-                    </div>
-                  )}
-                  
-                  {/* Clip Header Label */}
-                  <div className="absolute top-1 left-1 max-w-[80%] px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-medium leading-none flex items-center gap-1 shadow-xs truncate pointer-events-none">
-                    <span className="font-bold shrink-0">#{idx + 1}</span>
-                    <span className="shrink-0">{clip.mediaType === 'video' ? '🎬' : '🖼️'}</span>
-                  </div>
-
-                  {/* Duration Chip */}
-                  <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-neutral-200 text-[9px] font-mono leading-none shadow-xs pointer-events-none">
-                    {clip.durationSec || 4}s
-                  </div>
-
-                  {/* Speed Badge */}
-                  {clip.speed && clip.speed !== 1.0 && (
-                    <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-white text-black text-[8px] font-semibold leading-none shadow-xs pointer-events-none">
-                      {clip.speed}x
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Subtitles Track Visualizer */}
-          <div className="h-6 flex items-center gap-1.5 bg-[#1E1E1E] p-1 rounded-lg border border-[#2F3437] overflow-x-auto scrollbar-none">
-            {clips.map((clip, idx) => {
-              const range = clipRanges[idx];
-              const widthPct = Math.max(12, ((range?.duration || 4) / Math.max(1, totalDuration)) * 100);
-              const subCount = clip.customSubtitles?.length || (clip.title ? 1 : 0);
-
-              return (
-                <div
-                  key={`sub-${clip.id}`}
-                  style={{ width: `${widthPct}%`, minWidth: '90px' }}
-                  className="h-full rounded bg-[#2F3437] border border-[#3F4448] px-1.5 flex items-center justify-between text-[9px] text-neutral-300 font-medium shrink-0 truncate overflow-hidden"
-                >
-                  <span className="truncate whitespace-nowrap">T: {clip.customSubtitles?.[0]?.text || clip.title || '자막'}</span>
-                  {subCount > 1 && <span className="text-[8px] bg-[#3F4448] px-1 rounded shrink-0 ml-1">+{subCount}</span>}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* RED PLAYHEAD (Scrubber Line) */}
+          {/* Main Interactive Scrubbing Area (자유로운 재생 위치 이동 및 드래그 스크러빙) */}
           <div
-            style={{
-              left: `${Math.max(0, Math.min(100, (currentTime / Math.max(1, totalDuration)) * 100))}%`,
-            }}
-            className="absolute top-0 bottom-0 w-0.5 bg-white z-30 pointer-events-none"
+            ref={trackContainerRef}
+            onPointerDown={handleScrubberPointerDown}
+            onPointerMove={handleScrubberPointerMove}
+            onPointerUp={handleScrubberPointerUp}
+            onPointerCancel={handleScrubberPointerUp}
+            className="relative w-full min-w-[320px] cursor-pointer touch-none space-y-3 pb-3"
+            title="원하는 지점을 클릭하거나 드래그하여 재생 위치를 조절하세요"
           >
-            <div className="w-3 h-3.5 bg-white rounded-b-md -translate-x-1/2 flex items-center justify-center shadow-md">
-              <span className="w-1 h-1 bg-black rounded-full" />
+            {/* Time Ruler */}
+            {(() => {
+              const step = totalDuration > 30 ? 10 : totalDuration > 10 ? 5 : totalDuration > 5 ? 2 : 1;
+              return (
+                <div className="h-4 flex items-center text-[9px] font-mono text-neutral-500 border-b border-[#2F3437] pb-1">
+                  {Array.from({ length: Math.ceil(totalDuration) + 1 }).map((_, sec) => {
+                    const showLabel = sec % step === 0 || sec === Math.ceil(totalDuration);
+                    return (
+                      <div 
+                        key={sec} 
+                        style={{ width: `${(1 / Math.max(1, totalDuration)) * 100}%` }}
+                        className={`shrink-0 border-l ${sec % step === 0 ? 'border-neutral-500 h-3' : 'border-neutral-800 h-1.5'} pl-1 overflow-visible relative`}
+                      >
+                        {showLabel && (
+                          <span className="absolute -top-0.5 left-1 whitespace-nowrap font-mono text-[9px] text-neutral-400 select-none">
+                            {sec}s
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            {/* Video Clips Track */}
+            <div className="h-20 flex items-center gap-1.5">
+              {clips.map((clip, idx) => {
+                const isSelected = selectedIdx === idx;
+                const range = clipRanges[idx];
+                const widthPct = Math.max(12, ((range?.duration || 4) / Math.max(1, totalDuration)) * 100);
+
+                return (
+                  <div
+                    key={clip.id}
+                    onClick={(e) => handleClipClick(e, idx)}
+                    style={{ width: `${widthPct}%`, minWidth: '90px' }}
+                    className={`h-full relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all group shrink-0 bg-neutral-900 ${
+                      isSelected
+                        ? 'border-white ring-1 ring-white/50 shadow-xl scale-102 z-10'
+                        : 'border-[#2F3437] hover:border-neutral-500 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    {clip.url ? (
+                      <img 
+                        src={clip.url} 
+                        alt="" 
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                        className="w-full h-full object-cover pointer-events-none select-none" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-neutral-900 text-neutral-600">
+                        <Film className="w-6 h-6" />
+                      </div>
+                    )}
+                    
+                    {/* Clip Header Label */}
+                    <div className="absolute top-1 left-1 max-w-[80%] px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-medium leading-none flex items-center gap-1 shadow-xs truncate pointer-events-none">
+                      <span className="font-bold shrink-0">#{idx + 1}</span>
+                      <span className="shrink-0">{clip.mediaType === 'video' ? '🎬' : '🖼️'}</span>
+                    </div>
+
+                    {/* Duration Chip */}
+                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-neutral-200 text-[9px] font-mono leading-none shadow-xs pointer-events-none">
+                      {clip.durationSec || 4}s
+                    </div>
+
+                    {/* Speed Badge */}
+                    {clip.speed && clip.speed !== 1.0 && (
+                      <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-white text-black text-[8px] font-semibold leading-none shadow-xs pointer-events-none">
+                        {clip.speed}x
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Subtitles Track Visualizer */}
+            <div className="h-6 flex items-center gap-1.5 bg-[#1E1E1E] p-1 rounded-lg border border-[#2F3437] overflow-x-auto scrollbar-none">
+              {clips.map((clip, idx) => {
+                const range = clipRanges[idx];
+                const widthPct = Math.max(12, ((range?.duration || 4) / Math.max(1, totalDuration)) * 100);
+                const hasSub = clip.customSubtitles && clip.customSubtitles.length > 0 && clip.customSubtitles[0].text?.trim();
+
+                return (
+                  <div
+                    key={`sub-${clip.id}`}
+                    style={{ width: `${widthPct}%`, minWidth: '90px' }}
+                    className="h-full rounded bg-[#2F3437] border border-[#3F4448] px-1.5 flex items-center justify-between text-[9px] font-medium shrink-0 truncate overflow-hidden"
+                  >
+                    <span className={`truncate whitespace-nowrap ${hasSub ? 'text-white' : 'text-neutral-500'}`}>
+                      {hasSub ? `T: ${clip.customSubtitles![0].text}` : '자막 없음'}
+                    </span>
+                    {hasSub && clip.customSubtitles!.length > 1 && (
+                      <span className="text-[8px] bg-[#3F4448] text-white px-1 rounded shrink-0 ml-1">
+                        +{clip.customSubtitles!.length}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* WHITE PLAYHEAD (Scrubber Line with Real-time Drag Handle) */}
+            <div
+              style={{
+                left: `${Math.max(0, Math.min(100, (currentTime / Math.max(1, totalDuration)) * 100))}%`,
+              }}
+              className="absolute top-0 bottom-0 w-0.5 bg-white z-30 pointer-events-none -translate-x-1/2"
+            >
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-auto cursor-ew-resize">
+                <div className="px-1.5 py-0.5 rounded bg-white text-black font-mono text-[9px] font-bold shadow-md leading-none whitespace-nowrap mb-0.5 select-none">
+                  {currentTime.toFixed(1)}s
+                </div>
+                <div className="w-3.5 h-4 bg-white rounded-b-md flex items-center justify-center shadow-md border border-neutral-300">
+                  <span className="w-1.5 h-1.5 bg-black rounded-full" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
