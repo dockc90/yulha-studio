@@ -128,6 +128,11 @@ export interface MediaScene {
   transition?: TransitionEffect; // 클립 전환 효과
   rotation?: number;          // 0, 90, 180, 270도 회전
   
+  // 사진/영상 캔버스 내 직접 이동 & 확대/축소 (Pan & Zoom)
+  zoom?: number;              // 1.0 ~ 3.0 (기본값 1.0)
+  panX?: number;              // -50 ~ 50 (% offset, 기본값 0)
+  panY?: number;              // -50 ~ 50 (% offset, 기본값 0)
+
   // 프로급 보정 & 연출 필드
   adjustments?: ColorAdjustments;
   motionEffect?: MotionEffect;

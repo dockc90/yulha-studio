@@ -218,6 +218,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   // Timeline Scrubber state
   const [timelinePlayhead, setTimelinePlayhead] = useState(0); // in seconds
 
+  // Media Background Pan & Zoom state (사진 끌어서 이동 및 확대/축소)
+  const [isDraggingMedia, setIsDraggingMedia] = useState(false);
+  const mediaDragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const mediaPanStartRef = useRef<{ panX: number; panY: number }>({ panX: 0, panY: 0 });
+  const pinchStartDistanceRef = useRef<number>(0);
+  const pinchStartZoomRef = useRef<number>(1.0);
+
   // Original view toggle (Press & Hold or Click to compare)
   const [showOriginal, setShowOriginal] = useState(false);
 
@@ -297,7 +304,10 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
         durationSec: isVid ? 6 : 4,
         kidsStickers: [],
-        filter: 'butter_warm',
+        filter: 'none',
+        zoom: 1.0,
+        panX: 0,
+        panY: 0,
         adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
         motionEffect: 'zoom_in',
         typography: { fontFamily: 'Pretendard', fontSizeScale: 1, textAlign: 'center', boxStyle: 'dark', bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
@@ -647,15 +657,59 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     return { clientX: mouse.clientX, clientY: mouse.clientY };
   };
 
-  // Interactive Drag & Drop Sticker or Subtitle & Direct Rotation on Canvas (Mouse & Mobile Touch)
+  // Canvas Pointer Down: Background photo drag or pinch start
+  const handleCanvasPointerDown = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    // Check 2-finger touch for mobile pinch zoom
+    if ('touches' in e && e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      pinchStartDistanceRef.current = dist;
+      pinchStartZoomRef.current = currentScene?.zoom || 1.0;
+      setIsDraggingMedia(false);
+      return;
+    }
+
+    const { clientX, clientY } = getPointerCoords(e);
+    mediaDragStartRef.current = { x: clientX, y: clientY };
+    mediaPanStartRef.current = { panX: currentScene?.panX || 0, panY: currentScene?.panY || 0 };
+    setIsDraggingMedia(true);
+
+    // Deselect selected items when clicking empty canvas background
+    setSelectedSubtitleId(null);
+    setSelectedStickerId(null);
+  };
+
+  // Canvas Mouse Wheel: Zoom in/out on desktop
+  const handleCanvasWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const zoomDelta = -e.deltaY * 0.0015;
+    const currentZoom = currentScene?.zoom || 1.0;
+    const nextZoom = Math.max(1.0, Math.min(3.0, Number((currentZoom + zoomDelta).toFixed(2))));
+    updateCurrentScene({ zoom: nextZoom });
+  };
+
+  // Interactive Drag & Drop Sticker or Subtitle & Direct Rotation & Media Pan/Zoom on Canvas
   const handleCanvasPointerMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!previewContainerRef.current) return;
-    if (!isDraggingSticker && !isDraggingSubtitle && !isRotatingSubtitle && !isRotatingSticker) return;
+
+    // 1. Mobile Two-Finger Pinch Zoom
+    if ('touches' in e && e.touches.length === 2 && pinchStartDistanceRef.current > 0) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      const ratio = dist / pinchStartDistanceRef.current;
+      const nextZoom = Math.max(1.0, Math.min(3.0, Number((pinchStartZoomRef.current * ratio).toFixed(2))));
+      updateCurrentScene({ zoom: nextZoom });
+      return;
+    }
+
+    if (!isDraggingSticker && !isDraggingSubtitle && !isRotatingSubtitle && !isRotatingSticker && !isDraggingMedia) return;
 
     const { clientX, clientY } = getPointerCoords(e);
     const rect = previewContainerRef.current.getBoundingClientRect();
 
-    // 1. Direct On-Canvas Subtitle Rotation
+    // 2. Direct On-Canvas Subtitle Rotation
     if (isRotatingSubtitle && selectedSubtitleId) {
       const centerX = subtitleCenterRef.current.x;
       const centerY = subtitleCenterRef.current.y;
@@ -667,7 +721,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       return;
     }
 
-    // 2. Direct On-Canvas Sticker Rotation
+    // 3. Direct On-Canvas Sticker Rotation
     if (isRotatingSticker && selectedStickerId) {
       const centerX = stickerCenterRef.current.x;
       const centerY = stickerCenterRef.current.y;
@@ -679,14 +733,26 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       return;
     }
 
-    // 3. Drag & Move Subtitle or Sticker
-    const x = Math.max(5, Math.min(95, Math.round(((clientX - rect.left) / rect.width) * 100)));
-    const y = Math.max(5, Math.min(95, Math.round(((clientY - rect.top) / rect.height) * 100)));
-
+    // 4. Drag & Move Subtitle or Sticker
     if (isDraggingSticker && selectedStickerId) {
+      const x = Math.max(5, Math.min(95, Math.round(((clientX - rect.left) / rect.width) * 100)));
+      const y = Math.max(5, Math.min(95, Math.round(((clientY - rect.top) / rect.height) * 100)));
       updateSelectedSticker({ x, y });
+      return;
     } else if (isDraggingSubtitle && selectedSubtitleId) {
+      const x = Math.max(5, Math.min(95, Math.round(((clientX - rect.left) / rect.width) * 100)));
+      const y = Math.max(5, Math.min(95, Math.round(((clientY - rect.top) / rect.height) * 100)));
       updateSubtitle(selectedSubtitleId, { x, y });
+      return;
+    }
+
+    // 5. Drag & Move Photo Background (Pan)
+    if (isDraggingMedia) {
+      const deltaX = ((clientX - mediaDragStartRef.current.x) / rect.width) * 100;
+      const deltaY = ((clientY - mediaDragStartRef.current.y) / rect.height) * 100;
+      const nextPanX = Math.max(-60, Math.min(60, Math.round(mediaPanStartRef.current.panX + deltaX)));
+      const nextPanY = Math.max(-60, Math.min(60, Math.round(mediaPanStartRef.current.panY + deltaY)));
+      updateCurrentScene({ panX: nextPanX, panY: nextPanY });
     }
   };
 
@@ -695,6 +761,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     setIsDraggingSubtitle(false);
     setIsRotatingSubtitle(false);
     setIsRotatingSticker(false);
+    setIsDraggingMedia(false);
+    pinchStartDistanceRef.current = 0;
   };
 
   // Canvas API & CSS filter string helper (모바일 & PC 전체 일치)
@@ -804,10 +872,20 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     img.src = sceneToExport.url;
 
     img.onload = () => {
-      // 1. Draw Image with Filter & Fine Adjustments
+      // 1. Draw Image with Filter, Adjustments, and Pan & Zoom
       ctx.save();
       const adj = sceneToExport.adjustments || adjustments;
       ctx.filter = getCanvasFilterString(sceneToExport.filter, adj);
+
+      const zoom = sceneToExport.zoom || 1.0;
+      const panX = sceneToExport.panX || 0;
+      const panY = sceneToExport.panY || 0;
+
+      ctx.translate(width / 2, height / 2);
+      ctx.translate((panX / 100) * width, (panY / 100) * height);
+      ctx.scale(zoom, zoom);
+      ctx.translate(-width / 2, -height / 2);
+
       ctx.drawImage(img, 0, 0, width, height);
       ctx.restore();
 
@@ -1132,15 +1210,18 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           <div className="w-full flex justify-center py-2">
             <div
               ref={previewContainerRef}
+              onMouseDown={handleCanvasPointerDown}
+              onTouchStart={handleCanvasPointerDown}
               onMouseMove={handleCanvasPointerMove}
               onMouseUp={handleCanvasPointerUp}
               onMouseLeave={handleCanvasPointerUp}
               onTouchMove={handleCanvasPointerMove}
               onTouchEnd={handleCanvasPointerUp}
               onTouchCancel={handleCanvasPointerUp}
-              className={`relative overflow-hidden rounded-2xl shadow-xl border-4 border-slate-100 bg-slate-950 select-none touch-none ${getAspectRatioClasses(
-                project.aspectRatio
-              )} w-full`}
+              onWheel={handleCanvasWheel}
+              className={`relative overflow-hidden rounded-2xl shadow-xl border-4 border-slate-100 bg-slate-950 select-none touch-none ${
+                isDraggingMedia ? 'cursor-grabbing' : 'cursor-grab'
+              } ${getAspectRatioClasses(project.aspectRatio)} w-full`}
             >
               {/* Preview Live Badge in Canvas */}
               <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md z-30 pointer-events-none flex items-center gap-1.5 border border-white/20">
@@ -1148,7 +1229,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 <span>미리보기</span>
               </div>
 
-              {/* Media Element with Filter, Adjustments & Motion Animation */}
+              {/* Media Element with Filter, Pan & Zoom, and Adjustments */}
               {currentScene?.mediaType === 'video' ? (
                 <video
                   src={currentScene.url}
@@ -1156,15 +1237,25 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   playsInline
                   // @ts-ignore
                   webkit-playsinline="true"
-                  style={getCombinedFilterStyle()}
-                  className="w-full h-full object-cover"
+                  style={{
+                    ...getCombinedFilterStyle(),
+                    transform: `translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
+                    transformOrigin: 'center center',
+                    transition: isDraggingMedia ? 'none' : 'transform 0.1s ease-out',
+                  }}
+                  className="w-full h-full object-cover pointer-events-none"
                 />
               ) : (
                 <img
                   src={currentScene?.url}
                   alt={currentScene?.title}
-                  style={getCombinedFilterStyle()}
-                  className={`w-full h-full object-cover pointer-events-none transition-all duration-300 ${getMotionAnimationClass(currentMotion)}`}
+                  style={{
+                    ...getCombinedFilterStyle(),
+                    transform: `translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
+                    transformOrigin: 'center center',
+                    transition: isDraggingMedia ? 'none' : 'transform 0.1s ease-out',
+                  }}
+                  className={`w-full h-full object-cover pointer-events-none select-none ${getMotionAnimationClass(currentMotion)}`}
                 />
               )}
 
@@ -1464,6 +1555,64 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             </div>
           </div>
 
+          {/* Photo Zoom & Pan Controller Bar */}
+          <div className="w-full max-w-sm mt-3 px-3 py-2 bg-slate-50/90 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-xs">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <span className="text-[11px] text-slate-500 whitespace-nowrap">사진 확대</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const z = Math.max(1.0, Number(((currentScene?.zoom || 1.0) - 0.2).toFixed(1)));
+                  updateCurrentScene({ zoom: z });
+                }}
+                className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
+                title="사진 축소"
+              >
+                −
+              </button>
+              <input
+                type="range"
+                min="1.0"
+                max="3.0"
+                step="0.05"
+                value={currentScene?.zoom || 1.0}
+                onChange={(e) => updateCurrentScene({ zoom: parseFloat(e.target.value) })}
+                className="w-20 sm:w-28 accent-rose-600 cursor-pointer"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const z = Math.min(3.0, Number(((currentScene?.zoom || 1.0) + 0.2).toFixed(1)));
+                  updateCurrentScene({ zoom: z });
+                }}
+                className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
+                title="사진 확대"
+              >
+                +
+              </button>
+              <span className="font-mono text-[11px] text-rose-600 font-extrabold min-w-[36px] text-right">
+                {Math.round((currentScene?.zoom || 1.0) * 100)}%
+              </span>
+            </div>
+
+            {/* Reset Zoom & Pan Position Button */}
+            {((currentScene?.zoom && currentScene.zoom !== 1.0) || currentScene?.panX || currentScene?.panY) && (
+              <button
+                type="button"
+                onClick={() => updateCurrentScene({ zoom: 1.0, panX: 0, panY: 0 })}
+                className="text-[10px] font-extrabold text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 px-2 py-1 rounded-lg border border-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+                title="사진 위치 및 크기 원위치"
+              >
+                ↺ 원위치
+              </button>
+            )}
+          </div>
+
+          <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
+            <span>🖐️</span>
+            <span>사진을 직접 드래그하여 이동하고, 슬라이더나 두 손가락 핀치로 확대해보세요</span>
+          </p>
+
           {/* Controls Bar */}
           <div className="w-full flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
             <div className="flex items-center gap-2">
@@ -1593,15 +1742,15 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
               <div className="grid grid-cols-2 gap-2.5">
                 {[
+                  { id: 'none', label: '🖼️ 원본 그대로', badge: '기본 선택', desc: '필터 없는 본래 사진 원본' },
                   { id: 'butter_warm', label: '🧈 버터 필터', badge: '인스타 대세', desc: '따스하고 몽글몽글한 크리미 옐로우' },
                   { id: 'golden_hour', label: '🌅 골든 아워', badge: '노을 감성', desc: '황금빛 햇살이 부드럽게 스며드는 무드' },
                   { id: 'soft_milk', label: '🥛 밀크 크림', badge: '맑고 뽀얀', desc: '피부와 공간을 부드럽게 밝혀주는 톤' },
                   { id: 'tokyo_mood', label: '🗼 도쿄 필름', badge: '감성 피드', desc: '채도를 뺀 차분하고 서정적인 필름' },
                   { id: 'vintage_film', label: '🎞️ 빈티지 90s', badge: '레트로', desc: '아날로그 필름 카메라 감성' },
-                  { id: 'natural_clean', label: '🌿 내추럴 클린', badge: '기본 추천', desc: '맑고 왜곡 없는 투명한 톤' },
+                  { id: 'natural_clean', label: '🌿 내추럴 클린', badge: '추천', desc: '맑고 왜곡 없는 투명한 톤' },
                   { id: 'vivid_glow', label: '✨ 비비드 글로우', badge: '생기 UP', desc: '선명하고 화사하게 빛나는 톤' },
                   { id: 'pure_minimal', label: '🤍 퓨어 미니멀', badge: '미니멀', desc: '단정하고 군더더기 없는 화이트' },
-                  { id: 'none', label: '🖼️ 원본 그대로', badge: 'Original', desc: '필터 없는 본래 사진' },
                 ].map((f) => (
                   <button
                     key={f.id}

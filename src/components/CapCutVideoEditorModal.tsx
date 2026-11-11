@@ -267,7 +267,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         durationSec: isVideo ? 8 : 4,
         speed: 1.0,
         rotation: 0,
-        filter: 'butter_warm',
+        filter: 'none',
         transition: 'none',
         isMuted: false,
         volume: 100,

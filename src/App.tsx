@@ -206,7 +206,10 @@ export default function App() {
         durationSec: isVideo ? 8 : 4,
         kidsStickers: [],
         customSubtitles: [],
-        filter: 'butter_warm',
+        filter: 'none',
+        zoom: 1.0,
+        panX: 0,
+        panY: 0,
       };
     });
 
@@ -276,7 +279,10 @@ export default function App() {
           callToAction: '궁금하신 정보는 댓글 남겨주시면 알려드릴게요 🤍',
           durationSec: isVideoMode ? 15 : 4,
           kidsStickers: [],
-          filter: 'butter_warm'
+          filter: 'none',
+          zoom: 1.0,
+          panX: 0,
+          panY: 0
         }
       ],
       snsMetadata: {
