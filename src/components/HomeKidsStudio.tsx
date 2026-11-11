@@ -176,6 +176,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   // Subtitle Draggable & Multi-custom Subtitles
   const [selectedSubtitleId, setSelectedSubtitleId] = useState<string | null>(null);
   const [isDraggingSubtitle, setIsDraggingSubtitle] = useState(false);
+  const [isRotatingSubtitle, setIsRotatingSubtitle] = useState(false);
+  const subtitleCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // BGM Active Category & Preview State
   const [selectedBgmCategory, setSelectedBgmCategory] = useState<string>('all');
@@ -594,12 +596,41 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     updateCurrentScene({ kidsStickers: currentStickers });
   };
 
-  // Interactive Drag & Drop Sticker or Subtitle on Canvas
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Helper: extract clientX, clientY from Mouse or Touch event
+  const getPointerCoords = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
+    if ('touches' in e && e.touches.length > 0) {
+      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+    }
+    if ('changedTouches' in e && e.changedTouches.length > 0) {
+      return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+    }
+    const mouse = e as React.MouseEvent;
+    return { clientX: mouse.clientX, clientY: mouse.clientY };
+  };
+
+  // Interactive Drag & Drop Sticker or Subtitle & Direct Rotation on Canvas (Mouse & Mobile Touch)
+  const handleCanvasPointerMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!previewContainerRef.current) return;
+    if (!isDraggingSticker && !isDraggingSubtitle && !isRotatingSubtitle) return;
+
+    const { clientX, clientY } = getPointerCoords(e);
     const rect = previewContainerRef.current.getBoundingClientRect();
-    const x = Math.max(5, Math.min(95, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
-    const y = Math.max(5, Math.min(95, Math.round(((e.clientY - rect.top) / rect.height) * 100)));
+
+    // 1. Direct On-Canvas Subtitle Rotation
+    if (isRotatingSubtitle && selectedSubtitleId) {
+      const centerX = subtitleCenterRef.current.x;
+      const centerY = subtitleCenterRef.current.y;
+      const radians = Math.atan2(clientY - centerY, clientX - centerX);
+      let degrees = Math.round((radians * (180 / Math.PI)) - 90);
+      if (degrees > 180) degrees -= 360;
+      if (degrees < -180) degrees += 360;
+      updateSubtitle(selectedSubtitleId, { rotation: degrees });
+      return;
+    }
+
+    // 2. Drag & Move Subtitle or Sticker
+    const x = Math.max(5, Math.min(95, Math.round(((clientX - rect.left) / rect.width) * 100)));
+    const y = Math.max(5, Math.min(95, Math.round(((clientY - rect.top) / rect.height) * 100)));
 
     if (isDraggingSticker && selectedStickerId) {
       updateSelectedSticker({ x, y });
@@ -608,9 +639,10 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     }
   };
 
-  const handleCanvasMouseUp = () => {
+  const handleCanvasPointerUp = () => {
     setIsDraggingSticker(false);
     setIsDraggingSubtitle(false);
+    setIsRotatingSubtitle(false);
   };
 
   // Filter CSS class helper (인스타그램 & 숏폼 인기 필터)
@@ -1049,10 +1081,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           <div className="w-full flex justify-center py-2">
             <div
               ref={previewContainerRef}
-              onMouseMove={handleCanvasMouseMove}
-              onMouseUp={handleCanvasMouseUp}
-              onMouseLeave={handleCanvasMouseUp}
-              className={`relative overflow-hidden rounded-2xl shadow-xl border-4 border-slate-100 bg-slate-950 select-none ${getAspectRatioClasses(
+              onMouseMove={handleCanvasPointerMove}
+              onMouseUp={handleCanvasPointerUp}
+              onMouseLeave={handleCanvasPointerUp}
+              onTouchMove={handleCanvasPointerMove}
+              onTouchEnd={handleCanvasPointerUp}
+              onTouchCancel={handleCanvasPointerUp}
+              className={`relative overflow-hidden rounded-2xl shadow-xl border-4 border-slate-100 bg-slate-950 select-none touch-none ${getAspectRatioClasses(
                 project.aspectRatio
               )} w-full`}
             >
@@ -1135,6 +1170,11 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                       setSelectedSubtitleId(sub.id);
                       setIsDraggingSubtitle(true);
                     }}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                      setSelectedSubtitleId(sub.id);
+                      setIsDraggingSubtitle(true);
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedSubtitleId(sub.id);
@@ -1157,12 +1197,72 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                       {sub.text}
                     </span>
 
-                    {/* Drag helper tooltip badge */}
+                    {/* Direct On-Canvas Controls: Drag tooltip & Rotation Handle */}
                     {isSelected && (
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md whitespace-nowrap pointer-events-none leading-none">
-                        <Move className="w-2.5 h-2.5" />
-                        <span>화면 어디든 드래그</span>
-                      </div>
+                      <>
+                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md whitespace-nowrap pointer-events-none leading-none z-30">
+                          <Move className="w-2.5 h-2.5" />
+                          <span>터치/드래그 이동</span>
+                        </div>
+
+                        {/* Direct Rotation Stem & Handle on Canvas */}
+                        <div 
+                          className="absolute -bottom-9 left-1/2 -translate-x-1/2 flex items-center gap-1 z-30 pointer-events-auto"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {/* Quick Rotate -15° Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateSubtitle(sub.id, { rotation: ((sub.rotation || 0) - 15) });
+                            }}
+                            className="w-6 h-6 rounded-full bg-slate-900/90 hover:bg-slate-800 text-white flex items-center justify-center text-[10px] font-black shadow-md active:scale-90 transition-transform cursor-pointer border border-white/20"
+                            title="-15° 회전"
+                          >
+                            ↺
+                          </button>
+
+                          {/* Interactive Rotation Knob (Drag to Spin) */}
+                          <div
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              const targetEl = e.currentTarget.closest('.cursor-move') as HTMLElement;
+                              if (targetEl) {
+                                const r = targetEl.getBoundingClientRect();
+                                subtitleCenterRef.current = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+                              }
+                              setIsRotatingSubtitle(true);
+                            }}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                              const targetEl = e.currentTarget.closest('.cursor-move') as HTMLElement;
+                              if (targetEl) {
+                                const r = targetEl.getBoundingClientRect();
+                                subtitleCenterRef.current = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+                              }
+                              setIsRotatingSubtitle(true);
+                            }}
+                            className="w-7 h-7 rounded-full bg-white border-2 border-rose-500 text-rose-600 flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing hover:scale-110 active:scale-95 transition-transform"
+                            title="돌려서 직접 회전"
+                          >
+                            <RotateCw className="w-3.5 h-3.5 pointer-events-none" />
+                          </div>
+
+                          {/* Quick Rotate +15° Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateSubtitle(sub.id, { rotation: ((sub.rotation || 0) + 15) });
+                            }}
+                            className="w-6 h-6 rounded-full bg-slate-900/90 hover:bg-slate-800 text-white flex items-center justify-center text-[10px] font-black shadow-md active:scale-90 transition-transform cursor-pointer border border-white/20"
+                            title="+15° 회전"
+                          >
+                            ↻
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
                 );
@@ -1181,6 +1281,11 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                     selectedStickerId === stk.id ? 'ring-2 ring-rose-500 rounded-2xl scale-105' : ''
                   }`}
                   onMouseDown={(e) => {
+                    e.stopPropagation();
+                    setSelectedStickerId(stk.id);
+                    setIsDraggingSticker(true);
+                  }}
+                  onTouchStart={(e) => {
                     e.stopPropagation();
                     setSelectedStickerId(stk.id);
                     setIsDraggingSticker(true);
