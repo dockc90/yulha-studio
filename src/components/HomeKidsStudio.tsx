@@ -921,10 +921,10 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         </div>
 
         {/* Aspect Ratio Selector */}
-        <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/80 text-xs">
+        <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/80 text-xs overflow-x-auto max-w-full shrink-0">
           <button
             onClick={() => handleSetAspectRatio('9:16')}
-            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
               project.aspectRatio === '9:16'
                 ? 'bg-white text-slate-900 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
@@ -934,7 +934,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           </button>
           <button
             onClick={() => handleSetAspectRatio('1:1')}
-            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
               project.aspectRatio === '1:1'
                 ? 'bg-white text-slate-900 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
@@ -944,7 +944,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           </button>
           <button
             onClick={() => handleSetAspectRatio('4:5')}
-            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
               project.aspectRatio === '4:5'
                 ? 'bg-white text-slate-900 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
@@ -954,7 +954,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           </button>
           <button
             onClick={() => handleSetAspectRatio('16:9')}
-            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
               project.aspectRatio === '16:9'
                 ? 'bg-white text-slate-900 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
@@ -965,7 +965,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         </div>
 
         {/* Actions Button Row + Close Button */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           {/* Compare Original Button */}
           <button
             onMouseDown={() => setShowOriginal(true)}
@@ -973,7 +973,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             onMouseLeave={() => setShowOriginal(false)}
             onTouchStart={() => setShowOriginal(true)}
             onTouchEnd={() => setShowOriginal(false)}
-            className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer ${
               showOriginal ? 'bg-amber-400 text-amber-950 shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
             }`}
             title="누르고 있으면 원본 사진과 실시간 비교"
@@ -985,7 +985,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           {/* Export Options Dropdown or Buttons */}
           <button
             onClick={() => handleDownloadSnapshot(currentScene)}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer"
             title="현재 사진 고화질 저장"
           >
             <Download className="w-3.5 h-3.5 text-slate-600 shrink-0" />
@@ -995,17 +995,18 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           {project.scenes.length > 1 && (
             <button
               onClick={handleBatchDownloadAll}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all leading-none cursor-pointer"
+              className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer"
               title="모든 슬라이드 한 번에 저장"
             >
               <Layers className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-              <span className="leading-none">전체 일괄 저장</span>
+              <span className="leading-none hidden sm:inline">전체 일괄 저장</span>
+              <span className="leading-none sm:hidden">일괄 저장</span>
             </button>
           )}
 
           <button
             onClick={onSaveProject}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer"
           >
             <Check className="w-3.5 h-3.5 text-rose-600 shrink-0" />
             <span className="leading-none">보관함 저장</span>
@@ -1013,7 +1014,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
           <button
             onClick={onGoToPublish}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-xs font-bold shadow-sm shadow-rose-500/25 transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-[11px] sm:text-xs font-bold shadow-sm shadow-rose-500/25 transition-all leading-none cursor-pointer"
           >
             <Share2 className="w-3.5 h-3.5 shrink-0" />
             <span className="leading-none">SNS 가이드</span>
@@ -1022,7 +1023,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           {/* Pro Video Editor Launcher Button */}
           <button
             onClick={() => setIsCapCutModalOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-extrabold text-xs shadow-md border border-amber-500/30 transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-extrabold text-[11px] sm:text-xs shadow-md border border-amber-500/30 transition-all leading-none cursor-pointer"
             title="전문 동영상 편집기 열기"
           >
             <Scissors className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -1032,7 +1033,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 transition-colors cursor-pointer ml-1"
+              className="inline-flex items-center justify-center p-2 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 transition-colors cursor-pointer ml-0.5 sm:ml-1"
               title="창 닫기 (홈으로 이동)"
             >
               <X className="w-4 h-4 shrink-0" />

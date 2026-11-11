@@ -398,64 +398,67 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
       />
 
       {/* 1. TOP HEADER */}
-      <header className="h-14 border-b border-slate-800 bg-slate-950/80 px-5 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center shadow-md shadow-rose-500/20">
+      <header className="h-14 border-b border-slate-800 bg-slate-950/90 px-3 sm:px-5 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center shadow-md shadow-rose-500/20 shrink-0">
             <Scissors className="w-4 h-4 text-white" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-extrabold text-white leading-none">
-                프로 비디오 에디터 (Pro Video Studio)
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h2 className="text-xs sm:text-sm font-extrabold text-white leading-none truncate">
+                프로 비디오 에디터
               </h2>
-              <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded leading-none">
-                PRO STUDIO
+              <span className="hidden xs:inline-block bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded leading-none shrink-0">
+                PRO
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 mt-0.5 leading-none">
+            <p className="hidden md:block text-[10px] text-slate-400 mt-0.5 leading-none">
               재생바 위치에서 [✂️ 분할] 클릭 시 즉시 컷분할 · [🔗 컷 합치기] 클립 병합 · [➕ 미디어 추가] · 단축키 [Ctrl+B / Space]
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {isSavedBadge && (
-            <span className="text-emerald-400 font-bold text-xs animate-in fade-in flex items-center gap-1 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-lg">
-              <Check className="w-3.5 h-3.5" />
-              <span>저장 완료 ✨</span>
+            <span className="text-emerald-400 font-bold text-[11px] sm:text-xs animate-in fade-in flex items-center gap-1 bg-emerald-950/70 border border-emerald-800/80 px-2 sm:px-2.5 py-1 rounded-lg">
+              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden sm:inline">저장 완료 ✨</span>
+              <span className="sm:hidden">저장됨</span>
             </span>
           )}
 
           <button
             onClick={handleSave}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 shadow-sm transition-all cursor-pointer leading-none"
+            className="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] sm:text-xs border border-slate-700 shadow-sm transition-all cursor-pointer leading-none"
             title="현재까지 편집한 내용을 프로젝트에 저장합니다"
           >
-            <Save className="w-3.5 h-3.5 text-emerald-400" />
-            <span>저장하기</span>
+            <Save className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">저장하기</span>
+            <span className="sm:hidden">저장</span>
           </button>
 
           <button
             onClick={onClose}
-            className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer leading-none"
+            className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold text-[11px] sm:text-xs transition-colors cursor-pointer leading-none"
           >
             닫기
           </button>
 
           <button
             onClick={handleCommit}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-black text-xs shadow-md shadow-rose-500/30 transition-all cursor-pointer leading-none"
+            className="inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-black text-[11px] sm:text-xs shadow-md shadow-rose-500/30 transition-all cursor-pointer leading-none"
           >
-            <Check className="w-3.5 h-3.5" />
-            <span>적용 및 닫기</span>
+            <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">적용 및 닫기</span>
+            <span className="sm:hidden">적용</span>
           </button>
         </div>
       </header>
 
       {/* 2. MAIN WORKSPACE (Preview + Inspector) */}
-      <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* Left: Video Canvas Preview */}
-        <div className="flex-1 bg-slate-950 flex flex-col items-center justify-center p-4 relative">
+        <div className="flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-4 relative min-h-0">
           <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-slate-800 bg-black flex items-center justify-center max-w-full max-h-full">
             <div className={`${getAspectClasses(aspectRatio)} relative overflow-hidden flex items-center justify-center bg-black`}>
               {currentClip?.mediaType === 'video' ? (
@@ -547,8 +550,8 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
           </div>
         </div>
 
-        {/* Right: CapCut Pro Inspector Panel */}
-        <div className="w-80 border-l border-slate-800 bg-slate-900/95 flex flex-col shrink-0">
+        {/* Right: Pro Inspector Panel */}
+        <div className="w-full md:w-80 max-h-56 md:max-h-none border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900/95 flex flex-col shrink-0">
           {/* Inspector Tabs */}
           <div className="grid grid-cols-5 p-1.5 bg-slate-950 border-b border-slate-800 text-[11px] font-bold">
             {[
@@ -802,9 +805,9 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
       </div>
 
       {/* 3. MULTI-TRACK TIMELINE */}
-      <div className="h-64 border-t border-slate-800 bg-slate-950 flex flex-col shrink-0 select-none">
+      <div className="h-52 sm:h-64 border-t border-slate-800 bg-slate-950 flex flex-col shrink-0 select-none">
         {/* Timeline Top Control Strip */}
-        <div className="h-10 px-5 border-b border-slate-800/80 flex items-center justify-between text-xs">
+        <div className="h-10 px-3 sm:px-5 border-b border-slate-800/80 flex items-center justify-between text-xs overflow-x-auto scrollbar-none gap-2">
           <div className="flex items-center gap-3">
             <span className="font-black text-rose-400 flex items-center gap-1.5">
               <Film className="w-3.5 h-3.5" />

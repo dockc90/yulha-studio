@@ -285,7 +285,7 @@ export default function App() {
         />
 
         {/* Main Views */}
-        <main className="flex-1 pb-16">
+        <main className="flex-1 pb-24 sm:pb-16 w-full max-w-full overflow-x-hidden">
           {currentTab === 'templates' && (
             <HomeKidsTemplatesView
               activeCategory={activeCategory}
