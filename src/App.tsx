@@ -314,7 +314,7 @@ export default function App() {
   };
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary onReset={() => { setCurrentTab('templates'); setInitialOpenCapCut(false); }}>
       <div className="min-h-screen bg-[#FAFAFC] text-slate-900 flex flex-col font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
         {/* Main Header (All-in-One Studio) */}
         <HomeKidsHeader

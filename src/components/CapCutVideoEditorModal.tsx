@@ -271,6 +271,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         transition: 'none',
         isMuted: false,
         volume: 100,
+        kidsStickers: [],
         customSubtitles: [
           {
             id: `sub-${Date.now()}-${idx}`,
@@ -280,7 +281,8 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             fontSizeScale: 1.0,
             textColor: '#FFFFFF',
             bgColor: '#0F172A',
-            boxStyle: 'pill',
+            boxStyle: 'dark',
+            textAlign: 'center',
             fontFamily: 'Pretendard',
             rotation: 0,
           }

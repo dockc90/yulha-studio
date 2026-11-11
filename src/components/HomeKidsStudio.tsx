@@ -52,7 +52,8 @@ import {
   CustomSubtitle,
   TransitionEffect,
   BgmCategory,
-  BgmPresetItem
+  BgmPresetItem,
+  TextTypography
 } from '../types/homeAndKids';
 import { 
   CUTE_STICKER_CATEGORIES, 
@@ -159,6 +160,20 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   initialOpenCapCut,
 }) => {
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
+  const currentScene = project?.scenes?.[currentSceneIdx] || project?.scenes?.[0] || {
+    id: 'scene-fallback',
+    mediaType: 'image' as const,
+    url: '',
+    title: '',
+    subtitle: '',
+    durationSec: 4,
+    kidsStickers: [],
+    customSubtitles: [],
+    filter: 'none' as const,
+    zoom: 1.0,
+    panX: 0,
+    panY: 0
+  };
   const [isPlaying, setIsPlaying] = useState(false);
   
   // CapCut Pro Dedicated Editor Modal State & Browser Back navigation
@@ -297,7 +312,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
-  const currentScene = project.scenes[currentSceneIdx] || project.scenes[0];
+  // currentScene already declared above
 
   // Initialize adjustments and motion if undefined
   const adjustments: ColorAdjustments = currentScene?.adjustments || {
