@@ -1279,73 +1279,73 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-      {/* Top Action Bar with Back & Close Buttons */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-3xl p-4 sm:p-5 border border-slate-100 shadow-sm">
+      {/* Top Action Bar with Back & Close Buttons (Vivid & Cute Styling) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 border-2 border-pink-100/90 shadow-sm shadow-pink-500/5">
         <div className="flex items-center gap-3">
           {onBack && (
             <button
               onClick={onBack}
-              className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 transition-colors cursor-pointer border border-pink-200/60"
               title="이전 화면으로 돌아가기"
             >
               <ArrowLeft className="w-4 h-4 shrink-0" />
             </button>
           )}
 
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-sm shadow-rose-500/20">
-            <Sparkles className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-400 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md shadow-pink-500/25">
+            <Sparkles className="w-5 h-5 animate-spin-slow" />
           </div>
           <div className="flex flex-col justify-center">
             <input
               type="text"
               value={project.title}
               onChange={(e) => setProject((prev) => ({ ...prev, title: e.target.value }))}
-              className="font-bold text-base sm:text-lg text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-rose-500 focus:outline-none px-1 py-0.5 rounded-sm leading-normal"
+              className="font-black text-base sm:text-lg text-slate-900 bg-transparent border-b border-transparent hover:border-pink-300 focus:border-pink-500 focus:outline-none px-1 py-0.5 rounded-sm leading-normal"
             />
-            <span className="text-xs text-slate-400 font-medium leading-none mt-0.5">
-              슬라이드 {project.scenes.length}개 · {project.aspectRatio} 비율
+            <span className="text-xs text-pink-500/90 font-bold leading-none mt-0.5">
+              슬라이드 {project.scenes.length}개 · {project.aspectRatio} 비율 🎀
             </span>
           </div>
         </div>
 
-        {/* Aspect Ratio Selector */}
-        <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/80 text-xs overflow-x-auto max-w-full shrink-0">
+        {/* Aspect Ratio Selector (Vivid Colored Pills) */}
+        <div className="flex items-center gap-1.5 bg-pink-50/80 p-1.5 rounded-2xl border border-pink-200/80 text-xs overflow-x-auto max-w-full shrink-0 shadow-2xs">
           <button
             onClick={() => handleSetAspectRatio('9:16')}
-            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-bold transition-all leading-none cursor-pointer ${
               project.aspectRatio === '9:16'
-                ? 'bg-white text-slate-900 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-sm font-black scale-102'
+                : 'text-slate-600 hover:text-pink-600 hover:bg-white/80'
             }`}
           >
             <span className="leading-none">9:16 세로</span>
           </button>
           <button
             onClick={() => handleSetAspectRatio('1:1')}
-            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-bold transition-all leading-none cursor-pointer ${
               project.aspectRatio === '1:1'
-                ? 'bg-white text-slate-900 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-sm font-black scale-102'
+                : 'text-slate-600 hover:text-sky-600 hover:bg-white/80'
             }`}
           >
             <span className="leading-none">1:1 정방형</span>
           </button>
           <button
             onClick={() => handleSetAspectRatio('4:5')}
-            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-bold transition-all leading-none cursor-pointer ${
               project.aspectRatio === '4:5'
-                ? 'bg-white text-slate-900 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm font-black scale-102'
+                : 'text-slate-600 hover:text-amber-600 hover:bg-white/80'
             }`}
           >
             <span className="leading-none">4:5 피드</span>
           </button>
           <button
             onClick={() => handleSetAspectRatio('16:9')}
-            className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+            className={`inline-flex items-center justify-center px-3 py-1.5 rounded-xl font-bold transition-all leading-none cursor-pointer ${
               project.aspectRatio === '16:9'
-                ? 'bg-white text-slate-900 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-sm font-black scale-102'
+                : 'text-slate-600 hover:text-purple-600 hover:bg-white/80'
             }`}
           >
             <span className="leading-none">16:9 가로</span>
@@ -1361,8 +1361,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             onMouseLeave={() => setShowOriginal(false)}
             onTouchStart={() => setShowOriginal(true)}
             onTouchEnd={() => setShowOriginal(false)}
-            className={`inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer ${
-              showOriginal ? 'bg-amber-400 text-amber-950 shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            className={`inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-black transition-all leading-none cursor-pointer ${
+              showOriginal ? 'bg-amber-400 text-amber-950 shadow-xs' : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
             }`}
             title="누르고 있으면 원본 사진과 실시간 비교"
           >
@@ -1373,20 +1373,20 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           {/* Export Options Dropdown or Buttons */}
           <button
             onClick={() => handleDownloadSnapshot(currentScene)}
-            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-[11px] sm:text-xs font-black border border-pink-200 transition-all leading-none cursor-pointer"
             title="현재 사진 고화질 저장"
           >
-            <Download className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+            <Download className="w-3.5 h-3.5 text-pink-600 shrink-0" />
             <span className="leading-none">사진 저장</span>
           </button>
 
           {project.scenes.length > 1 && (
             <button
               onClick={handleBatchDownloadAll}
-              className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer"
+              className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-[11px] sm:text-xs font-black border border-purple-200 transition-all leading-none cursor-pointer"
               title="모든 슬라이드 한 번에 저장"
             >
-              <Layers className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+              <Layers className="w-3.5 h-3.5 text-purple-500 shrink-0" />
               <span className="leading-none hidden sm:inline">전체 일괄 저장</span>
               <span className="leading-none sm:hidden">일괄 저장</span>
             </button>
@@ -1394,15 +1394,15 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
           <button
             onClick={onSaveProject}
-            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] sm:text-xs font-bold transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] sm:text-xs font-black border border-emerald-200 transition-all leading-none cursor-pointer"
           >
-            <Check className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
             <span className="leading-none">보관함 저장</span>
           </button>
 
           <button
             onClick={onGoToPublish}
-            className="inline-flex items-center justify-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-[11px] sm:text-xs font-bold shadow-sm shadow-rose-500/25 transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 hover:from-pink-600 hover:to-amber-500 text-white text-[11px] sm:text-xs font-black shadow-md shadow-pink-500/25 transition-all leading-none cursor-pointer hover:scale-102"
           >
             <Share2 className="w-3.5 h-3.5 shrink-0" />
             <span className="leading-none">SNS 가이드</span>
@@ -1411,10 +1411,10 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           {/* Pro Video Editor Launcher Button */}
           <button
             onClick={openCapCutEditor}
-            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-extrabold text-[11px] sm:text-xs shadow-md border border-amber-500/30 transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black text-[11px] sm:text-xs shadow-md shadow-purple-500/25 border border-purple-400/30 transition-all leading-none cursor-pointer hover:scale-102"
             title="전문 동영상 편집기 열기"
           >
-            <Scissors className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <Scissors className="w-3.5 h-3.5 text-amber-300 shrink-0" />
             <span className="leading-none">🎬 동영상 컷편집</span>
           </button>
 
@@ -1432,21 +1432,21 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
       {/* Main Studio Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Canvas Preview (lg: 7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-4 sm:p-6 border border-slate-100 shadow-sm flex flex-col items-center relative">
+        {/* Left Column: Canvas Preview (lg: 7 cols - Vivid Cute Styling) */}
+        <div className="lg:col-span-7 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-6 border-2 border-pink-100 shadow-sm shadow-pink-500/5 flex flex-col items-center relative">
           {/* Prominent Preview Section Title */}
-          <div className="w-full flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+          <div className="w-full flex items-center justify-between pb-3 mb-2 border-b border-pink-100/80">
             <div className="inline-flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" />
               <h3 className="font-black text-sm sm:text-base text-slate-900 tracking-tight leading-none">
-                미리보기
+                미리보기 ✨
               </h3>
-              <span className="text-[10px] sm:text-[11px] font-extrabold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md leading-none">
+              <span className="text-[10px] sm:text-[11px] font-black text-pink-600 bg-pink-50 border border-pink-200 px-2 py-0.5 rounded-md leading-none">
                 {project.aspectRatio}
               </span>
             </div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400">
-              <span className="text-slate-700">{currentSceneIdx + 1}</span>
+            <div className="inline-flex items-center gap-1.5 text-xs font-black text-pink-400">
+              <span className="text-pink-600">{currentSceneIdx + 1}</span>
               <span>/</span>
               <span>{project.scenes.length}</span>
             </div>
@@ -1464,14 +1464,14 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               onTouchEnd={handleCanvasPointerUp}
               onTouchCancel={handleCanvasPointerUp}
               onWheel={handleCanvasWheel}
-              className={`relative overflow-hidden rounded-2xl shadow-xl border-4 border-slate-100 bg-slate-950 select-none touch-none ${
+              className={`relative overflow-hidden rounded-2xl shadow-xl border-4 border-pink-100/90 bg-slate-950 select-none touch-none ${
                 isDraggingMedia ? 'cursor-grabbing' : 'cursor-grab'
               } ${getAspectRatioClasses(project.aspectRatio)}`}
             >
               {/* Preview Live Badge in Canvas */}
-              <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md z-30 pointer-events-none flex items-center gap-1.5 border border-white/20">
+              <div className="absolute top-3 left-3 bg-pink-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-md z-30 pointer-events-none flex items-center gap-1.5 border border-pink-400/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>미리보기</span>
+                <span>실시간 미리보기</span>
               </div>
 
               {/* Direct On-Canvas '사진 채우기' Button (우측 하단 빠른 채우기) */}
@@ -1481,7 +1481,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   e.stopPropagation();
                   handleFillFrame();
                 }}
-                className="absolute bottom-3 right-3 z-30 bg-slate-900/85 hover:bg-rose-600 text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-lg border border-white/20 backdrop-blur-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                className="absolute bottom-3 right-3 z-30 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-full shadow-lg shadow-pink-500/30 border border-white/30 backdrop-blur-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95"
                 title="원본 비율 유지하며 검정 여백 없이 꽉 채우기"
               >
                 <span>🖼️</span>
@@ -1857,7 +1857,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   step="0.05"
                   value={currentScene?.zoom || 1.0}
                   onChange={(e) => updateCurrentScene({ zoom: parseFloat(e.target.value) })}
-                  className="w-20 sm:w-28 accent-rose-600 cursor-pointer"
+                  className="w-20 sm:w-28 accent-pink-500 cursor-pointer"
                 />
                 <button
                   type="button"
@@ -1865,12 +1865,12 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                     const z = Math.min(3.0, Number(((currentScene?.zoom || 1.0) + 0.1).toFixed(2)));
                     updateCurrentScene({ zoom: z });
                   }}
-                  className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
+                  className="w-6 h-6 rounded-lg bg-white border border-pink-200 hover:bg-pink-50 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
                   title="사진 확대"
                 >
                   +
                 </button>
-                <span className="font-mono text-[11px] text-rose-600 font-extrabold min-w-[36px] text-right">
+                <span className="font-mono text-[11px] text-pink-600 font-black min-w-[36px] text-right">
                   {Math.round((currentScene?.zoom || 1.0) * 100)}%
                 </span>
               </div>
@@ -1880,7 +1880,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 <button
                   type="button"
                   onClick={() => updateCurrentScene({ zoom: 1.0, panX: 0, panY: 0 })}
-                  className="text-[10px] font-extrabold text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 px-2 py-1 rounded-lg border border-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+                  className="text-[10px] font-black text-pink-600 hover:text-pink-700 bg-white hover:bg-pink-50 px-2 py-1 rounded-lg border border-pink-200 transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
                   title="사진 위치 및 크기 원위치"
                 >
                   ↺ 원위치
@@ -1889,12 +1889,12 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             </div>
 
             {/* Quick Presets: Frame Fill & Full Fit */}
-            <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-200/60 text-[11px]">
-              <span className="text-slate-500 font-bold whitespace-nowrap">화면 맞춤:</span>
+            <div className="flex items-center gap-1.5 pt-1.5 border-t border-pink-200/60 text-[11px]">
+              <span className="text-pink-600 font-black whitespace-nowrap">화면 맞춤:</span>
               <button
                 type="button"
                 onClick={handleFillFrame}
-                className="px-2.5 py-1 rounded-lg font-bold bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-xs transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                className="px-2.5 py-1 rounded-lg font-black bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 hover:from-pink-600 hover:to-amber-500 text-white shadow-xs transition-all cursor-pointer flex items-center gap-1 active:scale-95 hover:scale-102"
                 title="원본 사진 비율을 100% 유지하면서 검정 여백 없이 꽉 채웁니다"
               >
                 <span>🖼️</span>
@@ -1905,8 +1905,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 onClick={handleFitEntire}
                 className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer border ${
                   (currentScene?.zoom || 1.0) === 1.0 && (!currentScene?.panX && !currentScene?.panY)
-                    ? 'bg-slate-200 text-slate-800 border-slate-300 font-extrabold'
-                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                    ? 'bg-pink-100 text-pink-700 border-pink-300 font-black'
+                    : 'bg-white text-slate-600 hover:bg-pink-50 border-pink-200'
                 }`}
                 title="여백이 생기더라도 원본 사진 전체가 온전히 보이도록 맞춤"
               >
@@ -1915,19 +1915,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
+          <p className="text-[11px] text-pink-400 font-semibold mt-1.5 flex items-center gap-1">
             <span>🖐️</span>
             <span>사진을 직접 드래그하여 이동하고, 슬라이더나 두 손가락 핀치로 확대해보세요</span>
           </p>
 
           {/* Controls Bar */}
-          <div className="w-full flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
+          <div className="w-full flex items-center justify-between pt-4 mt-2 border-t border-pink-100">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all leading-none cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 font-black text-xs transition-all leading-none cursor-pointer border border-pink-200/80 shadow-2xs"
               >
-                {isPlaying ? <Pause className="w-3.5 h-3.5 text-rose-600 shrink-0" /> : <Play className="w-3.5 h-3.5 text-rose-600 shrink-0" />}
+                {isPlaying ? <Pause className="w-3.5 h-3.5 text-pink-600 shrink-0" /> : <Play className="w-3.5 h-3.5 text-pink-600 shrink-0" />}
                 <span className="leading-none">{isPlaying ? '일시정지' : '슬라이드 재생'}</span>
               </button>
 
@@ -1957,12 +1957,12 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
         {/* Right Column: Pro Editing Studio Tools (lg: 5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Pro Tool Tabs */}
-          <div className="bg-white rounded-2xl p-1.5 border border-slate-100 shadow-sm grid grid-cols-7 gap-1 text-[11px] font-bold">
+          {/* Pro Tool Tabs (Cute Vivid Candy Tool Switcher) */}
+          <div className="bg-pink-50/70 rounded-2xl p-1.5 border border-pink-200/80 shadow-xs grid grid-cols-7 gap-1 text-[11px] font-bold">
             <button
               onClick={() => setActiveTool('filter')}
               className={`inline-flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all leading-none cursor-pointer ${
-                activeTool === 'filter' ? 'bg-rose-50 text-rose-600 font-black' : 'text-slate-600 hover:bg-slate-50'
+                activeTool === 'filter' ? 'bg-pink-500 text-white font-black shadow-sm shadow-pink-500/25 scale-102' : 'text-slate-600 hover:text-pink-600 hover:bg-white/80'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 shrink-0" />
@@ -1972,7 +1972,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             <button
               onClick={() => setActiveTool('adjust')}
               className={`inline-flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all leading-none cursor-pointer ${
-                activeTool === 'adjust' ? 'bg-rose-50 text-rose-600 font-black' : 'text-slate-600 hover:bg-slate-50'
+                activeTool === 'adjust' ? 'bg-amber-500 text-white font-black shadow-sm shadow-amber-500/25 scale-102' : 'text-slate-600 hover:text-amber-600 hover:bg-white/80'
               }`}
             >
               <Sliders className="w-3.5 h-3.5 shrink-0" />
@@ -1982,7 +1982,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             <button
               onClick={() => setActiveTool('video_edit')}
               className={`inline-flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all leading-none cursor-pointer ${
-                activeTool === 'video_edit' ? 'bg-rose-50 text-rose-600 font-black' : 'text-slate-600 hover:bg-slate-50'
+                activeTool === 'video_edit' ? 'bg-violet-600 text-white font-black shadow-sm shadow-purple-500/25 scale-102' : 'text-slate-600 hover:text-violet-600 hover:bg-white/80'
               }`}
             >
               <Scissors className="w-3.5 h-3.5 shrink-0" />
@@ -1992,7 +1992,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             <button
               onClick={() => setActiveTool('motion')}
               className={`inline-flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all leading-none cursor-pointer ${
-                activeTool === 'motion' ? 'bg-rose-50 text-rose-600 font-black' : 'text-slate-600 hover:bg-slate-50'
+                activeTool === 'motion' ? 'bg-sky-500 text-white font-black shadow-sm shadow-sky-500/25 scale-102' : 'text-slate-600 hover:text-sky-600 hover:bg-white/80'
               }`}
             >
               <Film className="w-3.5 h-3.5 shrink-0" />
@@ -2002,7 +2002,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             <button
               onClick={() => setActiveTool('stickers')}
               className={`inline-flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all leading-none cursor-pointer ${
-                activeTool === 'stickers' ? 'bg-rose-50 text-rose-600 font-black' : 'text-slate-600 hover:bg-slate-50'
+                activeTool === 'stickers' ? 'bg-emerald-500 text-white font-black shadow-sm shadow-emerald-500/25 scale-102' : 'text-slate-600 hover:text-emerald-600 hover:bg-white/80'
               }`}
             >
               <Smile className="w-3.5 h-3.5 shrink-0" />
@@ -2012,7 +2012,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             <button
               onClick={() => setActiveTool('text')}
               className={`inline-flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all leading-none cursor-pointer ${
-                activeTool === 'text' ? 'bg-rose-50 text-rose-600 font-black' : 'text-slate-600 hover:bg-slate-50'
+                activeTool === 'text' ? 'bg-rose-500 text-white font-black shadow-sm shadow-rose-500/25 scale-102' : 'text-slate-600 hover:text-rose-600 hover:bg-white/80'
               }`}
             >
               <Type className="w-3.5 h-3.5 shrink-0" />
@@ -2022,7 +2022,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             <button
               onClick={() => setActiveTool('bgm')}
               className={`inline-flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all leading-none cursor-pointer ${
-                activeTool === 'bgm' ? 'bg-rose-50 text-rose-600 font-black' : 'text-slate-600 hover:bg-slate-50'
+                activeTool === 'bgm' ? 'bg-teal-500 text-white font-black shadow-sm shadow-teal-500/25 scale-102' : 'text-slate-600 hover:text-teal-600 hover:bg-white/80'
               }`}
             >
               <Music className="w-3.5 h-3.5 shrink-0" />
@@ -3464,7 +3464,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       {/* Floating Live Preview Window (스크롤을 내려도 미리보기 창이 계속 떠있도록 지원 & 위치 드래그 이동 & 소/중/대 크기 조절) */}
       {!isMainPreviewVisible && !isFloatingDismissed && (
         <div
-          className="floating-preview-root fixed z-50 bg-slate-900/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl shadow-2xl border-2 border-rose-500/90 animate-in fade-in slide-in-from-top-4 duration-200 select-none group"
+          className="floating-preview-root fixed z-50 bg-slate-900/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl shadow-2xl shadow-pink-500/25 border-2 border-pink-500 animate-in fade-in slide-in-from-top-4 duration-200 select-none group"
           style={{
             touchAction: 'none',
             ...(floatingPos
@@ -3479,13 +3479,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             onPointerMove={handleFloatingPointerMove}
             onPointerUp={handleFloatingPointerUp}
             onPointerCancel={handleFloatingPointerUp}
-            className={`flex items-center justify-between gap-1.5 pb-1.5 px-0.5 border-b border-slate-700/80 text-[10px] text-white font-extrabold select-none ${
+            className={`flex items-center justify-between gap-1.5 pb-1.5 px-0.5 border-b border-slate-700/80 text-[10px] text-white font-black select-none ${
               isDraggingFloating ? 'cursor-grabbing' : 'cursor-grab'
             }`}
           >
-            <div className="flex items-center gap-1 text-rose-400">
-              <span className="text-slate-400 hover:text-white font-mono text-xs cursor-grab" title="드래그하여 위치 이동">⠿</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+            <div className="flex items-center gap-1 text-pink-400">
+              <span className="text-pink-300 hover:text-white font-mono text-xs cursor-grab" title="드래그하여 위치 이동">⠿</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
               <span className="text-[10px] hidden sm:inline">미리보기</span>
             </div>
 
@@ -3497,8 +3497,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   e.stopPropagation();
                   setFloatingSize('sm');
                 }}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-bold leading-none cursor-pointer transition-colors ${
-                  floatingSize === 'sm' ? 'bg-rose-500 text-white' : 'text-slate-400 hover:text-white'
+                className={`px-1.5 py-0.5 rounded text-[9px] font-black leading-none cursor-pointer transition-colors ${
+                  floatingSize === 'sm' ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
                 title="작은 크기"
               >
@@ -3510,8 +3510,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   e.stopPropagation();
                   setFloatingSize('md');
                 }}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-bold leading-none cursor-pointer transition-colors ${
-                  floatingSize === 'md' ? 'bg-rose-500 text-white' : 'text-slate-400 hover:text-white'
+                className={`px-1.5 py-0.5 rounded text-[9px] font-black leading-none cursor-pointer transition-colors ${
+                  floatingSize === 'md' ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
                 title="중간 크기"
               >
@@ -3523,8 +3523,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   e.stopPropagation();
                   setFloatingSize('lg');
                 }}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-bold leading-none cursor-pointer transition-colors ${
-                  floatingSize === 'lg' ? 'bg-rose-500 text-white' : 'text-slate-400 hover:text-white'
+                className={`px-1.5 py-0.5 rounded text-[9px] font-black leading-none cursor-pointer transition-colors ${
+                  floatingSize === 'lg' ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
                 title="큰 크기"
               >

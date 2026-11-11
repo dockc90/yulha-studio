@@ -36,26 +36,26 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-      {/* Header Banner with Back & Close */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      {/* Header Banner with Back & Close (Vivid & Cute Styling) */}
+      <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border-2 border-pink-100 shadow-sm shadow-pink-500/5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
             onClick={onBackToStudio}
-            className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 transition-colors cursor-pointer border border-pink-200/60"
             title="에디터로 뒤로가기"
           >
             <span className="text-sm font-bold">←</span>
           </button>
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold border border-rose-100 leading-none">
-              <Sparkles className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-              <span className="leading-none">SNS 소통 최적화 퍼블리싱 매니저</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-black shadow-2xs leading-none">
+              <Sparkles className="w-3.5 h-3.5 text-amber-200 shrink-0 animate-bounce" />
+              <span className="leading-none">SNS 소통 최적화 퍼블리싱 매니저 🚀</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">
               {project.title}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500">
-              인스타그램, 오늘의집, 유튜브에서 시청자의 댓글과 호기심을 이끌어내는 맞춤 캡션을 원클릭 복사하세요.
+            <p className="text-xs sm:text-sm text-pink-500/90 font-bold">
+              인스타그램, 오늘의집, 유튜브에서 시청자의 댓글과 호기심을 이끌어내는 맞춤 캡션을 원클릭 복사하세요 ✨
             </p>
           </div>
         </div>
@@ -63,7 +63,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={onBackToStudio}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 font-black text-xs border border-pink-200 transition-all leading-none cursor-pointer"
           >
             <span className="leading-none">← 에디터로 돌아가기</span>
           </button>
@@ -71,7 +71,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center p-2.5 rounded-xl bg-pink-50 hover:bg-pink-100 hover:text-pink-600 text-slate-500 transition-colors cursor-pointer"
               title="창 닫기 (홈으로 이동)"
             >
               <span className="text-sm font-bold leading-none">✕</span>
@@ -80,54 +80,72 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
         </div>
       </div>
 
-      {/* Platform Switcher */}
+      {/* Platform Switcher (Vivid Pop Tabs) */}
       <div className="grid grid-cols-3 gap-3">
         {/* 인스타그램 Tab */}
         <button
           onClick={() => setSelectedPlatform('instagram')}
-          className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none ${
+          className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none hover:scale-102 ${
             selectedPlatform === 'instagram'
-              ? 'bg-rose-50/80 border-rose-400 shadow-xs'
-              : 'bg-white border-slate-200 hover:bg-slate-50'
+              ? 'bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-400 text-white border-pink-300 shadow-md shadow-pink-500/30'
+              : 'bg-white border-pink-100 hover:bg-pink-50/50 text-slate-700'
           }`}
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 text-white flex items-center justify-center shadow-xs shrink-0">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xs shrink-0 ${
+            selectedPlatform === 'instagram' ? 'bg-white/20 text-white' : 'bg-gradient-to-tr from-pink-500 to-amber-400 text-white'
+          }`}>
             <Instagram className="w-5 h-5 shrink-0" />
           </div>
-          <span className="font-extrabold text-xs sm:text-sm text-slate-900 leading-none">인스타그램</span>
-          <span className="text-[11px] text-rose-600 font-bold leading-none">릴스 · 피드 캡션</span>
+          <span className={`font-black text-xs sm:text-sm leading-none ${selectedPlatform === 'instagram' ? 'text-white' : 'text-slate-900'}`}>
+            인스타그램
+          </span>
+          <span className={`text-[11px] font-bold leading-none ${selectedPlatform === 'instagram' ? 'text-pink-100' : 'text-pink-600'}`}>
+            릴스 · 피드 캡션
+          </span>
         </button>
 
         {/* 오늘의집 Tab */}
         <button
           onClick={() => setSelectedPlatform('ohouse')}
-          className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none ${
+          className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none hover:scale-102 ${
             selectedPlatform === 'ohouse'
-              ? 'bg-sky-50 border-sky-400 shadow-xs'
-              : 'bg-white border-slate-200 hover:bg-slate-50'
+              ? 'bg-gradient-to-tr from-cyan-500 via-sky-500 to-blue-600 text-white border-sky-300 shadow-md shadow-sky-500/30'
+              : 'bg-white border-sky-100 hover:bg-sky-50/50 text-slate-700'
           }`}
         >
-          <div className="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center font-black text-sm shrink-0">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
+            selectedPlatform === 'ohouse' ? 'bg-white/20 text-white' : 'bg-sky-500 text-white'
+          }`}>
             집
           </div>
-          <span className="font-extrabold text-xs sm:text-sm text-slate-900 leading-none">오늘의집</span>
-          <span className="text-[11px] text-sky-600 font-bold leading-none">소통형 스토리</span>
+          <span className={`font-black text-xs sm:text-sm leading-none ${selectedPlatform === 'ohouse' ? 'text-white' : 'text-slate-900'}`}>
+            오늘의집
+          </span>
+          <span className={`text-[11px] font-bold leading-none ${selectedPlatform === 'ohouse' ? 'text-sky-100' : 'text-sky-600'}`}>
+            소통형 스토리
+          </span>
         </button>
 
         {/* 유튜브 Tab */}
         <button
           onClick={() => setSelectedPlatform('youtube')}
-          className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none ${
+          className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none hover:scale-102 ${
             selectedPlatform === 'youtube'
-              ? 'bg-red-50 border-red-400 shadow-xs'
-              : 'bg-white border-slate-200 hover:bg-slate-50'
+              ? 'bg-gradient-to-tr from-red-500 via-rose-600 to-pink-600 text-white border-red-300 shadow-md shadow-red-500/30'
+              : 'bg-white border-red-100 hover:bg-red-50/50 text-slate-700'
           }`}
         >
-          <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+            selectedPlatform === 'youtube' ? 'bg-white/20 text-white' : 'bg-red-600 text-white'
+          }`}>
             <Youtube className="w-5 h-5 shrink-0" />
           </div>
-          <span className="font-extrabold text-xs sm:text-sm text-slate-900 leading-none">유튜브 쇼츠</span>
-          <span className="text-[11px] text-red-600 font-bold leading-none">고정 댓글 질문</span>
+          <span className={`font-black text-xs sm:text-sm leading-none ${selectedPlatform === 'youtube' ? 'text-white' : 'text-slate-900'}`}>
+            유튜브 쇼츠
+          </span>
+          <span className={`text-[11px] font-bold leading-none ${selectedPlatform === 'youtube' ? 'text-red-100' : 'text-red-600'}`}>
+            고정 댓글 질문
+          </span>
         </button>
       </div>
 

@@ -348,7 +348,12 @@ export default function App() {
 
   return (
     <ErrorBoundary onReset={() => { setCurrentTab('templates'); setInitialOpenCapCut(false); }}>
-      <div className="min-h-screen bg-[#FAFAFC] text-slate-900 flex flex-col font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
+      <div className="min-h-screen bg-gradient-to-b from-[#FFF5F8] via-[#FFFDF9] to-[#F7F8FF] text-slate-900 flex flex-col font-sans antialiased selection:bg-pink-200 selection:text-pink-900 relative overflow-hidden">
+        {/* Cute Vivid Ambient Background Glows */}
+        <div className="fixed top-0 left-1/4 w-96 h-96 bg-pink-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="fixed top-1/3 right-10 w-80 h-80 bg-amber-200/20 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="fixed bottom-10 left-10 w-96 h-96 bg-purple-200/15 rounded-full blur-3xl pointer-events-none -z-10" />
+
         {/* Main Header (All-in-One Studio) */}
         <HomeKidsHeader
           currentTab={currentTab}
@@ -418,24 +423,26 @@ export default function App() {
           )}
         </main>
 
-        {/* Minimal Toast Notification */}
+        {/* Cute Vivid Toast Notification */}
         {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 bg-slate-900/95 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-slate-800 leading-none">
-            <Sparkles className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-            <span className="leading-none">{toastMessage}</span>
+          <div className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white text-xs font-black px-4 py-3 rounded-2xl shadow-xl shadow-pink-500/25 border-2 border-white/50 leading-none animate-in fade-in slide-in-from-bottom-2">
+            <Sparkles className="w-4 h-4 text-amber-200 shrink-0 animate-bounce" />
+            <span className="leading-none drop-shadow-xs">{toastMessage}</span>
           </div>
         )}
 
-        {/* Clean Aesthetic Footer */}
-        <footer className="bg-white border-t border-slate-100 py-8 text-xs text-slate-500">
+        {/* Cute & Vivid Aesthetic Footer */}
+        <footer className="bg-white/80 backdrop-blur-md border-t border-pink-100/90 py-8 text-xs text-slate-500">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="inline-flex items-center gap-2">
-              <span className="font-extrabold text-slate-900">율하스튜디오 (Yulha Studio)</span>
-              <span className="text-slate-300">·</span>
-              <span className="text-slate-500">All-in-One Media Creator Studio</span>
+              <span className="font-black bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">
+                율하스튜디오 💖
+              </span>
+              <span className="text-pink-300">·</span>
+              <span className="text-slate-600 font-bold">All-in-One Media Creator Studio</span>
             </div>
-            <p className="text-[11px] text-slate-400">
-              인스타그램, 오늘의집, 유튜브를 아우르는 감성 미디어 제작 만능 플랫폼
+            <p className="text-[11px] text-pink-400 font-semibold">
+              인스타그램, 오늘의집, 유튜브를 아우르는 감성 미디어 제작 만능 플랫폼 ✨
             </p>
           </div>
         </footer>
