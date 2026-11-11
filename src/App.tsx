@@ -348,12 +348,7 @@ export default function App() {
 
   return (
     <ErrorBoundary onReset={() => { setCurrentTab('templates'); setInitialOpenCapCut(false); }}>
-      <div className="min-h-screen bg-gradient-to-b from-[#FFF5F8] via-[#FFFDF9] to-[#F7F8FF] text-slate-900 flex flex-col font-sans antialiased selection:bg-pink-200 selection:text-pink-900 relative overflow-hidden">
-        {/* Cute Vivid Ambient Background Glows */}
-        <div className="fixed top-0 left-1/4 w-96 h-96 bg-pink-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
-        <div className="fixed top-1/3 right-10 w-80 h-80 bg-amber-200/20 rounded-full blur-3xl pointer-events-none -z-10" />
-        <div className="fixed bottom-10 left-10 w-96 h-96 bg-purple-200/15 rounded-full blur-3xl pointer-events-none -z-10" />
-
+      <div className="min-h-screen bg-[#FBFBFA] text-[#37352F] flex flex-col font-sans antialiased selection:bg-[#EAE9E5] selection:text-[#23272A]">
         {/* Main Header (All-in-One Studio) */}
         <HomeKidsHeader
           currentTab={currentTab}
@@ -423,26 +418,26 @@ export default function App() {
           )}
         </main>
 
-        {/* Cute Vivid Toast Notification */}
+        {/* Notion-Style Clean Minimalist Toast */}
         {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white text-xs font-black px-4 py-3 rounded-2xl shadow-xl shadow-pink-500/25 border-2 border-white/50 leading-none animate-in fade-in slide-in-from-bottom-2">
-            <Sparkles className="w-4 h-4 text-amber-200 shrink-0 animate-bounce" />
-            <span className="leading-none drop-shadow-xs">{toastMessage}</span>
+          <div className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 bg-[#2F3437] text-white text-xs font-medium px-4 py-3 rounded-xl shadow-xl border border-[#3F4448] leading-none animate-in fade-in slide-in-from-bottom-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="leading-none">{toastMessage}</span>
           </div>
         )}
 
-        {/* Cute & Vivid Aesthetic Footer */}
-        <footer className="bg-white/80 backdrop-blur-md border-t border-pink-100/90 py-8 text-xs text-slate-500">
+        {/* Notion-Style Clean Minimalist Footer */}
+        <footer className="bg-[#FBFBFA] border-t border-[#EDEDEB] py-7 text-xs text-[#787774]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="inline-flex items-center gap-2">
-              <span className="font-black bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">
-                율하스튜디오 💖
+              <span className="font-semibold text-[#37352F]">
+                율하스튜디오
               </span>
-              <span className="text-pink-300">·</span>
-              <span className="text-slate-600 font-bold">All-in-One Media Creator Studio</span>
+              <span className="text-[#D3D1CB]">·</span>
+              <span className="text-[#787774]">All-in-One Media Creator Studio</span>
             </div>
-            <p className="text-[11px] text-pink-400 font-semibold">
-              인스타그램, 오늘의집, 유튜브를 아우르는 감성 미디어 제작 만능 플랫폼 ✨
+            <p className="text-[11px] text-[#9B9A97]">
+              인스타그램, 오늘의집, 유튜브를 위한 심플하고 강력한 미디어 에디터
             </p>
           </div>
         </footer>

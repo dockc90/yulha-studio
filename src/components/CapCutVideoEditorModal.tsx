@@ -476,55 +476,55 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
       />
 
       {/* 1. TOP HEADER */}
-      <header className="h-14 border-b border-slate-800 bg-slate-950/90 px-3 sm:px-5 flex items-center justify-between shrink-0">
+      <header className="h-14 border-b border-[#2F3437] bg-[#191919]/95 px-3 sm:px-5 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center shadow-md shadow-rose-500/20 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#23272A] border border-[#3F4448] flex items-center justify-center shrink-0">
             <Scissors className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <h2 className="text-xs sm:text-sm font-extrabold text-white leading-none truncate">
-                프로 비디오 에디터
+              <h2 className="text-xs sm:text-sm font-semibold text-white leading-none truncate">
+                동영상 컷편집
               </h2>
-              <span className="hidden xs:inline-block bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded leading-none shrink-0">
+              <span className="hidden xs:inline-block bg-[#2F3437] border border-[#3F4448] text-neutral-300 text-[9px] font-medium px-1.5 py-0.5 rounded leading-none shrink-0">
                 PRO
               </span>
             </div>
-            <p className="hidden md:block text-[10px] text-slate-400 mt-0.5 leading-none">
-              재생바 위치에서 [✂️ 분할] 클릭 시 즉시 컷분할 · [🔗 컷 합치기] 클립 병합 · [📷 사진 추가] · [🎬 동영상 추가]
+            <p className="hidden md:block text-[10px] text-neutral-400 mt-0.5 leading-none">
+              재생바 위치에서 [분할] 클릭 시 컷 분할 · [컷 합치기] 클립 병합 · [사진 추가] · [동영상 추가]
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {isSavedBadge && (
-            <span className="text-emerald-400 font-bold text-[11px] sm:text-xs animate-in fade-in flex items-center gap-1 bg-emerald-950/70 border border-emerald-800/80 px-2 sm:px-2.5 py-1 rounded-lg">
+            <span className="text-emerald-400 font-medium text-[11px] sm:text-xs animate-in fade-in flex items-center gap-1 bg-emerald-950/70 border border-emerald-800/80 px-2 sm:px-2.5 py-1 rounded-lg">
               <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              <span className="hidden sm:inline">저장 완료 ✨</span>
+              <span className="hidden sm:inline">저장 완료</span>
               <span className="sm:hidden">저장됨</span>
             </span>
           )}
 
           <button
             onClick={handleSave}
-            className="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] sm:text-xs border border-slate-700 shadow-sm transition-all cursor-pointer leading-none"
+            className="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 font-medium text-[11px] sm:text-xs border border-[#3F4448] transition-colors cursor-pointer leading-none"
             title="현재까지 편집한 내용을 프로젝트에 저장합니다"
           >
-            <Save className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" />
+            <Save className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-300" />
             <span className="hidden sm:inline">저장하기</span>
             <span className="sm:hidden">저장</span>
           </button>
 
           <button
             onClick={onClose}
-            className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold text-[11px] sm:text-xs transition-colors cursor-pointer leading-none"
+            className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium text-[11px] sm:text-xs border border-[#3F4448] transition-colors cursor-pointer leading-none"
           >
             닫기
           </button>
 
           <button
             onClick={handleCommit}
-            className="inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-black text-[11px] sm:text-xs shadow-md shadow-rose-500/30 transition-all cursor-pointer leading-none"
+            className="inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white hover:bg-neutral-200 text-[#191919] font-semibold text-[11px] sm:text-xs transition-colors cursor-pointer leading-none shadow-xs"
           >
             <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span className="hidden sm:inline">적용 및 닫기</span>
@@ -633,24 +633,24 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
             <button
               onClick={togglePlayPause}
-              className="w-8 h-8 rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center cursor-pointer shadow-md shadow-rose-600/30"
+              className="w-8 h-8 rounded-lg bg-white hover:bg-neutral-200 text-black flex items-center justify-center cursor-pointer shadow-sm transition-colors"
               title="재생 / 일시정지 (스페이스바)"
             >
               {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
             </button>
 
-            <div className="font-mono text-xs flex items-center gap-1 text-slate-300">
-              <span className="text-rose-400 font-bold">{currentTime.toFixed(1)}s</span>
+            <div className="font-mono text-xs flex items-center gap-1 text-neutral-300">
+              <span className="text-white font-semibold">{currentTime.toFixed(1)}s</span>
               <span>/</span>
               <span>{totalDuration.toFixed(1)}s</span>
             </div>
 
-            <span className="text-slate-600">|</span>
+            <span className="text-[#3F4448]">|</span>
 
             {/* Split At Playhead Button */}
             <button
               onClick={handleSplitAtPlayhead}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs cursor-pointer shadow-md shadow-amber-500/20"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448]"
               title="재생바 위치에서 클립 분할 (Ctrl+B)"
             >
               <Scissors className="w-3.5 h-3.5" />
@@ -660,9 +660,9 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         </div>
 
         {/* Right: Pro Inspector Panel */}
-        <div className="w-full md:w-80 flex-1 min-h-0 overflow-y-auto border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900/95 flex flex-col">
+        <div className="w-full md:w-80 flex-1 min-h-0 overflow-y-auto border-t md:border-t-0 md:border-l border-[#2F3437] bg-[#191919]/95 flex flex-col">
           {/* Inspector Tabs */}
-          <div className="grid grid-cols-5 p-1.5 bg-slate-950 border-b border-slate-800 text-[11px] font-bold">
+          <div className="grid grid-cols-5 p-1 bg-[#191919] border-b border-[#2F3437] text-[11px] font-medium">
             {[
               { id: 'edit', label: '편집' },
               { id: 'speed', label: '속도' },
@@ -673,10 +673,10 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveInspectorTab(tab.id as any)}
-                className={`py-2 rounded-xl transition-all leading-none cursor-pointer text-center ${
+                className={`py-1.5 rounded-md transition-colors leading-none cursor-pointer text-center ${
                   activeInspectorTab === tab.id
-                    ? 'bg-rose-600 text-white font-black shadow-xs'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-[#2F3437] text-white font-semibold shadow-xs'
+                    : 'text-neutral-400 hover:text-white'
                 }`}
               >
                 {tab.label}
@@ -689,21 +689,21 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {/* TAB 1: Edit & Transform */}
             {activeInspectorTab === 'edit' && (
               <div className="space-y-4">
-                <div className="p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 space-y-2">
-                  <span className="text-slate-400 font-bold block">선택된 클립 정보</span>
-                  <div className="font-extrabold text-sm text-white">{currentClip?.title}</div>
-                  <div className="text-[11px] text-rose-400 font-mono">
+                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-1.5">
+                  <span className="text-neutral-400 font-medium block">선택된 클립 정보</span>
+                  <div className="font-semibold text-sm text-white">{currentClip?.title}</div>
+                  <div className="text-[11px] text-neutral-300 font-mono">
                     길이: {currentClip?.durationSec || 4}초 · 배속: {currentClip?.speed || 1.0}x
                   </div>
                 </div>
 
                 {/* Quick Split, Merge & Actions */}
                 <div className="space-y-2">
-                  <label className="font-bold text-slate-300 block">클립 분할 & 합치기</label>
+                  <label className="font-medium text-neutral-300 block">클립 분할 & 합치기</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={handleSplitAtPlayhead}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black cursor-pointer shadow-md leading-none"
+                      className="inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer border border-[#3F4448] leading-none"
                       title="재생바 위치에서 컷을 둘로 나눕니다 (단축키: Ctrl+B)"
                     >
                       <Scissors className="w-3.5 h-3.5" />
@@ -712,10 +712,10 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     <button
                       onClick={handleMergeNextCut}
                       disabled={selectedIdx >= clips.length - 1}
-                      className={`inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl font-black leading-none ${
+                      className={`inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg font-medium leading-none ${
                         selectedIdx < clips.length - 1
-                          ? 'bg-sky-600 hover:bg-sky-500 text-white cursor-pointer shadow-md'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                          ? 'bg-[#2F3437] hover:bg-[#3F4448] text-white cursor-pointer border border-[#3F4448]'
+                          : 'bg-[#1E1E1E] text-neutral-500 cursor-not-allowed border border-[#2F3437]'
                       }`}
                       title="선택된 클립과 다음 클립을 하나로 합칩니다"
                     >
@@ -727,7 +727,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   {selectedIdx > 0 && (
                     <button
                       onClick={handleMergePrevCut}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold border border-slate-700 cursor-pointer text-xs"
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium border border-[#2F3437] cursor-pointer text-xs"
                       title="선택된 클립과 이전 클립을 하나로 합칩니다"
                     >
                       <Link2 className="w-3.5 h-3.5" />
@@ -738,28 +738,28 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
                 {/* Add Media Files & Duplicate */}
                 <div className="space-y-2">
-                  <label className="font-bold text-slate-300 block">미디어 추가 및 관리</label>
+                  <label className="font-medium text-neutral-300 block">미디어 추가 및 관리</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => photoInputRef.current?.click()}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold cursor-pointer leading-none shadow-sm text-xs"
+                      className="inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer leading-none border border-[#3F4448] text-xs"
                       title="사진 파일을 타임라인에 추가합니다"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>📷 사진 추가</span>
+                      <span>사진 추가</span>
                     </button>
                     <button
                       onClick={() => videoInputRef.current?.click()}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold cursor-pointer leading-none border border-amber-500/30 text-xs"
+                      className="inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#23272A] hover:bg-[#3F4448] text-neutral-200 font-medium cursor-pointer leading-none border border-[#3F4448] text-xs"
                       title="동영상 파일을 타임라인에 추가합니다"
                     >
-                      <Plus className="w-3.5 h-3.5 text-amber-400" />
-                      <span>🎬 동영상 추가</span>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>동영상 추가</span>
                     </button>
                   </div>
                   <button
                     onClick={handleDuplicate}
-                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold cursor-pointer leading-none border border-slate-700 text-xs"
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium cursor-pointer leading-none border border-[#2F3437] text-xs"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>클립 복제</span>
@@ -767,16 +767,16 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                 </div>
 
                 {/* Rotation */}
-                <div className="p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 space-y-2">
+                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-300">화면 회전</span>
-                    <span className="font-mono text-rose-400 font-bold">{currentClip?.rotation || 0}°</span>
+                    <span className="font-medium text-neutral-300">화면 회전</span>
+                    <span className="font-mono text-neutral-200 font-semibold">{currentClip?.rotation || 0}°</span>
                   </div>
                   <button
                     onClick={() => updateCurrentClip({ rotation: ((currentClip.rotation || 0) + 90) % 360 })}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer border border-[#3F4448]"
                   >
-                    <RotateCw className="w-3.5 h-3.5 text-rose-400" />
+                    <RotateCw className="w-3.5 h-3.5 text-neutral-300" />
                     <span>90° 시계방향 회전</span>
                   </button>
                 </div>
@@ -785,7 +785,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                 {clips.length > 1 && (
                   <button
                     onClick={handleDelete}
-                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-800/80 text-red-300 font-bold cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-950/40 hover:bg-red-950/70 border border-red-900/60 text-red-300 font-medium cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>현재 클립 삭제</span>
@@ -798,21 +798,21 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {activeInspectorTab === 'speed' && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-300">재생 속도 (배속)</span>
-                  <span className="font-mono text-rose-400 font-extrabold text-sm">
+                  <span className="font-medium text-neutral-300">재생 속도 (배속)</span>
+                  <span className="font-mono text-white font-semibold text-sm">
                     {currentClip?.speed || 1.0}x
                   </span>
                 </div>
 
-                <div className="grid grid-cols-4 gap-1.5 font-bold">
+                <div className="grid grid-cols-4 gap-1.5 font-medium">
                   {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0].map((spd) => (
                     <button
                       key={spd}
                       onClick={() => updateCurrentClip({ speed: spd })}
-                      className={`py-2 rounded-xl border text-center transition-all cursor-pointer ${
+                      className={`py-1.5 rounded-lg border text-center transition-colors cursor-pointer ${
                         (currentClip?.speed || 1.0) === spd
-                          ? 'bg-rose-600 border-rose-500 text-white font-black'
-                          : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'
+                          ? 'bg-white border-white text-black font-semibold'
+                          : 'bg-[#23272A] border-[#2F3437] text-neutral-300 hover:bg-[#2F3437]'
                       }`}
                     >
                       {spd}x
@@ -827,7 +827,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   step={0.1}
                   value={currentClip?.speed || 1.0}
                   onChange={(e) => updateCurrentClip({ speed: Number(e.target.value) })}
-                  className="w-full accent-rose-500 mt-2"
+                  className="w-full accent-white mt-2"
                 />
               </div>
             )}
@@ -835,8 +835,8 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {/* TAB 3: Transitions */}
             {activeInspectorTab === 'transition' && (
               <div className="space-y-3">
-                <span className="font-bold text-slate-300 block">클립 전환 효과</span>
-                <div className="grid grid-cols-2 gap-2 font-bold">
+                <span className="font-medium text-neutral-300 block">클립 전환 효과</span>
+                <div className="grid grid-cols-2 gap-2 font-medium">
                   {[
                     { id: 'none', label: '없음 (컷)', emoji: '✂️' },
                     { id: 'fade', label: '페이드', emoji: '🌫️' },
@@ -848,13 +848,13 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     <button
                       key={tr.id}
                       onClick={() => updateCurrentClip({ transition: tr.id as TransitionEffect })}
-                      className={`p-3 rounded-2xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-colors cursor-pointer ${
                         (currentClip?.transition || 'none') === tr.id
-                          ? 'bg-rose-950/60 border-rose-500 text-white font-black shadow-xs'
-                          : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'
+                          ? 'bg-white border-white text-black font-semibold shadow-xs'
+                          : 'bg-[#23272A] border-[#2F3437] text-neutral-300 hover:bg-[#2F3437]'
                       }`}
                     >
-                      <span className="text-xl leading-none">{tr.emoji}</span>
+                      <span className="text-lg leading-none">{tr.emoji}</span>
                       <span className="truncate leading-none">{tr.label}</span>
                     </button>
                   ))}
@@ -865,8 +865,8 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {/* TAB 4: Filters & Adjustments */}
             {activeInspectorTab === 'adjust' && (
               <div className="space-y-3">
-                <span className="font-bold text-slate-300 block">인기 필터 적용</span>
-                <div className="grid grid-cols-2 gap-2 font-bold">
+                <span className="font-medium text-neutral-300 block">인기 필터 적용</span>
+                <div className="grid grid-cols-2 gap-2 font-medium">
                   {[
                     { id: 'none', label: '원본 (Normal)' },
                     { id: 'butter_warm', label: '🧈 버터 필터' },
@@ -878,10 +878,10 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     <button
                       key={f.id}
                       onClick={() => updateCurrentClip({ filter: f.id as AestheticFilter })}
-                      className={`py-2 px-2.5 rounded-xl border text-xs truncate transition-all cursor-pointer ${
+                      className={`py-2 px-2.5 rounded-lg border text-xs truncate transition-colors cursor-pointer ${
                         (currentClip?.filter || 'none') === f.id
-                          ? 'bg-rose-600 border-rose-500 text-white font-black'
-                          : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'
+                          ? 'bg-white border-white text-black font-semibold'
+                          : 'bg-[#23272A] border-[#2F3437] text-neutral-300 hover:bg-[#2F3437]'
                       }`}
                     >
                       {f.label}
@@ -895,11 +895,11 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {activeInspectorTab === 'audio' && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-300">비디오 음량</span>
+                  <span className="font-medium text-neutral-300">비디오 음량</span>
                   <button
                     onClick={() => updateCurrentClip({ isMuted: !currentClip?.isMuted })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
-                      currentClip?.isMuted ? 'bg-rose-900 text-rose-300' : 'bg-slate-800 text-slate-300'
+                    className={`px-2 py-1 rounded-md text-[10px] font-medium cursor-pointer border ${
+                      currentClip?.isMuted ? 'bg-[#23272A] text-neutral-400 border-[#3F4448]' : 'bg-white text-black border-white'
                     }`}
                   >
                     {currentClip?.isMuted ? '음소거 해제' : '음소거'}
@@ -912,7 +912,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     max={100}
                     value={currentClip?.volume ?? 100}
                     onChange={(e) => updateCurrentClip({ volume: Number(e.target.value) })}
-                    className="w-full accent-rose-500"
+                    className="w-full accent-white"
                   />
                 )}
               </div>
@@ -922,11 +922,11 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
       </div>
 
       {/* 3. MULTI-TRACK TIMELINE */}
-      <div className="h-52 sm:h-64 border-t border-slate-800 bg-slate-950 flex flex-col shrink-0 select-none">
+      <div className="h-52 sm:h-64 border-t border-[#2F3437] bg-[#191919] flex flex-col shrink-0 select-none">
         {/* Timeline Top Control Strip */}
-        <div className="h-10 px-3 sm:px-5 border-b border-slate-800/80 flex items-center justify-between text-xs overflow-x-auto scrollbar-none gap-2">
+        <div className="h-10 px-3 sm:px-5 border-b border-[#2F3437] flex items-center justify-between text-xs overflow-x-auto scrollbar-none gap-2">
           <div className="flex items-center gap-3">
-            <span className="font-black text-rose-400 flex items-center gap-1.5">
+            <span className="font-semibold text-neutral-300 flex items-center gap-1.5">
               <Film className="w-3.5 h-3.5" />
               <span>타임라인</span>
             </span>
@@ -934,50 +934,50 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {/* Big Split Button */}
             <button
               onClick={handleSplitAtPlayhead}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs cursor-pointer shadow-sm shadow-amber-500/20"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448]"
               title="재생바 위치에서 클립 분할 (Ctrl+B)"
             >
               <Scissors className="w-3.5 h-3.5" />
-              <span>✂️ 분할</span>
+              <span>분할</span>
             </button>
 
             {/* Merge Cut Button */}
             <button
               onClick={selectedIdx < clips.length - 1 ? handleMergeNextCut : handleMergePrevCut}
               disabled={clips.length <= 1}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black shadow-sm transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 clips.length > 1
-                  ? 'bg-sky-600 hover:bg-sky-500 text-white cursor-pointer shadow-sky-600/20'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                  ? 'bg-[#2F3437] hover:bg-[#3F4448] text-white cursor-pointer border border-[#3F4448]'
+                  : 'bg-[#1E1E1E] text-neutral-500 cursor-not-allowed border border-[#2F3437]'
               }`}
               title={selectedIdx < clips.length - 1 ? "선택된 클립과 다음 클립 합치기" : "선택된 클립과 이전 클립 합치기"}
             >
               <Link2 className="w-3.5 h-3.5" />
-              <span>🔗 컷 합치기</span>
+              <span>컷 합치기</span>
             </button>
 
             {/* Add Photo & Video Buttons */}
             <button
               onClick={() => photoInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-black text-xs cursor-pointer shadow-sm shadow-rose-600/20"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448]"
               title="사진 파일 직접 추가하기"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>📷 사진 추가</span>
+              <span>사진 추가</span>
             </button>
 
             <button
               onClick={() => videoInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-black text-xs cursor-pointer border border-amber-500/30"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium text-xs cursor-pointer border border-[#2F3437]"
               title="동영상 파일 직접 추가하기"
             >
-              <Plus className="w-3.5 h-3.5 text-amber-400" />
-              <span>🎬 동영상 추가</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>동영상 추가</span>
             </button>
 
             <button
               onClick={handleDuplicate}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 text-xs font-medium cursor-pointer border border-[#2F3437]"
             >
               <Copy className="w-3 h-3" />
               <span>복제</span>
@@ -986,7 +986,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {clips.length > 1 && (
               <button
                 onClick={handleDelete}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-950/70 hover:bg-red-900 text-red-300 text-xs font-bold cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-950/40 hover:bg-red-950/70 text-red-300 text-xs font-medium cursor-pointer border border-red-900/60"
               >
                 <Trash2 className="w-3 h-3" />
                 <span>삭제</span>
@@ -994,7 +994,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             )}
           </div>
 
-          <div className="text-[11px] text-slate-400 font-mono">
+          <div className="text-[11px] text-neutral-400 font-mono">
             클립 {selectedIdx + 1} / {clips.length}
           </div>
         </div>
@@ -1003,15 +1003,15 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         <div 
           ref={timelineRef}
           onClick={handleTimelineClick}
-          className="flex-1 relative overflow-x-auto p-4 cursor-pointer bg-slate-950 space-y-3"
+          className="flex-1 relative overflow-x-auto p-4 cursor-pointer bg-[#141414] space-y-3"
         >
           {/* Time Ruler */}
-          <div className="h-4 flex items-center text-[9px] font-mono text-slate-500 border-b border-slate-800/60 pb-1">
+          <div className="h-4 flex items-center text-[9px] font-mono text-neutral-500 border-b border-[#2F3437] pb-1">
             {Array.from({ length: Math.ceil(totalDuration) + 1 }).map((_, sec) => (
               <div 
                 key={sec} 
                 style={{ width: `${(1 / Math.max(1, totalDuration)) * 100}%` }}
-                className="shrink-0 border-l border-slate-700 pl-1"
+                className="shrink-0 border-l border-neutral-700 pl-1"
               >
                 {sec}s
               </div>
@@ -1036,25 +1036,25 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   style={{ width: `${widthPct}%`, minWidth: '90px' }}
                   className={`h-full relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all group shrink-0 ${
                     isSelected
-                      ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-xl scale-102 z-10'
-                      : 'border-slate-800 hover:border-slate-600 opacity-80 hover:opacity-100'
+                      ? 'border-white ring-1 ring-white/50 shadow-xl scale-102 z-10'
+                      : 'border-[#2F3437] hover:border-neutral-500 opacity-80 hover:opacity-100'
                   }`}
                 >
                   <img src={clip.url} alt={clip.title} className="w-full h-full object-cover" />
                   
                   {/* Clip Header Label */}
-                  <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-bold leading-none">
+                  <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-medium leading-none">
                     #{idx + 1} {clip.mediaType === 'video' ? '🎬' : '🖼️'}
                   </div>
 
                   {/* Duration Chip */}
-                  <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-amber-300 text-[9px] font-mono font-bold leading-none">
+                  <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-neutral-200 text-[9px] font-mono leading-none">
                     {clip.durationSec || 4}s
                   </div>
 
                   {/* Speed Badge */}
                   {clip.speed && clip.speed !== 1.0 && (
-                    <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-rose-600 text-white text-[8px] font-black leading-none">
+                    <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-white text-black text-[8px] font-semibold leading-none">
                       {clip.speed}x
                     </div>
                   )}
@@ -1064,7 +1064,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
           </div>
 
           {/* Subtitles Track Visualizer */}
-          <div className="h-6 flex items-center gap-1.5 bg-slate-900/60 p-1 rounded-lg border border-slate-800/80">
+          <div className="h-6 flex items-center gap-1.5 bg-[#1E1E1E] p-1 rounded-lg border border-[#2F3437]">
             {clips.map((clip, idx) => {
               const range = clipRanges[idx];
               const widthPct = Math.max(12, ((range?.duration || 4) / Math.max(1, totalDuration)) * 100);
@@ -1074,10 +1074,10 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                 <div
                   key={`sub-${clip.id}`}
                   style={{ width: `${widthPct}%`, minWidth: '90px' }}
-                  className="h-full rounded bg-sky-950/70 border border-sky-800/60 px-1.5 flex items-center justify-between text-[9px] text-sky-300 font-bold shrink-0 truncate"
+                  className="h-full rounded bg-[#2F3437] border border-[#3F4448] px-1.5 flex items-center justify-between text-[9px] text-neutral-300 font-medium shrink-0 truncate"
                 >
                   <span className="truncate">T: {clip.customSubtitles?.[0]?.text || clip.title || '자막'}</span>
-                  {subCount > 1 && <span className="text-[8px] bg-sky-800 px-1 rounded">+{subCount}</span>}
+                  {subCount > 1 && <span className="text-[8px] bg-[#3F4448] px-1 rounded">+{subCount}</span>}
                 </div>
               );
             })}
@@ -1088,10 +1088,10 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             style={{
               left: `${Math.max(0, Math.min(100, (currentTime / Math.max(1, totalDuration)) * 100))}%`,
             }}
-            className="absolute top-0 bottom-0 w-0.5 bg-rose-500 z-30 pointer-events-none"
+            className="absolute top-0 bottom-0 w-0.5 bg-white z-30 pointer-events-none"
           >
-            <div className="w-3 h-3.5 bg-rose-500 rounded-b-md -translate-x-1/2 flex items-center justify-center shadow-md">
-              <span className="w-1 h-1 bg-white rounded-full" />
+            <div className="w-3 h-3.5 bg-white rounded-b-md -translate-x-1/2 flex items-center justify-center shadow-md">
+              <span className="w-1 h-1 bg-black rounded-full" />
             </div>
           </div>
         </div>

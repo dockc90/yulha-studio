@@ -96,339 +96,330 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
         className="hidden"
       />
 
-      {/* 1. HERO & PURPOSE: Vivid & Cute Interactive Start */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100/90 via-[#FFF9FB] to-amber-100/80 p-5 sm:p-8 md:p-10 border-2 border-pink-200/80 shadow-[0_12px_40px_rgba(255,100,160,0.12)] w-full">
-        {/* Decorative Background Bubbles */}
-        <div className="absolute -top-12 -right-12 w-48 h-48 bg-pink-300/30 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-amber-300/25 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="max-w-3xl space-y-3.5 sm:space-y-4 relative z-10">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 py-1.5 rounded-full bg-white/95 text-pink-600 text-[11px] sm:text-xs font-black border border-pink-200 shadow-sm leading-none">
-            <Sparkles className="w-4 h-4 text-pink-500 shrink-0 animate-bounce" />
-            <span className="leading-none">All-in-One 감성 크리에이터 스튜디오 🎀</span>
+      {/* 1. HERO & PURPOSE: Notion-Style Clean Minimalist Start */}
+      <div className="relative overflow-hidden rounded-2xl bg-white p-6 sm:p-8 md:p-10 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] w-full">
+        <div className="max-w-3xl space-y-3.5 sm:space-y-4">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#F1F1EF] text-[#37352F] text-[11px] sm:text-xs font-semibold border border-[#E3E2DE] leading-none">
+            <Sparkles className="w-3.5 h-3.5 text-[#37352F] shrink-0" />
+            <span className="leading-none">All-in-One Media Creator Studio</span>
           </div>
 
-          <h1 className="text-xl sm:text-3xl lg:text-5xl font-black text-slate-900 tracking-tight leading-snug sm:leading-tight break-keep">
-            오늘 어떤 소중한 순간을 <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-pink-500 via-purple-600 to-amber-500 bg-clip-text text-transparent">
-              생생하고 귀여운 콘텐츠
-            </span>
-            로 완성할까요? ✨
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#37352F] tracking-tight leading-snug sm:leading-tight break-keep">
+            소중한 일상과 순간을 <br className="hidden sm:inline" />
+            깔끔한 미디어 콘텐츠로 완성하세요
           </h1>
 
-          <p className="text-xs sm:text-base text-slate-600 leading-relaxed font-medium break-keep">
-            사진 보정, 타임라인 정밀 컷분할 & 병합, 화면 직접 회전 자막, 인기 버터 필터, 저작권 안심 36곡 BGM까지!
-            <br className="hidden md:inline" />{' '}
-            복잡한 툴 없이 <strong>인스타그램 릴스 · 오늘의집 스토리 · 유튜브 쇼츠</strong>를 3분 만에 완성하세요.
+          <p className="text-xs sm:text-sm text-[#787774] leading-relaxed font-normal break-keep">
+            사진 보정, 타임라인 정밀 컷분할 & 병합, 회전 자막, 스튜디오 필터, 저작권 안심 36곡 BGM까지 —
+            복잡한 툴 없이 <strong>인스타그램 릴스 · 오늘의집 스토리 · 유튜브 쇼츠</strong>를 빠르게 제작할 수 있습니다.
           </p>
 
           {/* Platform Quick Dimension Buttons */}
           <div className="pt-1 sm:pt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <span className="text-[11px] sm:text-xs font-black text-pink-600 mr-0.5 sm:mr-1">📐 올릴 플랫폼:</span>
+            <span className="text-xs font-medium text-[#787774] mr-0.5">플랫폼 규격:</span>
             <button
               onClick={() => onCreateNewProject('all', { aspectRatio: '9:16' })}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-[11px] sm:text-xs font-black border border-pink-200 shadow-2xs transition-all cursor-pointer hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
             >
-              <Smartphone className="w-3.5 h-3.5 text-pink-500 shrink-0" />
+              <Smartphone className="w-3.5 h-3.5 text-[#787774] shrink-0" />
               <span>9:16 릴스·쇼츠</span>
             </button>
 
             <button
               onClick={() => onCreateNewProject('home', { aspectRatio: '1:1' })}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 text-[11px] sm:text-xs font-black border border-sky-200 shadow-2xs transition-all cursor-pointer hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
             >
-              <Square className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-              <span>1:1 오늘의집·피드</span>
+              <Square className="w-3.5 h-3.5 text-[#787774] shrink-0" />
+              <span>1:1 피드</span>
             </button>
 
             <button
               onClick={() => onCreateNewProject('daily', { aspectRatio: '4:5' })}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] sm:text-xs font-black border border-amber-200 shadow-2xs transition-all cursor-pointer hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
             >
-              <Maximize2 className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <Maximize2 className="w-3.5 h-3.5 text-[#787774] shrink-0" />
               <span>4:5 세로 피드</span>
             </button>
 
             <button
               onClick={() => onCreateNewProject('cafe_travel', { aspectRatio: '16:9' })}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-[11px] sm:text-xs font-black border border-purple-200 shadow-2xs transition-all cursor-pointer hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
             >
-              <Film className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-              <span>16:9 와이드 영상</span>
+              <Film className="w-3.5 h-3.5 text-[#787774] shrink-0" />
+              <span>16:9 가로 영상</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* 2. 4 SUPERPOWER CARDS: Canva/CapCut Direct Action Hub (Vivid Pop Candy Theme) */}
+      {/* 2. 4 SUPERPOWER CARDS: Notion-Style Clean Action Hub */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-            <span>⚡ 원하는 작업을 바로 시작하세요</span>
-            <span className="text-xs text-pink-600 font-black bg-pink-100 px-2.5 py-0.5 rounded-full border border-pink-200">원클릭 시작 🚀</span>
+          <h2 className="text-base sm:text-lg font-bold text-[#37352F] flex items-center gap-2">
+            <span>작업 시작하기</span>
+            <span className="text-xs text-[#787774] font-medium bg-[#F1F1EF] px-2 py-0.5 rounded border border-[#E3E2DE]">바로가기</span>
           </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
-          {/* Action 1: Dedicated Video Cut Editor - Electric Violet */}
+          {/* Action 1: Dedicated Video Cut Editor */}
           <div 
             onClick={() => {
               if (onOpenCapCutDirectly) onOpenCapCutDirectly();
               else onCreateNewProject('all', { openCapCut: true, aspectRatio: '9:16' });
             }}
-            className="group relative overflow-hidden rounded-3xl p-4 sm:p-5 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white shadow-lg shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/35 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between border-2 border-purple-400/40 w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shadow-inner">
-                  <Scissors className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F]">
+                  <Scissors className="w-4 h-4 text-[#37352F]" />
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-white/20 text-purple-100 border border-white/30">
-                  ✂️ 프로 에디터
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                  동영상 에디터
                 </span>
               </div>
 
               <div>
-                <h3 className="font-black text-base text-white group-hover:text-amber-200 transition-colors">
+                <h3 className="font-bold text-sm sm:text-base text-[#37352F] group-hover:text-black transition-colors">
                   동영상 컷분할 & 합치기
                 </h3>
-                <p className="text-xs text-purple-100/90 mt-1 leading-relaxed break-keep font-medium">
-                  재생바에서 즉시 <strong>✂️ 분할</strong> 및 <strong>🔗 합치기</strong>, 0.5x~4.0x 배속, 화면 회전, 페이드 전환 효과까지 한 번에!
+                <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
+                  재생바에서 <strong>분할</strong> 및 <strong>합치기</strong>, 배속 조절, 화면 회전, 전환 효과를 직관적으로 편집합니다.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3.5 sm:pt-4 mt-3 border-t border-white/20 flex items-center justify-between text-xs font-black text-purple-200 group-hover:text-white">
-              <span>동영상 편집기 열기</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
+              <span>편집기 열기</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
 
-          {/* Action 2: Photo Polish & Stickers - Vivid Pink & Orange */}
+          {/* Action 2: Photo Polish & Stickers */}
           <div 
             onClick={() => onCreateNewProject('home', { aspectRatio: '1:1' })}
-            className="group relative overflow-hidden rounded-3xl p-4 sm:p-5 bg-gradient-to-br from-pink-500 via-rose-500 to-amber-400 text-white shadow-lg shadow-pink-500/25 hover:shadow-2xl hover:shadow-pink-500/40 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between border-2 border-pink-300/50 w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shadow-inner">
-                  <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F]">
+                  <ImageIcon className="w-4 h-4 text-[#37352F]" />
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-white/20 text-white border border-white/30">
-                  🎨 감성 버터 필터
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                  감성 필터
                 </span>
               </div>
 
               <div>
-                <h3 className="font-black text-base text-white">
+                <h3 className="font-bold text-sm sm:text-base text-[#37352F]">
                   사진 보정 & 스티커
                 </h3>
-                <p className="text-xs text-rose-100 mt-1 leading-relaxed break-keep font-medium">
-                  버터·코지 감성 필터, 귀여운 아기 동물 마스크 스티커, <strong>화면 직접 회전 자막</strong> 적용.
+                <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
+                  감성 스튜디오 필터, 얼굴 보호용 마스크 스티커, 화면 직접 회전 자막을 손쉽게 적용합니다.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3.5 sm:pt-4 mt-3 border-t border-white/25 flex items-center justify-between text-xs font-black text-white">
-              <span>사진 편집 시작하기</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
+              <span>사진 편집 시작</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
 
-          {/* Action 3: 9:16 Vertical Shorts/Reels - Vivid Fuchsia */}
+          {/* Action 3: 9:16 Vertical Shorts/Reels */}
           <div 
             onClick={() => onCreateNewProject('daily', { aspectRatio: '9:16' })}
-            className="group relative overflow-hidden rounded-3xl p-4 sm:p-5 bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600 text-white shadow-lg shadow-rose-500/20 hover:shadow-2xl hover:shadow-rose-500/35 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between border-2 border-rose-300/40 w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shadow-inner">
-                  <Instagram className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F]">
+                  <Instagram className="w-4 h-4 text-[#37352F]" />
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-white/20 text-white border border-white/30">
-                  🔥 9:16 세로 숏폼
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                  9:16 숏폼
                 </span>
               </div>
 
               <div>
-                <h3 className="font-black text-base text-white">
+                <h3 className="font-bold text-sm sm:text-base text-[#37352F]">
                   인스타 릴스 · 쇼츠
                 </h3>
-                <p className="text-xs text-rose-100 mt-1 leading-relaxed break-keep font-medium">
-                  상·하단 UI 가림 없는 <strong>플랫폼 안전영역(Safe Zone)</strong> 자동 가이드로 깔끔하게 제작.
+                <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
+                  상·하단 UI 가림 없는 플랫폼 안전영역(Safe Zone) 자동 가이드로 깔끔하게 제작합니다.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3.5 sm:pt-4 mt-3 border-t border-white/20 flex items-center justify-between text-xs font-black text-white">
-              <span>9:16 숏폼 만들기</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
+              <span>숏폼 만들기</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
 
-          {/* Action 4: Today's House 1:1 Feed - Vivid Sky & Cyan */}
+          {/* Action 4: Today's House 1:1 Feed */}
           <div 
             onClick={() => onCreateNewProject('home', { aspectRatio: '1:1' })}
-            className="group relative overflow-hidden rounded-3xl p-4 sm:p-5 bg-gradient-to-br from-cyan-500 via-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/20 hover:shadow-2xl hover:shadow-sky-500/35 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between border-2 border-sky-300/40 w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white font-black text-sm shadow-inner">
+                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F] font-bold text-xs">
                   오늘
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-white/20 text-white border border-white/30">
-                  💬 질문 소통형
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                  1:1 피드
                 </span>
               </div>
 
               <div>
-                <h3 className="font-black text-base text-white">
+                <h3 className="font-bold text-sm sm:text-base text-[#37352F]">
                   오늘의집 & 인스타 피드
                 </h3>
-                <p className="text-xs text-sky-100 mt-1 leading-relaxed break-keep font-medium">
-                  댓글과 스크랩을 유도하는 질문형 자막과 1:1 정방형 고화질 컷으로 감성 공간 기록.
+                <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
+                  댓글과 스크랩을 유도하는 질문형 자막과 1:1 정방형 컷으로 깔끔하게 기록합니다.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3.5 sm:pt-4 mt-3 border-t border-white/20 flex items-center justify-between text-xs font-black text-white">
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
               <span>1:1 피드 만들기</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. SMART DRAG & DROP HUB: Vivid Candy Pop Upload Entry */}
+      {/* 3. SMART DRAG & DROP HUB: Notion Clean File Entry */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative overflow-hidden rounded-3xl p-5 sm:p-8 border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-3 w-full ${
+        className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 border border-dashed transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-3 w-full ${
           isDragOver
-            ? 'border-pink-500 bg-pink-100/70 scale-[1.02] shadow-xl ring-4 ring-pink-300/50'
-            : 'border-pink-300 hover:border-pink-500 bg-gradient-to-b from-pink-50/70 via-white to-pink-50/40 hover:bg-pink-50/80 shadow-sm hover:shadow-lg hover:shadow-pink-500/10'
+            ? 'border-[#23272A] bg-[#F1F1EF] shadow-sm'
+            : 'border-[#D3D1CB] hover:border-[#37352F] bg-white hover:bg-[#FBFBFA]'
         }`}
       >
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-400 text-white flex items-center justify-center shadow-md shadow-pink-500/30 group-hover:scale-110 transition-transform">
-          <UploadCloud className="w-6 h-6 sm:w-7 sm:h-7 animate-pulse" />
+        <div className="w-11 h-11 rounded-xl bg-[#F1F1EF] text-[#37352F] flex items-center justify-center">
+          <UploadCloud className="w-5 h-5 text-[#37352F]" />
         </div>
 
         <div>
-          <h3 className="font-black text-sm sm:text-lg text-slate-900 break-keep">
-            내 사진 또는 동영상을 여기에 끌어다 놓으세요 💌
+          <h3 className="font-bold text-sm sm:text-base text-[#37352F] break-keep">
+            내 사진 또는 동영상을 여기에 끌어다 놓으세요
           </h3>
-          <p className="text-xs sm:text-sm text-pink-600 mt-1 break-keep font-bold">
-            또는 <strong className="text-pink-600 underline cursor-pointer hover:text-pink-700">여기를 클릭하여 파일 선택</strong> (사진 및 영상 다중 선택 지원)
+          <p className="text-xs text-[#787774] mt-1 break-keep">
+            또는 <strong className="text-[#37352F] underline cursor-pointer font-semibold">여기를 클릭하여 파일 선택</strong> (사진 및 영상 다중 선택 지원)
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-black text-slate-500">
-          <span className="px-2.5 py-0.5 rounded-lg bg-white border border-pink-200 text-pink-600 shadow-2xs">📸 사진추가</span>
-          <span className="text-pink-400">+</span>
-          <span className="px-2.5 py-0.5 rounded-lg bg-white border border-purple-200 text-purple-600 shadow-2xs">🎬 동영상추가</span>
-          <span className="break-keep text-slate-500">업로드 즉시 전용 에디터로 자동 전환</span>
+        <div className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-[#787774]">
+          <span className="px-2 py-0.5 rounded bg-[#F1F1EF] border border-[#E3E2DE] text-[#37352F] font-medium text-[11px]">사진추가</span>
+          <span>·</span>
+          <span className="px-2 py-0.5 rounded bg-[#F1F1EF] border border-[#E3E2DE] text-[#37352F] font-medium text-[11px]">동영상추가</span>
+          <span>·</span>
+          <span className="text-[11px]">업로드 즉시 에디터로 자동 전환</span>
         </div>
       </div>
 
-      {/* 4. WHY YULHA STUDIO? 5 Core Innovations Infographic (Vivid Neon Pop) */}
-      <div className="rounded-3xl bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 text-white p-5 sm:p-8 space-y-5 sm:space-y-6 w-full border-2 border-purple-500/30 shadow-2xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-purple-800/60 pb-4">
+      {/* 4. WHY YULHA STUDIO? 5 Core Innovations Infographic (Notion Clean Cards) */}
+      <div className="rounded-2xl bg-white text-[#37352F] p-6 sm:p-8 space-y-5 w-full border border-[#E9E9E7]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#EDEDEB] pb-4">
           <div>
-            <span className="text-xs font-black text-pink-400 tracking-wider uppercase flex items-center gap-1">
-              <span>✨ Key Innovations</span>
-            </span>
-            <h2 className="text-base sm:text-xl font-black text-white mt-0.5">
-              율하스튜디오만의 5대 핵심 기능 🌈
+            <span className="text-xs font-semibold text-[#787774] uppercase">Key Innovations</span>
+            <h2 className="text-base sm:text-lg font-bold text-[#37352F] mt-0.5">
+              율하스튜디오 5대 핵심 기능
             </h2>
           </div>
-          <p className="text-xs text-purple-200/80 max-w-md break-keep font-medium">
-            전문 영상 편집 프로그램을 배우지 않아도, 누구나 최고 수준의 콘텐츠를 쉽게 만들 수 있습니다.
+          <p className="text-xs text-[#787774] max-w-md break-keep font-normal">
+            전문 툴을 따로 배우지 않아도 누구나 직관적으로 고품질 콘텐츠를 제작할 수 있습니다.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 w-full">
-          <div className="bg-purple-900/40 rounded-2xl p-3.5 sm:p-4 border border-purple-600/40 space-y-2 min-w-0 hover:border-purple-400 transition-colors">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-violet-500/30 text-violet-300 flex items-center justify-center font-black">
-              <Scissors className="w-4 h-4 sm:w-5 sm:h-5 text-violet-300" />
+          <div className="bg-[#FBFBFA] rounded-xl p-3.5 border border-[#EDEDEB] space-y-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-[#F1F1EF] text-[#37352F] flex items-center justify-center">
+              <Scissors className="w-4 h-4 text-[#37352F]" />
             </div>
-            <h4 className="font-black text-sm text-white">1. 타임라인 컷분할 & 합치기</h4>
-            <p className="text-xs text-purple-200/80 leading-relaxed break-keep">
-              재생 헤드를 원하는 지점에 두고 <strong>✂️ 분할</strong> 및 <strong>🔗 합치기</strong> 클릭 한 번으로 손쉽게 클립을 편집하고 배속 조절.
+            <h4 className="font-bold text-xs sm:text-sm text-[#37352F]">1. 타임라인 컷분할 & 합치기</h4>
+            <p className="text-xs text-[#787774] leading-relaxed break-keep font-normal">
+              재생바에서 원하는 지점을 <strong>분할</strong> 및 <strong>합치기</strong> 클릭으로 손쉽게 편집하고 배속 조절.
             </p>
           </div>
 
-          <div className="bg-purple-900/40 rounded-2xl p-3.5 sm:p-4 border border-purple-600/40 space-y-2 min-w-0 hover:border-pink-400 transition-colors">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-pink-500/30 text-pink-300 flex items-center justify-center font-black">
-              <RotateCw className="w-4 h-4 sm:w-5 sm:h-5 text-pink-300" />
+          <div className="bg-[#FBFBFA] rounded-xl p-3.5 border border-[#EDEDEB] space-y-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-[#F1F1EF] text-[#37352F] flex items-center justify-center">
+              <RotateCw className="w-4 h-4 text-[#37352F]" />
             </div>
-            <h4 className="font-black text-sm text-white">2. 화면 직접 회전 자막</h4>
-            <p className="text-xs text-purple-200/80 leading-relaxed break-keep">
-              미리보기 화면의 자막을 터치하고 바로 회전 핸들을 돌리는 직관적 제어 (드래그 시 박스 크기 불변).
+            <h4 className="font-bold text-xs sm:text-sm text-[#37352F]">2. 화면 직접 회전 자막</h4>
+            <p className="text-xs text-[#787774] leading-relaxed break-keep font-normal">
+              미리보기 화면의 자막을 터치하고 회전 핸들을 돌리는 직관적 제어 (드래그 시 박스 크기 불변).
             </p>
           </div>
 
-          <div className="bg-purple-900/40 rounded-2xl p-3.5 sm:p-4 border border-purple-600/40 space-y-2 min-w-0 hover:border-amber-400 transition-colors">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/30 text-amber-300 flex items-center justify-center font-black">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300" />
+          <div className="bg-[#FBFBFA] rounded-xl p-3.5 border border-[#EDEDEB] space-y-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-[#F1F1EF] text-[#37352F] flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-[#37352F]" />
             </div>
-            <h4 className="font-black text-sm text-white">3. 인스타 인기 버터 필터</h4>
-            <p className="text-xs text-purple-200/80 leading-relaxed break-keep">
-              버터 웜, 코지 우드, 소프트 파스텔 등 인스타그램에서 가장 인기 있는 스튜디오 조명 톤온톤 무드.
+            <h4 className="font-bold text-xs sm:text-sm text-[#37352F]">3. 스튜디오 감성 필터</h4>
+            <p className="text-xs text-[#787774] leading-relaxed break-keep font-normal">
+              버터 웜, 코지 우드, 소프트 톤온톤 등 인스타그램에서 인기 있는 차분한 조명 톤.
             </p>
           </div>
 
-          <div className="bg-purple-900/40 rounded-2xl p-3.5 sm:p-4 border border-purple-600/40 space-y-2 min-w-0 hover:border-pink-400 transition-colors">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-pink-500/30 text-pink-300 flex items-center justify-center font-black">
-              <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-pink-300" />
+          <div className="bg-[#FBFBFA] rounded-xl p-3.5 border border-[#EDEDEB] space-y-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-[#F1F1EF] text-[#37352F] flex items-center justify-center">
+              <Heart className="w-4 h-4 text-[#37352F]" />
             </div>
-            <h4 className="font-black text-sm text-white">4. 귀여운 안심 스티커</h4>
-            <p className="text-xs text-purple-200/80 leading-relaxed break-keep">
-              얼굴 보호용 동물 마스크 스티커, D+100 성장 배지, 감성 데코 스티커로 아이 사진도 안심 공유.
+            <h4 className="font-bold text-xs sm:text-sm text-[#37352F]">4. 안심 마스크 스티커</h4>
+            <p className="text-xs text-[#787774] leading-relaxed break-keep font-normal">
+              얼굴 보호용 동물 마스크 스티커, D+100 성장 배지, 감성 데코 스티커로 안심 공유.
             </p>
           </div>
 
-          <div className="bg-purple-900/40 rounded-2xl p-3.5 sm:p-4 border border-purple-600/40 space-y-2 min-w-0 hover:border-emerald-400 transition-colors">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/30 text-emerald-300 flex items-center justify-center font-black">
-              <Music className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-300" />
+          <div className="bg-[#FBFBFA] rounded-xl p-3.5 border border-[#EDEDEB] space-y-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-[#F1F1EF] text-[#37352F] flex items-center justify-center">
+              <Music className="w-4 h-4 text-[#37352F]" />
             </div>
-            <h4 className="font-black text-sm text-white">5. 저작권 안심 36곡 BGM</h4>
-            <p className="text-xs text-purple-200/80 leading-relaxed break-keep">
+            <h4 className="font-bold text-xs sm:text-sm text-[#37352F]">5. 저작권 안심 36곡 BGM</h4>
+            <p className="text-xs text-[#787774] leading-relaxed break-keep font-normal">
               카페, 키즈, 힐링, 여행 등 6대 테마 음원을 Web Audio 신디사이저로 즉시 실시간 미리듣기.
             </p>
           </div>
         </div>
       </div>
 
-      {/* 5. READY-MADE TEMPLATES WITH CATEGORY TABS */}
+      {/* 5. READY-MADE TEMPLATES WITH CATEGORY TABS (Notion Style) */}
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-pink-100 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EDEDEB] pb-4">
           <div>
-            <h2 className="text-lg sm:text-xl font-black text-slate-900">
-              인기 감성 템플릿 (30초 만에 글자·사진만 바꿔 완성) 🧸
+            <h2 className="text-base sm:text-lg font-bold text-[#37352F]">
+              추천 템플릿
             </h2>
-            <p className="text-xs text-pink-600 mt-0.5 font-bold">
+            <p className="text-xs text-[#787774] mt-0.5">
               원하는 테마를 고르면 규격, 자막 스타일, 추천 필터와 BGM이 자동 세팅됩니다.
             </p>
           </div>
 
           {/* Category Filter Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          <div className="flex items-center gap-1 bg-[#F1F1EF] p-1 rounded-xl border border-[#E3E2DE] text-xs overflow-x-auto pb-1">
             {[
-              { id: 'all', label: '⭐ 전체' },
-              { id: 'home', label: '🏡 홈스타일링' },
-              { id: 'daily', label: '☕ 일상·브이로그' },
-              { id: 'kids', label: '👶 키즈·패밀리' },
-              { id: 'cafe_travel', label: '🌿 공간·감성' },
+              { id: 'all', label: '전체' },
+              { id: 'home', label: '홈스타일링' },
+              { id: 'daily', label: '일상·브이로그' },
+              { id: 'kids', label: '키즈·패밀리' },
+              { id: 'cafe_travel', label: '공간·감성' },
             ].map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id as UniversalCategory)}
-                className={`px-3.5 py-1.5 rounded-xl font-black whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer ${
                   activeCategory === cat.id
-                    ? 'bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 text-white shadow-sm shadow-pink-500/25 scale-102'
-                    : 'bg-white hover:bg-pink-50 text-slate-700 border border-pink-100'
+                    ? 'bg-white text-[#37352F] shadow-xs font-semibold'
+                    : 'text-[#787774] hover:text-[#37352F] font-medium'
                 }`}
               >
                 {cat.label}
@@ -438,52 +429,50 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
         </div>
 
         {/* Templates Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="bg-white rounded-3xl p-5 border-2 border-pink-100/80 shadow-sm hover:shadow-xl hover:shadow-pink-500/10 hover:border-pink-300 transition-all flex flex-col justify-between group"
+              className="bg-white rounded-2xl p-4 border border-[#E9E9E7] hover:border-[#D3D1CB] hover:shadow-xs transition-all flex flex-col justify-between group"
             >
-              <div className="space-y-3.5">
-                <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-pink-50/50">
+              <div className="space-y-3">
+                <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-[#F7F6F3]">
                   <img
                     src={template.previewImage}
                     alt={template.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-200"
                   />
-                  <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-[11px] font-black text-white shadow-md">
+                  <div className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#23272A]/90 backdrop-blur-xs text-[10px] font-medium text-white shadow-xs">
                     <span>{template.badge}</span>
                   </div>
 
-                  <div className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900/85 backdrop-blur-xs text-white text-[10px] font-black">
+                  <div className="absolute bottom-2.5 right-2.5 inline-flex items-center px-1.5 py-0.5 rounded bg-white/90 text-[#37352F] text-[10px] font-semibold">
                     <span>{template.aspectRatio}</span>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-black text-base text-slate-900 group-hover:text-pink-600 transition-colors">
+                  <h4 className="font-bold text-sm sm:text-base text-[#37352F] group-hover:text-black transition-colors">
                     {template.title}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed font-medium">
+                  <p className="text-xs text-[#787774] mt-1 line-clamp-2 leading-relaxed font-normal">
                     {template.subtitle}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-pink-50 flex items-center justify-between">
-                <div className="flex items-center gap-1 text-[11px] text-pink-400 font-black">
-                  <Instagram className="w-3.5 h-3.5 text-pink-500" />
-                  <Youtube className="w-3.5 h-3.5 text-red-500" />
-                  <span>멀티 최적화</span>
-                </div>
+              <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between">
+                <span className="text-[11px] text-[#9B9A97] font-medium">
+                  멀티 플랫폼 최적화
+                </span>
 
                 <button
                   type="button"
                   onClick={() => onSelectTemplate(template)}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black text-xs transition-all cursor-pointer shadow-sm shadow-pink-500/25 hover:scale-102"
+                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#37352F] text-white font-medium text-xs transition-colors cursor-pointer"
                 >
-                  <span>이 템플릿으로 편집</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  <span>편집하기</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -492,54 +481,54 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
       </div>
 
       {/* 6. SAMPLE SHOWCASE: 1-Click Load Full Projects */}
-      <div className="space-y-5 pt-4">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between border-b border-[#EDEDEB] pb-3">
           <div>
-            <h2 className="text-lg sm:text-xl font-extrabold text-slate-900">
-              클릭 한 번으로 불러오는 완성작 샘플 프로젝트
+            <h2 className="text-base sm:text-lg font-semibold text-[#37352F]">
+              샘플 프로젝트
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              실제 인스타그램/오늘의집 인기 피드 규격으로 미리 구성된 완성작을 열어 내 사진과 영상으로 교체해보세요.
+            <p className="text-xs text-[#787774] mt-0.5">
+              인스타그램 및 피드 규격으로 미리 구성된 완성작을 열어 내 사진과 영상으로 교체해보세요.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {SAMPLE_HOME_KIDS_PROJECTS.map((project) => (
             <div
               key={project.id}
-              className="bg-white rounded-3xl p-5 border-2 border-pink-100/90 shadow-sm hover:shadow-xl hover:shadow-pink-500/10 hover:border-pink-300 transition-all flex flex-col justify-between group"
+              className="bg-white rounded-2xl p-4 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#D3D1CB] transition-all flex flex-col justify-between group"
             >
-              <div className="space-y-3.5">
-                <div className="relative aspect-video rounded-2xl overflow-hidden bg-pink-50/50">
+              <div className="space-y-3">
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-[#F1F1EF]">
                   <img
                     src={project.scenes[0]?.url}
                     alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                   />
-                  <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[11px] font-black shadow-xs">
+                  <div className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#23272A]/85 backdrop-blur-xs text-white text-[10px] font-medium">
                     <span>슬라이드 {project.scenes.length}개</span>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-black text-sm text-slate-900 group-hover:text-pink-600 transition-colors line-clamp-1">
+                  <h3 className="font-semibold text-sm text-[#37352F] line-clamp-1">
                     {project.title}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed font-medium">
+                  <p className="text-xs text-[#787774] mt-1 line-clamp-2 leading-relaxed">
                     {project.description}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-4 mt-3 border-t border-pink-50 flex items-center justify-between">
-                <span className="text-[11px] font-black text-pink-400">
-                  {project.aspectRatio} 전용 규격
+              <div className="pt-3 mt-3 border-t border-[#EDEDEB] flex items-center justify-between">
+                <span className="text-[11px] text-[#9B9A97] font-mono">
+                  {project.aspectRatio} 전용
                 </span>
 
                 <button
                   onClick={() => onLoadProject(project)}
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-pink-50 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white text-pink-600 text-xs font-black transition-all cursor-pointer shadow-2xs hover:scale-102"
+                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] text-xs font-medium transition-colors cursor-pointer"
                 >
                   <span>프로젝트 열기</span>
                   <ArrowRight className="w-3.5 h-3.5" />
