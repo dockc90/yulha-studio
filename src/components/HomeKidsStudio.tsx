@@ -1179,21 +1179,20 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           const boxHeight = 70 * scale;
           const boxWidth = textWidth + boxPadding * 2;
 
-          if (sub.boxStyle !== 'none') {
+          const subOpacity = (sub.bgOpacity !== undefined ? sub.bgOpacity : 75) / 100;
+          if (sub.boxStyle !== 'none' && subOpacity > 0) {
             if (sub.boxStyle === 'glass') {
-              const a = (sub.bgOpacity ?? 40) / 100;
-              ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
+              ctx.fillStyle = `rgba(255, 255, 255, ${subOpacity})`;
             } else if (sub.boxStyle === 'cream') {
-              ctx.fillStyle = `rgba(254, 243, 199, ${(sub.bgOpacity ?? 90) / 100})`;
+              ctx.fillStyle = `rgba(254, 243, 199, ${subOpacity})`;
             } else if (sub.bgColor) {
               const hex = sub.bgColor.replace('#', '');
               const r = parseInt(hex.substring(0, 2), 16) || 15;
               const g = parseInt(hex.substring(2, 4), 16) || 23;
               const b = parseInt(hex.substring(4, 6), 16) || 42;
-              const a = (sub.bgOpacity ?? 75) / 100;
-              ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+              ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${subOpacity})`;
             } else {
-              ctx.fillStyle = `rgba(15, 23, 42, ${(sub.bgOpacity ?? 75) / 100})`;
+              ctx.fillStyle = `rgba(15, 23, 42, ${subOpacity})`;
             }
             safeRoundRect(-boxWidth / 2, -boxHeight / 2, boxWidth, boxHeight, 20 * scale);
             ctx.fill();
@@ -1468,25 +1467,6 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 isDraggingMedia ? 'cursor-grabbing' : 'cursor-grab'
               } ${getAspectRatioClasses(project.aspectRatio)}`}
             >
-              {/* Preview Live Badge in Canvas */}
-              <div className="absolute top-3 left-3 bg-[#191919]/90 backdrop-blur-xs text-neutral-300 px-2.5 py-1 rounded-md text-[10px] font-medium shadow-sm z-30 pointer-events-none flex items-center gap-1.5 border border-white/10">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>실시간 미리보기</span>
-              </div>
-
-              {/* Direct On-Canvas '사진 채우기' Button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleFillFrame();
-                }}
-                className="absolute bottom-3 right-3 z-30 bg-[#23272A]/90 hover:bg-[#23272A] text-white text-[11px] font-medium px-3 py-1.5 rounded-lg shadow-md border border-white/20 backdrop-blur-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="원본 비율 유지하며 검정 여백 없이 꽉 채우기"
-              >
-                <span>사진 채우기</span>
-              </button>
-
               {/* Media Element with Filter, Pan & Zoom, and Adjustments (Preserves original aspect ratio and fits width/height) */}
               {currentScene?.mediaType === 'video' ? (
                 <video
@@ -1557,19 +1537,24 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               {/* Interactive Draggable Custom Subtitles Overlay */}
               {activeSubtitles.map((sub) => {
                 const isSelected = selectedSubtitleId === sub.id;
+                const subOpacity = (sub.bgOpacity !== undefined ? sub.bgOpacity : 75) / 100;
+                const isCompletelyTransparent = (sub.boxStyle === 'none' && (sub.bgOpacity ?? 0) === 0) || subOpacity === 0;
+
                 const getSubBg = () => {
-                  if (sub.boxStyle === 'none') return 'transparent';
-                  if (sub.boxStyle === 'glass') return `rgba(255, 255, 255, ${(sub.bgOpacity ?? 40) / 100})`;
-                  if (sub.boxStyle === 'cream') return `rgba(254, 243, 199, ${(sub.bgOpacity ?? 90) / 100})`;
+                  if (sub.boxStyle === 'none') {
+                    if ((sub.bgOpacity ?? 0) === 0) return 'transparent';
+                    return `rgba(15, 23, 42, ${(sub.bgOpacity ?? 0) / 100})`;
+                  }
+                  if (sub.boxStyle === 'glass') return `rgba(255, 255, 255, ${subOpacity})`;
+                  if (sub.boxStyle === 'cream') return `rgba(254, 243, 199, ${subOpacity})`;
                   if (sub.bgColor) {
                     const hex = sub.bgColor.replace('#', '');
                     const r = parseInt(hex.substring(0, 2), 16) || 15;
                     const g = parseInt(hex.substring(2, 4), 16) || 23;
                     const b = parseInt(hex.substring(4, 6), 16) || 42;
-                    const a = (sub.bgOpacity ?? 75) / 100;
-                    return `rgba(${r}, ${g}, ${b}, ${a})`;
+                    return `rgba(${r}, ${g}, ${b}, ${subOpacity})`;
                   }
-                  return `rgba(15, 23, 42, ${(sub.bgOpacity ?? 75) / 100})`;
+                  return `rgba(15, 23, 42, ${subOpacity})`;
                 };
 
                 return (
@@ -1581,15 +1566,15 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                       transform: `translate(-50%, -50%) rotate(${sub.rotation || 0}deg)`,
                       backgroundColor: getSubBg(),
                       textAlign: sub.textAlign || 'center',
-                      backdropFilter: sub.boxStyle === 'none' ? 'none' : 'blur(8px)',
-                      WebkitBackdropFilter: sub.boxStyle === 'none' ? 'none' : 'blur(8px)',
+                      backdropFilter: isCompletelyTransparent ? 'none' : 'blur(8px)',
+                      WebkitBackdropFilter: isCompletelyTransparent ? 'none' : 'blur(8px)',
                       width: 'max-content',
                       maxWidth: '92%',
                       whiteSpace: 'nowrap',
                       border: isSelected
-                        ? '2px solid #E11D48'
-                        : sub.boxStyle === 'none'
-                          ? '1px dashed rgba(255,255,255,0.4)'
+                        ? '2px solid #23272A'
+                        : isCompletelyTransparent
+                          ? 'none'
                           : '1px solid rgba(255, 255, 255, 0.25)',
                     }}
                     onMouseDown={(e) => {
@@ -2860,89 +2845,147 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                     />
                   </div>
 
-                  {/* SECTION 3: Background Box Style */}
+                  {/* SECTION 3: Background Box Style & Opacity Control */}
                   <div className="p-3.5 bg-[#F7F6F3] rounded-xl border border-[#EDEDEB] space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="font-medium text-xs text-[#37352F] leading-none">자막 배경 스타일 & 색상</label>
-                      <span className="text-[11px] font-mono text-[#787774] leading-none">
-                        투명도: {selectedSubtitle.boxStyle === 'none' ? '0%' : `${selectedSubtitle.bgOpacity ?? 75}%`}
-                      </span>
-                    </div>
+                    {(() => {
+                      const currentOpacity = selectedSubtitle.boxStyle === 'none' && (selectedSubtitle.bgOpacity ?? 0) === 0 ? 0 : (selectedSubtitle.bgOpacity ?? 75);
 
-                    <div className="grid grid-cols-4 gap-1.5 text-xs font-medium">
-                      {[
-                        { id: 'dark', label: '다크 블러' },
-                        { id: 'glass', label: '소프트 글래스' },
-                        { id: 'cream', label: '크림 옐로우' },
-                        { id: 'none', label: '투명 (없음)' },
-                      ].map((box) => (
-                        <button
-                          key={box.id}
-                          onClick={() =>
-                            updateSubtitle(selectedSubtitle.id, {
-                              boxStyle: box.id as any,
-                              ...(box.id === 'cream' ? { bgColor: '#FEF3C7', textColor: '#0F172A' } : {}),
-                              ...(box.id === 'dark' ? { bgColor: '#0F172A', textColor: '#FFFFFF' } : {})
-                            })
-                          }
-                          className={`py-1.5 rounded-lg border text-center transition-colors leading-none cursor-pointer ${
-                            selectedSubtitle.boxStyle === box.id
-                              ? 'bg-[#23272A] border-[#23272A] text-white font-semibold shadow-xs'
-                              : 'bg-white border-[#EDEDEB] text-[#37352F] hover:bg-[#F1F1EF]'
-                          }`}
-                        >
-                          {box.label}
-                        </button>
-                      ))}
-                    </div>
+                      return (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <label className="font-medium text-xs text-[#37352F] leading-none">자막 배경 스타일 & 투명도</label>
+                            <span className="text-[11px] font-mono text-[#787774] leading-none">
+                              투명도: {currentOpacity}%
+                            </span>
+                          </div>
 
-                    {selectedSubtitle.boxStyle !== 'none' && (
-                      <div>
-                        <span className="text-[11px] font-medium text-[#787774] block mb-1.5">배경 컬러 팔레트</span>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {[
-                            { hex: '#0F172A', label: '다크 차콜' },
-                            { hex: '#FFFFFF', label: '화이트' },
-                            { hex: '#FEF3C7', label: '버터 크림' },
-                            { hex: '#F1F1EF', label: '라이트 그레이' },
-                            { hex: '#ECFDF5', label: '세이지 민트' },
-                            { hex: '#E0E7FF', label: '소프트 블루' },
-                            { hex: '#0284C7', label: '스카이 블루' },
-                            { hex: '#D97706', label: '웜 앰버' },
-                          ].map((c) => (
-                            <button
-                              key={c.hex}
-                              onClick={() => updateSubtitle(selectedSubtitle.id, { bgColor: c.hex, boxStyle: 'custom' })}
-                              style={{ backgroundColor: c.hex }}
-                              title={c.label}
-                              className={`w-6 h-6 rounded-full border transition-transform hover:scale-105 cursor-pointer ${
-                                selectedSubtitle.bgColor === c.hex
-                                  ? 'border-[#23272A] ring-2 ring-[#23272A]/30 scale-105'
-                                  : 'border-[#EDEDEB]'
-                              }`}
+                          <div className="grid grid-cols-4 gap-1.5 text-xs font-medium">
+                            {[
+                              { id: 'dark', label: '다크 블러' },
+                              { id: 'glass', label: '소프트 글래스' },
+                              { id: 'cream', label: '크림 옐로우' },
+                              { id: 'none', label: '투명 (없음)' },
+                            ].map((box) => (
+                              <button
+                                key={box.id}
+                                onClick={() =>
+                                  updateSubtitle(selectedSubtitle.id, {
+                                    boxStyle: box.id as any,
+                                    ...(box.id === 'cream' ? { bgColor: '#FEF3C7', textColor: '#0F172A', bgOpacity: 90 } : {}),
+                                    ...(box.id === 'glass' ? { bgColor: '#FFFFFF', textColor: '#0F172A', bgOpacity: 40 } : {}),
+                                    ...(box.id === 'dark' ? { bgColor: '#0F172A', textColor: '#FFFFFF', bgOpacity: 75 } : {}),
+                                    ...(box.id === 'none' ? { bgOpacity: 0 } : {}),
+                                  })
+                                }
+                                className={`py-1.5 rounded-lg border text-center transition-colors leading-none cursor-pointer ${
+                                  selectedSubtitle.boxStyle === box.id
+                                    ? 'bg-[#23272A] border-[#23272A] text-white font-semibold shadow-xs'
+                                    : 'bg-white border-[#EDEDEB] text-[#37352F] hover:bg-[#F1F1EF]'
+                                }`}
+                              >
+                                {box.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          {selectedSubtitle.boxStyle !== 'none' && (
+                            <div>
+                              <span className="text-[11px] font-medium text-[#787774] block mb-1.5">배경 컬러 팔레트</span>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {[
+                                  { hex: '#0F172A', label: '다크 차콜' },
+                                  { hex: '#FFFFFF', label: '화이트' },
+                                  { hex: '#FEF3C7', label: '버터 크림' },
+                                  { hex: '#F1F1EF', label: '라이트 그레이' },
+                                  { hex: '#ECFDF5', label: '세이지 민트' },
+                                  { hex: '#E0E7FF', label: '소프트 블루' },
+                                  { hex: '#0284C7', label: '스카이 블루' },
+                                  { hex: '#D97706', label: '웜 앰버' },
+                                ].map((c) => (
+                                  <button
+                                    key={c.hex}
+                                    onClick={() => updateSubtitle(selectedSubtitle.id, { bgColor: c.hex, boxStyle: 'custom' })}
+                                    style={{ backgroundColor: c.hex }}
+                                    title={c.label}
+                                    className={`w-6 h-6 rounded-full border transition-transform hover:scale-105 cursor-pointer ${
+                                      selectedSubtitle.bgColor === c.hex
+                                        ? 'border-[#23272A] ring-2 ring-[#23272A]/30 scale-105'
+                                        : 'border-[#EDEDEB]'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 모든 자막 상자 투명도 조절 슬라이더 및 원클릭 프리셋 */}
+                          <div className="pt-2 border-t border-[#EDEDEB]/80 space-y-2">
+                            <div className="flex items-center justify-between text-[11px] text-[#787774]">
+                              <span className="font-medium text-[#37352F]">자막 상자 불투명도 조절</span>
+                              <span className="font-mono font-semibold text-[#23272A]">
+                                {currentOpacity === 0 ? '0% (완전 투명)' : `${currentOpacity}%`}
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              step={5}
+                              value={currentOpacity}
+                              onChange={(e) => {
+                                const val = Number(e.target.value);
+                                if (val === 0) {
+                                  updateSubtitle(selectedSubtitle.id, { bgOpacity: 0, boxStyle: 'none' });
+                                } else {
+                                  updateSubtitle(selectedSubtitle.id, {
+                                    bgOpacity: val,
+                                    boxStyle: selectedSubtitle.boxStyle === 'none' ? 'dark' : selectedSubtitle.boxStyle,
+                                    bgColor: selectedSubtitle.boxStyle === 'none' && !selectedSubtitle.bgColor ? '#0F172A' : selectedSubtitle.bgColor,
+                                  });
+                                }
+                              }}
+                              className="w-full accent-[#23272A]"
                             />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedSubtitle.boxStyle !== 'none' && (
-                      <div>
-                        <div className="flex items-center justify-between text-[11px] text-[#787774] mb-1">
-                          <span>배경 투명도</span>
-                          <span className="font-mono">{selectedSubtitle.bgOpacity ?? 75}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={10}
-                          max={100}
-                          step={5}
-                          value={selectedSubtitle.bgOpacity ?? 75}
-                          onChange={(e) => updateSubtitle(selectedSubtitle.id, { bgOpacity: Number(e.target.value) })}
-                          className="w-full accent-[#23272A]"
-                        />
-                      </div>
-                    )}
+                            <div className="flex items-center gap-1.5">
+                              {[
+                                { val: 0, label: '0%' },
+                                { val: 25, label: '25%' },
+                                { val: 50, label: '50%' },
+                                { val: 75, label: '75%' },
+                                { val: 90, label: '90%' },
+                                { val: 100, label: '100%' },
+                              ].map((p) => {
+                                const isActive = currentOpacity === p.val;
+                                return (
+                                  <button
+                                    key={p.val}
+                                    type="button"
+                                    onClick={() => {
+                                      if (p.val === 0) {
+                                        updateSubtitle(selectedSubtitle.id, { bgOpacity: 0, boxStyle: 'none' });
+                                      } else {
+                                        updateSubtitle(selectedSubtitle.id, {
+                                          bgOpacity: p.val,
+                                          boxStyle: selectedSubtitle.boxStyle === 'none' ? 'dark' : selectedSubtitle.boxStyle,
+                                          bgColor: selectedSubtitle.boxStyle === 'none' && !selectedSubtitle.bgColor ? '#0F172A' : selectedSubtitle.bgColor,
+                                        });
+                                      }
+                                    }}
+                                    className={`flex-1 py-1 rounded text-[10px] font-mono border transition-colors cursor-pointer leading-none text-center ${
+                                      isActive
+                                        ? 'bg-[#23272A] text-white border-[#23272A] font-semibold'
+                                        : 'bg-white text-[#787774] border-[#EDEDEB] hover:bg-[#F1F1EF]'
+                                    }`}
+                                  >
+                                    {p.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
 
                   {/* SECTION 4: Text Font & Color */}
@@ -3592,8 +3635,21 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   top: `${sub.y}%`,
                   transform: 'translate(-50%, -50%)',
                   fontSize: floatingSize === 'sm' ? '7px' : floatingSize === 'lg' ? '10px' : '8px',
-                  color: sub.textColor,
-                  backgroundColor: sub.bgColor || 'rgba(0,0,0,0.7)',
+                  color: sub.textColor || '#FFFFFF',
+                  backgroundColor: (() => {
+                    const subOpacity = (sub.bgOpacity !== undefined ? sub.bgOpacity : 75) / 100;
+                    if (sub.boxStyle === 'none' || subOpacity === 0) return 'transparent';
+                    if (sub.boxStyle === 'glass') return `rgba(255, 255, 255, ${subOpacity})`;
+                    if (sub.boxStyle === 'cream') return `rgba(254, 243, 199, ${subOpacity})`;
+                    if (sub.bgColor) {
+                      const hex = sub.bgColor.replace('#', '');
+                      const r = parseInt(hex.substring(0, 2), 16) || 15;
+                      const g = parseInt(hex.substring(2, 4), 16) || 23;
+                      const b = parseInt(hex.substring(4, 6), 16) || 42;
+                      return `rgba(${r}, ${g}, ${b}, ${subOpacity})`;
+                    }
+                    return `rgba(15, 23, 42, ${subOpacity})`;
+                  })(),
                   borderRadius: '4px',
                   padding: '1px 3px',
                   position: 'absolute',

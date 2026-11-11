@@ -30,7 +30,8 @@ import {
   CanvasAspectRatio, 
   TransitionEffect, 
   AestheticFilter,
-  ColorAdjustments 
+  ColorAdjustments,
+  CustomSubtitle
 } from '../types/homeAndKids';
 
 interface CapCutVideoEditorModalProps {
@@ -60,7 +61,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [activeInspectorTab, setActiveInspectorTab] = useState<'edit' | 'speed' | 'transition' | 'adjust' | 'audio'>('edit');
+  const [activeInspectorTab, setActiveInspectorTab] = useState<'edit' | 'subtitle' | 'speed' | 'transition' | 'adjust' | 'audio'>('edit');
   const [isSavedBadge, setIsSavedBadge] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -368,9 +369,61 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     e.target.value = '';
   };
 
+  const handleSave = () => {
+    onApply(clips);
+    setIsSavedBadge(true);
+    setTimeout(() => setIsSavedBadge(false), 2000);
+  };
+
   const handleCommit = () => {
     onApply(clips);
     onClose();
+  };
+
+  const updateCurrentClipSubtitle = (updates: Partial<CustomSubtitle>) => {
+    setClips((prev) => {
+      const next = [...prev];
+      if (!next[selectedIdx]) return prev;
+      const clip = { ...next[selectedIdx] };
+      const currentSubs = clip.customSubtitles && clip.customSubtitles.length > 0
+        ? [...clip.customSubtitles]
+        : [{
+            id: `sub-${Date.now()}`,
+            text: clip.title || '',
+            x: 50,
+            y: 82,
+            fontSizeScale: 1.0,
+            textColor: '#FFFFFF',
+            bgColor: '#0F172A',
+            bgOpacity: 75,
+            boxStyle: 'dark' as const,
+            textAlign: 'center' as const,
+            fontFamily: 'Pretendard' as const,
+            rotation: 0,
+          }];
+      currentSubs[0] = { ...currentSubs[0], ...updates };
+      clip.customSubtitles = currentSubs;
+      next[selectedIdx] = clip;
+      return next;
+    });
+  };
+
+  const getClipSubBg = (sub: CustomSubtitle) => {
+    if (sub.boxStyle === 'none') {
+      if ((sub.bgOpacity ?? 0) === 0) return 'transparent';
+      return `rgba(15, 23, 42, ${(sub.bgOpacity ?? 0) / 100})`;
+    }
+    const opacity = (sub.bgOpacity !== undefined ? sub.bgOpacity : 75) / 100;
+    if (sub.boxStyle === 'glass') return `rgba(255, 255, 255, ${opacity})`;
+    if (sub.boxStyle === 'cream') return `rgba(254, 243, 199, ${opacity})`;
+    if (sub.bgColor) {
+      const hex = sub.bgColor.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16) || 15;
+      const g = parseInt(hex.substring(2, 4), 16) || 23;
+      const b = parseInt(hex.substring(4, 6), 16) || 42;
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return `rgba(15, 23, 42, ${opacity})`;
   };
 
   // Filter style helper (Mobile WebKit & Canvas compatible)
@@ -539,12 +592,6 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         <div className="shrink-0 md:flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 relative min-h-0 border-b md:border-b-0 md:border-r border-slate-800">
           <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-slate-800 bg-black flex items-center justify-center max-w-full max-h-full">
             <div className={`${getAspectClasses(aspectRatio)} relative overflow-hidden flex items-center justify-center bg-black`}>
-              {/* Preview Live Badge in Canvas */}
-              <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md z-30 pointer-events-none flex items-center gap-1.5 border border-white/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>미리보기</span>
-              </div>
-
               {currentClip?.mediaType === 'video' ? (
                 <video
                   ref={videoRef}
@@ -596,25 +643,30 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
               )}
 
               {/* Subtitles Preview Overlay */}
-              {currentClip?.customSubtitles?.map((sub) => (
-                <div
-                  key={sub.id}
-                  style={{
-                    left: `${sub.x}%`,
-                    top: `${sub.y}%`,
-                    transform: `translate(-50%, -50%) rotate(${sub.rotation || 0}deg)`,
-                    backgroundColor: sub.boxStyle === 'none' ? 'transparent' : (sub.bgColor || '#0F172A'),
-                    color: sub.textColor || '#FFFFFF',
-                    fontFamily: sub.fontFamily || 'Pretendard',
-                    fontSize: `${14 * (sub.fontSizeScale || 1.0)}px`,
-                    whiteSpace: 'nowrap',
-                    width: 'max-content',
-                  }}
-                  className="absolute z-20 px-3 py-1.5 rounded-xl shadow-lg font-bold pointer-events-none drop-shadow-sm border border-white/20"
-                >
-                  {sub.text}
-                </div>
-              ))}
+              {currentClip?.customSubtitles?.map((sub) => {
+                const subOpacity = (sub.bgOpacity !== undefined ? sub.bgOpacity : 75) / 100;
+                const isCompletelyTransparent = sub.boxStyle === 'none' && subOpacity === 0;
+                return (
+                  <div
+                    key={sub.id}
+                    style={{
+                      left: `${sub.x}%`,
+                      top: `${sub.y}%`,
+                      transform: `translate(-50%, -50%) rotate(${sub.rotation || 0}deg)`,
+                      backgroundColor: getClipSubBg(sub),
+                      color: sub.textColor || '#FFFFFF',
+                      fontFamily: sub.fontFamily || 'Pretendard',
+                      fontSize: `${14 * (sub.fontSizeScale || 1.0)}px`,
+                      whiteSpace: 'nowrap',
+                      width: 'max-content',
+                      border: isCompletelyTransparent ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
+                    }}
+                    className="absolute z-20 px-3 py-1.5 rounded-xl shadow-lg font-bold pointer-events-none drop-shadow-sm"
+                  >
+                    {sub.text}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -662,9 +714,10 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         {/* Right: Pro Inspector Panel */}
         <div className="w-full md:w-80 flex-1 min-h-0 overflow-y-auto border-t md:border-t-0 md:border-l border-[#2F3437] bg-[#191919]/95 flex flex-col">
           {/* Inspector Tabs */}
-          <div className="grid grid-cols-5 p-1 bg-[#191919] border-b border-[#2F3437] text-[11px] font-medium">
+          <div className="grid grid-cols-6 p-1 bg-[#191919] border-b border-[#2F3437] text-[11px] font-medium">
             {[
               { id: 'edit', label: '편집' },
+              { id: 'subtitle', label: '자막' },
               { id: 'speed', label: '속도' },
               { id: 'transition', label: '전환' },
               { id: 'adjust', label: '필터' },
@@ -791,6 +844,191 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     <span>현재 클립 삭제</span>
                   </button>
                 )}
+              </div>
+            )}
+
+            {/* TAB: Subtitles with Background Opacity Control */}
+            {activeInspectorTab === 'subtitle' && (
+              <div className="space-y-4">
+                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-2">
+                  <span className="text-neutral-400 font-medium block">클립 자막 문구</span>
+                  <input
+                    type="text"
+                    value={currentClip?.customSubtitles?.[0]?.text || currentClip?.title || ''}
+                    onChange={(e) => updateCurrentClipSubtitle({ text: e.target.value })}
+                    placeholder="자막 내용을 입력하세요"
+                    className="w-full px-3 py-2 bg-[#191919] border border-[#3F4448] rounded-lg text-white text-xs focus:outline-none focus:border-white"
+                  />
+                </div>
+
+                {/* Subtitle Background Box Style & Opacity */}
+                {(() => {
+                  const clipSub = currentClip?.customSubtitles?.[0] || {
+                    id: 'sub-default',
+                    text: currentClip?.title || '',
+                    x: 50,
+                    y: 82,
+                    boxStyle: 'dark' as const,
+                    bgColor: '#0F172A',
+                    bgOpacity: 75,
+                    textColor: '#FFFFFF',
+                  };
+                  const currentOpacity = clipSub.boxStyle === 'none' && (clipSub.bgOpacity ?? 0) === 0 ? 0 : (clipSub.bgOpacity ?? 75);
+
+                  return (
+                    <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="font-medium text-neutral-300">자막 배경 스타일</label>
+                        <span className="text-[11px] font-mono text-neutral-400">
+                          투명도: {currentOpacity}%
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-1.5 text-xs font-medium">
+                        {[
+                          { id: 'dark', label: '다크 블러' },
+                          { id: 'glass', label: '글래스' },
+                          { id: 'cream', label: '크림 옐로우' },
+                          { id: 'none', label: '투명 (없음)' },
+                        ].map((box) => (
+                          <button
+                            key={box.id}
+                            type="button"
+                            onClick={() =>
+                              updateCurrentClipSubtitle({
+                                boxStyle: box.id as any,
+                                ...(box.id === 'cream' ? { bgColor: '#FEF3C7', textColor: '#0F172A', bgOpacity: 90 } : {}),
+                                ...(box.id === 'glass' ? { bgColor: '#FFFFFF', textColor: '#0F172A', bgOpacity: 40 } : {}),
+                                ...(box.id === 'dark' ? { bgColor: '#0F172A', textColor: '#FFFFFF', bgOpacity: 75 } : {}),
+                                ...(box.id === 'none' ? { bgOpacity: 0 } : {}),
+                              })
+                            }
+                            className={`py-1.5 rounded-lg border text-center transition-colors leading-none cursor-pointer text-[11px] ${
+                              clipSub.boxStyle === box.id
+                                ? 'bg-white text-black font-semibold border-white shadow-xs'
+                                : 'bg-[#191919] border-[#3F4448] text-neutral-300 hover:bg-[#2F3437]'
+                            }`}
+                          >
+                            {box.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* 배경 컬러 선택 */}
+                      {clipSub.boxStyle !== 'none' && (
+                        <div>
+                          <span className="text-[11px] font-medium text-neutral-400 block mb-1.5">배경 컬러</span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {[
+                              { hex: '#0F172A', label: '다크 차콜' },
+                              { hex: '#FFFFFF', label: '화이트' },
+                              { hex: '#FEF3C7', label: '버터 크림' },
+                              { hex: '#3F4448', label: '그레이' },
+                              { hex: '#0284C7', label: '블루' },
+                              { hex: '#059669', label: '에메랄드' },
+                              { hex: '#D97706', label: '앰버' },
+                            ].map((c) => (
+                              <button
+                                key={c.hex}
+                                type="button"
+                                onClick={() => updateCurrentClipSubtitle({ bgColor: c.hex, boxStyle: 'custom' })}
+                                style={{ backgroundColor: c.hex }}
+                                title={c.label}
+                                className={`w-5 h-5 rounded-full border transition-transform hover:scale-105 cursor-pointer ${
+                                  clipSub.bgColor === c.hex
+                                    ? 'border-white ring-2 ring-white/50 scale-105'
+                                    : 'border-[#3F4448]'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 자막 상자 투명도 조절 슬라이더 & 원클릭 버튼 */}
+                      <div className="pt-2 border-t border-[#3F4448]/60 space-y-2">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-medium text-neutral-300">자막 상자 불투명도 조절</span>
+                          <span className="font-mono text-white font-semibold">{currentOpacity}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          step={5}
+                          value={currentOpacity}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (val === 0) {
+                              updateCurrentClipSubtitle({ bgOpacity: 0, boxStyle: 'none' });
+                            } else {
+                              updateCurrentClipSubtitle({
+                                bgOpacity: val,
+                                boxStyle: clipSub.boxStyle === 'none' ? 'dark' : clipSub.boxStyle,
+                                bgColor: clipSub.boxStyle === 'none' && !clipSub.bgColor ? '#0F172A' : clipSub.bgColor,
+                              });
+                            }
+                          }}
+                          className="w-full accent-white"
+                        />
+                        <div className="flex items-center gap-1">
+                          {[
+                            { val: 0, label: '0%' },
+                            { val: 25, label: '25%' },
+                            { val: 50, label: '50%' },
+                            { val: 75, label: '75%' },
+                            { val: 90, label: '90%' },
+                            { val: 100, label: '100%' },
+                          ].map((p) => (
+                            <button
+                              key={p.val}
+                              type="button"
+                              onClick={() => {
+                                if (p.val === 0) {
+                                  updateCurrentClipSubtitle({ bgOpacity: 0, boxStyle: 'none' });
+                                } else {
+                                  updateCurrentClipSubtitle({
+                                    bgOpacity: p.val,
+                                    boxStyle: clipSub.boxStyle === 'none' ? 'dark' : clipSub.boxStyle,
+                                    bgColor: clipSub.boxStyle === 'none' && !clipSub.bgColor ? '#0F172A' : clipSub.bgColor,
+                                  });
+                                }
+                              }}
+                              className={`flex-1 py-1 rounded text-[10px] font-mono border transition-colors cursor-pointer leading-none text-center ${
+                                currentOpacity === p.val
+                                  ? 'bg-white text-black border-white font-semibold'
+                                  : 'bg-[#191919] text-neutral-400 border-[#3F4448] hover:bg-[#2F3437]'
+                              }`}
+                            >
+                              {p.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 글자 색상 & 크기 */}
+                      <div className="pt-2 border-t border-[#3F4448]/60 space-y-2">
+                        <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                          <span>글자 색상</span>
+                          <span className="font-mono text-neutral-300">{clipSub.textColor || '#FFFFFF'}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {['#FFFFFF', '#0F172A', '#FEF3C7', '#60A5FA', '#34D399', '#FBBF24'].map((col) => (
+                            <button
+                              key={col}
+                              type="button"
+                              onClick={() => updateCurrentClipSubtitle({ textColor: col })}
+                              style={{ backgroundColor: col }}
+                              className={`w-5 h-5 rounded-full border transition-transform hover:scale-105 cursor-pointer ${
+                                (clipSub.textColor || '#FFFFFF') === col ? 'border-white ring-2 ring-white/50 scale-105' : 'border-[#3F4448]'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
