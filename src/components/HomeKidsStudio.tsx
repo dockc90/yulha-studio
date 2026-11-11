@@ -1470,20 +1470,33 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               {/* Media Element with Filter, Pan & Zoom, and Adjustments (Preserves original aspect ratio and fits width/height) */}
               {!currentScene || !currentScene.url ? (
                 <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#191919] select-none cursor-pointer hover:bg-[#202020] transition-colors"
+                  className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#191919] select-none"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-[#282828] border border-[#3F4448] flex items-center justify-center mb-3 text-neutral-300">
                     <Upload className="w-6 h-6" />
                   </div>
                   <h4 className="text-sm font-semibold text-white mb-1">사진 또는 동영상 추가</h4>
                   <p className="text-xs text-neutral-400 mb-4 max-w-[220px] leading-relaxed">
-                    여기를 탭하거나 파일을 선택하여 편집을 시작하세요
+                    사진이나 동영상을 추가하여 편집을 시작하세요
                   </p>
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white text-black font-semibold text-xs shadow-xs hover:bg-neutral-200 transition-colors">
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>파일 선택하기</span>
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => videoInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white text-black font-bold text-xs shadow-sm hover:bg-neutral-200 transition-colors cursor-pointer"
+                    >
+                      <Film className="w-3.5 h-3.5" />
+                      <span>동영상 추가</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => photoInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#282828] text-white font-medium text-xs shadow-xs hover:bg-[#333] transition-colors cursor-pointer border border-[#3F4448]"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>사진 추가</span>
+                    </button>
+                  </div>
                 </div>
               ) : currentScene?.mediaType === 'video' ? (
                 <video
@@ -3279,44 +3292,28 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               <span>클립 분할</span>
             </button>
 
+            {/* 1. Primary Action: Add Video (High-contrast bright button) */}
             <button
-              onClick={() => setActiveTool('video_edit')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none"
+              onClick={() => videoInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer leading-none shrink-0"
+              title="새로운 동영상 파일을 타임라인에 추가합니다"
             >
-              <FastForward className="w-3.5 h-3.5 text-neutral-300" />
-              <span>속도 조절</span>
+              <Film className="w-3.5 h-3.5 text-black" />
+              <span>동영상 추가</span>
             </button>
+            <input
+              type="file"
+              ref={videoInputRef}
+              multiple
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => handleMediaUpload(e, 'video')}
+            />
 
-            <button
-              onClick={() => setActiveTool('video_edit')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-neutral-300" />
-              <span>전환 효과</span>
-            </button>
-
-            <button
-              onClick={handleDuplicateClip}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none"
-            >
-              <Copy className="w-3.5 h-3.5 text-neutral-300" />
-              <span>복제</span>
-            </button>
-
-            {project.scenes.length > 1 && (
-              <button
-                onClick={() => handleDeleteScene(currentSceneIdx)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-950/70 border border-red-900/60 text-red-300 text-xs font-medium transition-colors cursor-pointer leading-none"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>삭제</span>
-              </button>
-            )}
-
-            {/* Dedicated Photo & Video Addition Buttons */}
+            {/* 2. Add Photo */}
             <button
               onClick={() => photoInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-xs font-semibold shadow-xs transition-colors cursor-pointer leading-none ml-1"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none shrink-0"
               title="새로운 사진 파일을 타임라인에 추가합니다"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -3331,22 +3328,53 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               onChange={(e) => handleMediaUpload(e, 'image')}
             />
 
+            {/* 3. Clip Split */}
             <button
-              onClick={() => videoInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none"
-              title="새로운 동영상 파일을 타임라인에 추가합니다"
+              onClick={handleSplitClip}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none shrink-0"
             >
-              <Film className="w-3.5 h-3.5 text-amber-400" />
-              <span>🎬 동영상 추가</span>
+              <Scissors className="w-3.5 h-3.5 text-neutral-300" />
+              <span>클립 분할</span>
             </button>
-            <input
-              type="file"
-              ref={videoInputRef}
-              multiple
-              accept="video/*"
-              className="hidden"
-              onChange={(e) => handleMediaUpload(e, 'video')}
-            />
+
+            {/* 4. Delete Clip (Clearly visible red button) */}
+            {project.scenes.length > 1 && (
+              <button
+                onClick={() => handleDeleteScene(currentSceneIdx)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/35 border border-red-500/40 text-red-300 hover:text-red-200 text-xs font-semibold transition-transform active:scale-95 cursor-pointer leading-none shrink-0"
+                title="현재 선택된 클립 삭제"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                <span>클립 삭제</span>
+              </button>
+            )}
+
+            {/* 5. Duplicate */}
+            <button
+              onClick={handleDuplicateClip}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none shrink-0"
+            >
+              <Copy className="w-3.5 h-3.5 text-neutral-300" />
+              <span>복제</span>
+            </button>
+
+            {/* 6. Speed */}
+            <button
+              onClick={() => setActiveTool('video_edit')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none shrink-0"
+            >
+              <FastForward className="w-3.5 h-3.5 text-neutral-300" />
+              <span>속도 조절</span>
+            </button>
+
+            {/* 7. Transition */}
+            <button
+              onClick={() => setActiveTool('video_edit')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none shrink-0"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-neutral-300" />
+              <span>전환 효과</span>
+            </button>
           </div>
         </div>
 

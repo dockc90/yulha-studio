@@ -21,7 +21,9 @@ import {
   RotateCw,
   Share2,
   Edit3,
-  RefreshCw
+  RefreshCw,
+  Play,
+  Scissors
 } from 'lucide-react';
 import { TrendingFigure, ShortsProject, TargetPersona, VideoMoodTone, SceneItem, MotionEffectType } from '../types';
 import { ScenePhotoCollageModal } from './ScenePhotoCollageModal';

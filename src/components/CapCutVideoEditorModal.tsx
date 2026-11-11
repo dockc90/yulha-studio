@@ -23,7 +23,8 @@ import {
   Plus,
   Save,
   Link2,
-  Upload
+  Upload,
+  Type
 } from 'lucide-react';
 import { 
   MediaScene, 
@@ -1160,23 +1161,35 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
                 {/* Add Media Files & Duplicate */}
                 <div className="space-y-2">
-                  <label className="font-medium text-neutral-300 block">미디어 추가 및 관리</label>
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-white block">미디어 추가 및 관리</label>
+                    {clips.length > 1 && (
+                      <button
+                        onClick={handleDelete}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-[11px] font-semibold cursor-pointer transition-colors"
+                        title="현재 선택된 클립을 삭제합니다"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                        <span>클립 삭제</span>
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <button
+                      onClick={() => videoInputRef.current?.click()}
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold cursor-pointer leading-none text-xs shadow-sm transition-transform active:scale-98"
+                      title="동영상 파일을 타임라인에 추가합니다"
+                    >
+                      <Film className="w-3.5 h-3.5 text-black" />
+                      <span>동영상 추가</span>
+                    </button>
+                    <button
                       onClick={() => photoInputRef.current?.click()}
-                      className="inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer leading-none border border-[#3F4448] text-xs"
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer leading-none border border-[#3F4448] text-xs transition-colors"
                       title="사진 파일을 타임라인에 추가합니다"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>사진 추가</span>
-                    </button>
-                    <button
-                      onClick={() => videoInputRef.current?.click()}
-                      className="inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#23272A] hover:bg-[#3F4448] text-neutral-200 font-medium cursor-pointer leading-none border border-[#3F4448] text-xs"
-                      title="동영상 파일을 타임라인에 추가합니다"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>동영상 추가</span>
                     </button>
                   </div>
                   <button
@@ -1203,13 +1216,13 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   </button>
                 </div>
 
-                {/* Delete Clip */}
+                {/* Delete Clip (Prominent Danger Button) */}
                 {clips.length > 1 && (
                   <button
                     onClick={handleDelete}
-                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-950/40 hover:bg-red-950/70 border border-red-900/60 text-red-300 font-medium cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 font-semibold cursor-pointer transition-colors text-xs"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4 text-red-400" />
                     <span>현재 클립 삭제</span>
                   </button>
                 )}
@@ -1587,26 +1600,62 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         {/* Timeline Top Control Strip */}
         <div className="h-11 px-3 sm:px-4 border-b border-[#2F3437] flex items-center justify-between text-xs overflow-x-auto scrollbar-none gap-3 bg-[#191919]">
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-max">
-            <span className="font-semibold text-neutral-300 flex items-center gap-1 shrink-0 whitespace-nowrap text-xs mr-1">
-              <Film className="w-3.5 h-3.5" />
-              <span>타임라인</span>
-            </span>
+            {/* Primary Action 1: Add Video (High-contrast bright button) */}
+            <button
+              onClick={() => videoInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-bold text-xs cursor-pointer shadow-sm shrink-0 whitespace-nowrap leading-none transition-transform active:scale-95"
+              title="동영상 파일 직접 추가하기"
+            >
+              <Film className="w-3.5 h-3.5 text-black shrink-0" />
+              <span>동영상 추가</span>
+            </button>
 
-            {/* Big Split Button */}
+            {/* Primary Action 2: Add Photo */}
+            <button
+              onClick={() => photoInputRef.current?.click()}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448] shrink-0 whitespace-nowrap leading-none"
+              title="사진 파일 직접 추가하기"
+            >
+              <Plus className="w-3.5 h-3.5 shrink-0" />
+              <span>사진 추가</span>
+            </button>
+
+            {/* Split Button */}
             <button
               onClick={handleSplitAtPlayhead}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448] shrink-0 whitespace-nowrap leading-none"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448] shrink-0 whitespace-nowrap leading-none"
               title="재생바 위치에서 클립 분할 (Ctrl+B)"
             >
               <Scissors className="w-3.5 h-3.5 shrink-0" />
               <span>분할</span>
             </button>
 
+            {/* Primary Action 3: Delete Clip (Clearly visible red button) */}
+            {clips.length > 1 && (
+              <button
+                onClick={handleDelete}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/35 text-red-300 hover:text-red-200 text-xs font-semibold cursor-pointer border border-red-500/40 shrink-0 whitespace-nowrap leading-none transition-transform active:scale-95"
+                title="현재 선택된 클립 삭제"
+              >
+                <Trash2 className="w-3.5 h-3.5 shrink-0 text-red-400" />
+                <span>삭제</span>
+              </button>
+            )}
+
+            {/* Duplicate Button */}
+            <button
+              onClick={handleDuplicate}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 text-xs font-medium cursor-pointer border border-[#2F3437] shrink-0 whitespace-nowrap leading-none"
+            >
+              <Copy className="w-3 h-3 shrink-0" />
+              <span>복제</span>
+            </button>
+
             {/* Merge Cut Button */}
             <button
               onClick={selectedIdx < clips.length - 1 ? handleMergeNextCut : handleMergePrevCut}
               disabled={clips.length <= 1}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors shrink-0 whitespace-nowrap leading-none ${
+              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 whitespace-nowrap leading-none ${
                 clips.length > 1
                   ? 'bg-[#2F3437] hover:bg-[#3F4448] text-white cursor-pointer border border-[#3F4448]'
                   : 'bg-[#1E1E1E] text-neutral-500 cursor-not-allowed border border-[#2F3437]'
@@ -1616,43 +1665,6 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
               <Link2 className="w-3.5 h-3.5 shrink-0" />
               <span>컷 합치기</span>
             </button>
-
-            {/* Add Photo & Video Buttons */}
-            <button
-              onClick={() => photoInputRef.current?.click()}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448] shrink-0 whitespace-nowrap leading-none"
-              title="사진 파일 직접 추가하기"
-            >
-              <Plus className="w-3.5 h-3.5 shrink-0" />
-              <span>사진 추가</span>
-            </button>
-
-            <button
-              onClick={() => videoInputRef.current?.click()}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium text-xs cursor-pointer border border-[#2F3437] shrink-0 whitespace-nowrap leading-none"
-              title="동영상 파일 직접 추가하기"
-            >
-              <Plus className="w-3.5 h-3.5 shrink-0" />
-              <span>동영상 추가</span>
-            </button>
-
-            <button
-              onClick={handleDuplicate}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 text-xs font-medium cursor-pointer border border-[#2F3437] shrink-0 whitespace-nowrap leading-none"
-            >
-              <Copy className="w-3 h-3 shrink-0" />
-              <span>복제</span>
-            </button>
-
-            {clips.length > 1 && (
-              <button
-                onClick={handleDelete}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-950/40 hover:bg-red-950/70 text-red-300 text-xs font-medium cursor-pointer border border-red-900/60 shrink-0 whitespace-nowrap leading-none"
-              >
-                <Trash2 className="w-3 h-3 shrink-0" />
-                <span>삭제</span>
-              </button>
-            )}
           </div>
 
           <div className="text-[11px] text-neutral-400 font-mono shrink-0 whitespace-nowrap pl-2">
@@ -1771,15 +1783,61 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                       {getClipEffectiveDuration(clip)}s
                     </div>
 
+                    {/* Active Clip Quick Delete Button on Mobile */}
+                    {isSelected && clips.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete();
+                        }}
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-90 z-20 cursor-pointer"
+                        title="이 클립 삭제"
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+
                     {/* Speed Badge */}
                     {clip.speed && clip.speed !== 1.0 && (
-                      <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-white text-black text-[8px] font-semibold leading-none shadow-md pointer-events-none z-10">
+                      <div className="absolute top-1 right-7 px-1 py-0.5 rounded bg-white text-black text-[8px] font-semibold leading-none shadow-md pointer-events-none z-10">
                         {clip.speed}x
                       </div>
                     )}
                   </div>
                 );
               })}
+
+              {/* + Quick Add Media Tile at end of timeline */}
+              <div 
+                className="h-full w-24 shrink-0 rounded-xl border-2 border-dashed border-[#3F4448] hover:border-neutral-400 bg-[#1F2326]/60 flex flex-col items-center justify-center gap-1.5 text-neutral-400 hover:text-white transition-colors select-none p-1.5 text-center"
+              >
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      videoInputRef.current?.click();
+                    }}
+                    className="p-1.5 rounded-lg bg-white text-black hover:bg-neutral-200 shadow-xs cursor-pointer transition-transform active:scale-95"
+                    title="동영상 추가"
+                  >
+                    <Film className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      photoInputRef.current?.click();
+                    }}
+                    className="p-1.5 rounded-lg bg-[#2F3437] text-white hover:bg-[#3F4448] border border-[#3F4448] cursor-pointer transition-transform active:scale-95"
+                    title="사진 추가"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <span className="text-[10px] font-medium leading-none text-neutral-300">클립 추가</span>
+              </div>
             </div>
 
             {/* Subtitles Track Visualizer */}
