@@ -50,7 +50,7 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
                 </span>
               </div>
               <span className="text-[11px] text-slate-400 font-medium leading-none mt-1">
-                Yulha Media Studio
+                Yulha Studio
               </span>
             </div>
           </button>
