@@ -443,38 +443,19 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     }
   };
 
+  // 가로/세로 원본 비율 100% 무왜곡 유지 (비율 차이는 깔끔한 검정색 영역으로 채움)
   const getMediaSizeStyle = (): React.CSSProperties => {
-    const boxRatio = getBoxAspectRatio(aspectRatio);
-    const aspect = naturalAspect;
-
-    if (!aspect) {
-      return {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-      };
-    }
-
-    if (aspect >= boxRatio) {
-      const widthPercent = (aspect / boxRatio) * 100;
-      return {
-        height: '100%',
-        width: `${widthPercent.toFixed(2)}%`,
-        maxWidth: 'none',
-        maxHeight: 'none',
-      };
-    } else {
-      const heightPercent = (boxRatio / aspect) * 100;
-      return {
-        width: '100%',
-        height: `${heightPercent.toFixed(2)}%`,
-        maxWidth: 'none',
-        maxHeight: 'none',
-      };
-    }
+    return {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      backgroundColor: '#000000',
+    };
   };
 
-  return (
+    return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col select-none text-slate-100 animate-in fade-in duration-200">
       {/* Hidden File Inputs for uploading photo & video inside editor */}
       <input
@@ -555,7 +536,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
       {/* 2. MAIN WORKSPACE (Preview + Inspector) */}
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* Left: Video Canvas Preview */}
-        <div className="shrink-0 md:flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 relative min-h-0 sticky top-0 z-20 border-b md:border-b-0 md:border-r border-slate-800">
+        <div className="shrink-0 md:flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 relative min-h-0 border-b md:border-b-0 md:border-r border-slate-800">
           <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-slate-800 bg-black flex items-center justify-center max-w-full max-h-full">
             <div className={`${getAspectClasses(aspectRatio)} relative overflow-hidden flex items-center justify-center bg-black`}>
               {/* Preview Live Badge in Canvas */}

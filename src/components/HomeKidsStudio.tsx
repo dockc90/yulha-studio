@@ -271,44 +271,66 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     }
   };
 
-  // 가로/세로를 프레임에 맞춰 과도한 확대 없이 자연스럽게 채우는 비율 스타일
+  // 가로/세로 원본 비율 100% 무왜곡 유지 (비율 차이는 깔끔한 검정색 레터박스로 채움)
   const getMediaSizeStyle = (): React.CSSProperties => {
-    const boxRatio = getBoxAspectRatio(project.aspectRatio);
-    const aspect = naturalAspect;
-
-    if (!aspect) {
-      return {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-      };
-    }
-
-    if (aspect >= boxRatio) {
-      // 가로로 긴 사진: 프레임 높이에 100% 딱 맞추고, 가로는 원본 비율대로 자연스럽게 연장
-      const widthPercent = (aspect / boxRatio) * 100;
-      return {
-        height: '100%',
-        width: `${widthPercent.toFixed(2)}%`,
-        maxWidth: 'none',
-        maxHeight: 'none',
-      };
-    } else {
-      // 세로로 긴 사진: 프레임 너비에 100% 딱 맞추고, 세로는 원본 비율대로 자연스럽게 연장
-      const heightPercent = (boxRatio / aspect) * 100;
-      return {
-        width: '100%',
-        height: `${heightPercent.toFixed(2)}%`,
-        maxWidth: 'none',
-        maxHeight: 'none',
-      };
-    }
+    return {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      backgroundColor: '#000000',
+    };
   };
 
-  // Original view toggle (Press & Hold or Click to compare)
+    // Original view toggle (Press & Hold or Click to compare)
   const [showOriginal, setShowOriginal] = useState(false);
 
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Floating Live Preview tracking (스크롤 내려도 미리보기 창이 계속 떠있도록 지원)
+  const [isMainPreviewVisible, setIsMainPreviewVisible] = useState(true);
+  const [isFloatingDismissed, setIsFloatingDismissed] = useState(false);
+
+  useEffect(() => {
+    const target = previewContainerRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsMainPreviewVisible(entry.isIntersecting);
+      },
+      {
+        root: null,
+        threshold: 0.15,
+      }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToMainPreview = () => {
+    if (previewContainerRef.current) {
+      const top = previewContainerRef.current.getBoundingClientRect().top + window.scrollY - 90;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  };
+
+  const getMiniAspectClasses = (ratio: CanvasAspectRatio) => {
+    switch (ratio) {
+      case '9:16':
+        return 'w-24 h-40 sm:w-28 sm:h-48';
+      case '1:1':
+        return 'w-28 h-28 sm:w-34 sm:h-34';
+      case '4:5':
+        return 'w-26 h-32 sm:w-30 sm:h-38';
+      case '16:9':
+        return 'w-38 h-22 sm:w-46 sm:h-26';
+      default:
+        return 'w-24 h-40 sm:w-28 sm:h-48';
+    }
+  };
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1007,14 +1029,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       let drawWidth = width;
       let drawHeight = height;
 
+      // 0. Fill canvas background with solid black (letterbox / pillarbox)
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
+
+      // 1. Calculate true contain dimensions preserving image original aspect ratio
       if (imgRatio > canvasRatio) {
-        // Image is wider than canvas (landscape in 1:1, 9:16, 4:5): match height, expand width
-        drawHeight = height;
-        drawWidth = height * imgRatio;
-      } else {
-        // Image is taller than canvas (portrait in 1:1, 16:9): match width, expand height
+        // Image is wider than canvas: match width, height has clean letterbox
         drawWidth = width;
         drawHeight = width / imgRatio;
+      } else {
+        // Image is taller than canvas: match height, width has clean pillarbox
+        drawHeight = height;
+        drawWidth = height * imgRatio;
       }
 
       ctx.save();
@@ -1334,7 +1361,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       {/* Main Studio Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Canvas Preview (lg: 7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-3 sm:p-5 lg:p-6 border border-slate-100 shadow-sm flex flex-col items-center sticky top-14 sm:top-18 lg:top-20 z-30 bg-white/95 backdrop-blur-md shadow-xs">
+        <div className="lg:col-span-7 bg-white rounded-3xl p-4 sm:p-6 border border-slate-100 shadow-sm flex flex-col items-center relative">
           {/* Prominent Preview Section Title */}
           <div className="w-full flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
             <div className="inline-flex items-center gap-2">
@@ -3354,7 +3381,125 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         </div>
       </div>
 
-      {/* 100% CapCut Video Editor Dedicated Modal */}
+      {/* Floating Live Preview Window (스크롤을 내려도 미리보기 창이 계속 떠있도록 지원) */}
+      {!isMainPreviewVisible && !isFloatingDismissed && (
+        <div
+          className="fixed top-20 right-3 sm:right-6 z-40 bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl shadow-2xl border-2 border-rose-500/90 animate-in fade-in slide-in-from-top-4 duration-200 transition-all group"
+          title="스크롤 시 계속 떠있는 실시간 미리보기"
+        >
+          <div className="flex items-center justify-between gap-2 pb-1.5 px-0.5 border-b border-slate-700/80 text-[10px] text-white font-extrabold">
+            <span className="flex items-center gap-1 text-rose-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+              실시간 미리보기
+            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-[9px] text-slate-400 bg-slate-800 px-1 py-0.2 rounded font-mono">
+                {project.aspectRatio}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFloatingDismissed(true);
+                }}
+                className="w-4 h-4 rounded text-slate-400 hover:text-white flex items-center justify-center cursor-pointer text-xs"
+                title="미리보기 닫기"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div
+            onClick={scrollToMainPreview}
+            className={`relative overflow-hidden rounded-xl bg-black mt-1.5 ${getMiniAspectClasses(project.aspectRatio)} shadow-inner cursor-pointer hover:opacity-95 transition-opacity`}
+          >
+            {/* Live Media with Filter & Zoom */}
+            {currentScene?.mediaType === 'video' ? (
+              <video
+                src={currentScene.url}
+                muted
+                playsInline
+                style={{
+                  ...getCombinedFilterStyle(),
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  backgroundColor: '#000000',
+                  transform: `scale(${currentScene.zoom || 1.0})`,
+                }}
+                className="pointer-events-none"
+              />
+            ) : (
+              <img
+                src={currentScene?.url}
+                alt={currentScene?.title}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80';
+                }}
+                style={{
+                  ...getCombinedFilterStyle(),
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  backgroundColor: '#000000',
+                  transform: `scale(${currentScene.zoom || 1.0})`,
+                }}
+                className="pointer-events-none select-none"
+              />
+            )}
+
+            {/* Subtitles Overlay on Mini Preview */}
+            {currentScene?.customSubtitles?.map((sub) => (
+              <div
+                key={sub.id}
+                style={{
+                  left: `${sub.x}%`,
+                  top: `${sub.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '8px',
+                  color: sub.textColor,
+                  backgroundColor: sub.bgColor || 'rgba(0,0,0,0.7)',
+                  borderRadius: '4px',
+                  padding: '1px 3px',
+                  position: 'absolute',
+                  maxWidth: '90%',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  pointerEvents: 'none'
+                }}
+              >
+                {sub.text}
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={scrollToMainPreview}
+            className="w-full pt-1.5 text-center text-[9px] text-slate-300 font-bold hover:text-rose-300 flex items-center justify-center gap-1 cursor-pointer"
+          >
+            <span>본문 위치로 이동</span>
+            <span>↑</span>
+          </button>
+        </div>
+      )}
+
+      {/* Re-open floating preview button if dismissed */}
+      {!isMainPreviewVisible && isFloatingDismissed && (
+        <button
+          type="button"
+          onClick={() => setIsFloatingDismissed(false)}
+          className="fixed top-20 right-3 z-40 bg-slate-900/90 text-rose-400 border border-rose-500/50 px-2.5 py-1.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-1 cursor-pointer hover:bg-slate-800"
+        >
+          <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+          <span>미리보기 보기</span>
+        </button>
+      )}
+
+      {`/* 100% CapCut Video Editor Dedicated Modal */`}
       <CapCutVideoEditorModal
         isOpen={isCapCutModalOpen}
         onClose={() => setIsCapCutModalOpen(false)}
