@@ -189,31 +189,64 @@ export default function App() {
     showToast('프로 동영상 편집기를 실행했습니다 🎬');
   };
 
+  // Helper to safely buffer uploaded media into memory (prevents blob revocation and broken images on mobile)
+  const processMediaFile = (file: File): Promise<{ url: string; isVideo: boolean; title: string }> => {
+    const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|mov|avi|m4v)$/i.test(file.name);
+    const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
+
+    if (isVideo) {
+      return Promise.resolve({
+        url: URL.createObjectURL(file),
+        isVideo: true,
+        title: cleanTitle || '생생한 순간의 비디오'
+      });
+    }
+
+    // For photos, use FileReader.readAsDataURL so the image is fully buffered in memory as base64.
+    // This completely eliminates blob revocation / broken image icons when the input unmounts!
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve({
+          url: reader.result as string,
+          isVideo: false,
+          title: cleanTitle || '마음이 머무는 사진'
+        });
+      };
+      reader.onerror = () => {
+        resolve({
+          url: URL.createObjectURL(file),
+          isVideo: false,
+          title: cleanTitle || '마음이 머무는 사진'
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   // Start directly with dropped or selected user media (Canva/CapCut Style)
-  const handleStartWithMedia = (files: FileList | File[], options?: { aspectRatio?: CanvasAspectRatio; openCapCut?: boolean }) => {
+  const handleStartWithMedia = async (files: FileList | File[], options?: { aspectRatio?: CanvasAspectRatio; openCapCut?: boolean }) => {
     if (!files || files.length === 0) return;
     const fileList = Array.from(files);
 
-    const newScenes: MediaScene[] = fileList.map((file, idx) => {
-      const url = URL.createObjectURL(file);
-      const isVideo = file.type.startsWith('video');
-      return {
-        id: `scene-${Date.now()}-${idx + 1}`,
-        mediaType: isVideo ? 'video' : 'image',
-        url: url,
-        title: isVideo ? '생생한 순간의 비디오' : '마음이 머무는 사진',
-        subtitle: '소중한 일상을 담았습니다',
-        durationSec: isVideo ? 8 : 4,
-        kidsStickers: [],
-        customSubtitles: [],
-        filter: 'none',
-        zoom: 1.0,
-        panX: 0,
-        panY: 0,
-      };
-    });
+    const processed = await Promise.all(fileList.map((f) => processMediaFile(f)));
 
-    const hasVideo = fileList.some(f => f.type.startsWith('video'));
+    const newScenes: MediaScene[] = processed.map((item, idx) => ({
+      id: `scene-${Date.now()}-${idx + 1}`,
+      mediaType: item.isVideo ? 'video' : 'image',
+      url: item.url,
+      title: item.title,
+      subtitle: item.isVideo ? '생생한 순간을 담았습니다' : '소중한 일상을 담았습니다',
+      durationSec: item.isVideo ? 8 : 4,
+      kidsStickers: [],
+      customSubtitles: [],
+      filter: 'none',
+      zoom: 1.0,
+      panX: 0,
+      panY: 0,
+    }));
+
+    const hasVideo = processed.some((p) => p.isVideo);
     const chosenRatio = options?.aspectRatio || '9:16';
     const shouldOpenCapCut = options?.openCapCut ?? hasVideo;
 
@@ -349,6 +382,7 @@ export default function App() {
 
           {currentTab === 'studio' && (
             <HomeKidsStudio
+              key={currentProject.id}
               project={currentProject}
               setProject={setCurrentProject}
               onGoToPublish={() => navigateToTab('publish')}

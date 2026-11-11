@@ -250,105 +250,124 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     setSelectedIdx(selectedIdx - 1);
   };
 
-  // ➕ 편집기 내부에서 사진/동영상 파일 직접 추가
-  const handleAddMediaFiles = (e: React.ChangeEvent<HTMLInputElement>, forceType?: 'image' | 'video') => {
+  // ➕ 편집기 내부에서 사진/동영상 파일 직접 추가 (DataURL 버퍼링으로 액박 방지)
+  const handleAddMediaFiles = async (e: React.ChangeEvent<HTMLInputElement>, forceType?: 'image' | 'video') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const newClips: MediaScene[] = Array.from(files).map((file, idx) => {
-      const isVideo = forceType ? forceType === 'video' : file.type.startsWith('video');
-      const objectUrl = URL.createObjectURL(file);
+    const fileList = Array.from(files);
+    const newClips: MediaScene[] = await Promise.all(fileList.map((file, idx) => {
+      const isVideo = forceType ? forceType === 'video' : (file.type.startsWith('video/') || /\.(mp4|webm|mov|avi|m4v)$/i.test(file.name));
       const cleanName = file.name.replace(/\.[^/.]+$/, "");
-      return {
-        id: `clip-upload-${Date.now()}-${idx}`,
-        title: cleanName,
-        mediaType: isVideo ? 'video' : 'image',
-        url: objectUrl,
-        durationSec: isVideo ? 8 : 4,
-        speed: 1.0,
-        rotation: 0,
-        filter: 'none',
-        transition: 'none',
-        isMuted: false,
-        volume: 100,
-        kidsStickers: [],
-        customSubtitles: [
-          {
-            id: `sub-${Date.now()}-${idx}`,
-            text: cleanName,
-            x: 50,
-            y: 82,
-            fontSizeScale: 1.0,
-            textColor: '#FFFFFF',
-            bgColor: '#0F172A',
-            boxStyle: 'dark',
-            textAlign: 'center',
-            fontFamily: 'Pretendard',
+
+      if (isVideo) {
+        return Promise.resolve({
+          id: `clip-upload-${Date.now()}-${idx}`,
+          title: cleanName,
+          mediaType: 'video' as const,
+          url: URL.createObjectURL(file),
+          durationSec: 8,
+          speed: 1.0,
+          rotation: 0,
+          filter: 'none' as const,
+          transition: 'none' as const,
+          isMuted: false,
+          volume: 100,
+          kidsStickers: [],
+          customSubtitles: [
+            {
+              id: `sub-${Date.now()}-${idx}`,
+              text: cleanName,
+              x: 50,
+              y: 82,
+              fontSizeScale: 1.0,
+              textColor: '#FFFFFF',
+              bgColor: '#0F172A',
+              boxStyle: 'dark' as const,
+              textAlign: 'center' as const,
+              fontFamily: 'Pretendard' as const,
+              rotation: 0,
+            }
+          ]
+        });
+      }
+
+      return new Promise<MediaScene>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            id: `clip-upload-${Date.now()}-${idx}`,
+            title: cleanName,
+            mediaType: 'image' as const,
+            url: reader.result as string,
+            durationSec: 4,
+            speed: 1.0,
             rotation: 0,
-          }
-        ]
-      };
-    });
+            filter: 'none' as const,
+            transition: 'none' as const,
+            isMuted: false,
+            volume: 100,
+            kidsStickers: [],
+            customSubtitles: [
+              {
+                id: `sub-${Date.now()}-${idx}`,
+                text: cleanName,
+                x: 50,
+                y: 82,
+                fontSizeScale: 1.0,
+                textColor: '#FFFFFF',
+                bgColor: '#0F172A',
+                boxStyle: 'dark' as const,
+                textAlign: 'center' as const,
+                fontFamily: 'Pretendard' as const,
+                rotation: 0,
+              }
+            ]
+          });
+        };
+        reader.onerror = () => {
+          resolve({
+            id: `clip-upload-${Date.now()}-${idx}`,
+            title: cleanName,
+            mediaType: 'image' as const,
+            url: URL.createObjectURL(file),
+            durationSec: 4,
+            speed: 1.0,
+            rotation: 0,
+            filter: 'none' as const,
+            transition: 'none' as const,
+            isMuted: false,
+            volume: 100,
+            kidsStickers: [],
+            customSubtitles: [
+              {
+                id: `sub-${Date.now()}-${idx}`,
+                text: cleanName,
+                x: 50,
+                y: 82,
+                fontSizeScale: 1.0,
+                textColor: '#FFFFFF',
+                bgColor: '#0F172A',
+                boxStyle: 'dark' as const,
+                textAlign: 'center' as const,
+                fontFamily: 'Pretendard' as const,
+                rotation: 0,
+              }
+            ]
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    }));
 
     const nextClips = [...clips];
     const insertIndex = selectedIdx >= 0 ? selectedIdx + 1 : nextClips.length;
     nextClips.splice(insertIndex, 0, ...newClips);
     setClips(nextClips);
     setSelectedIdx(insertIndex);
-
     e.target.value = '';
   };
 
-  // 💾 편집 내용 중간 저장 (모달 닫지 않고 상태 동기화)
-  const handleSave = () => {
-    onApply(clips);
-    setIsSavedBadge(true);
-    setTimeout(() => {
-      setIsSavedBadge(false);
-    }, 2500);
-  };
-
-  // Duplicate current clip
-  const handleDuplicate = () => {
-    const clone: MediaScene = {
-      ...currentClip,
-      id: `clip-${Date.now()}-copy`,
-      title: `${currentClip.title} (복제)`
-    };
-    const nextClips = [...clips];
-    nextClips.splice(selectedIdx + 1, 0, clone);
-    setClips(nextClips);
-    setSelectedIdx(selectedIdx + 1);
-  };
-
-  // Delete current clip
-  const handleDelete = () => {
-    if (clips.length <= 1) return;
-    const nextClips = clips.filter((_, idx) => idx !== selectedIdx);
-    setClips(nextClips);
-    setSelectedIdx(Math.max(0, selectedIdx - 1));
-  };
-
-  // Timeline click to move playhead
-  const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!timelineRef.current) return;
-    const rect = timelineRef.current.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const targetTime = ratio * totalDuration;
-    setCurrentTime(targetTime);
-
-    // Find which clip this falls into
-    const idx = clipRanges.findIndex((r) => targetTime >= r.start && targetTime <= r.end);
-    if (idx !== -1) {
-      setSelectedIdx(idx);
-      if (videoRef.current && clips[idx].mediaType === 'video') {
-        const localTime = targetTime - clipRanges[idx].start;
-        videoRef.current.currentTime = localTime;
-      }
-    }
-  };
-
-  // Apply and exit
   const handleCommit = () => {
     onApply(clips);
     onClose();
@@ -381,15 +400,15 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   const getAspectClasses = (ratio: CanvasAspectRatio) => {
     switch (ratio) {
       case '9:16':
-        return 'aspect-[9/16] h-[460px]';
+        return 'aspect-[9/16] h-[30vh] sm:h-[40vh] md:h-[440px] max-w-full';
       case '1:1':
-        return 'aspect-square h-[440px]';
+        return 'aspect-square h-[30vh] sm:h-[38vh] md:h-[420px] max-w-full';
       case '4:5':
-        return 'aspect-[4/5] h-[460px]';
+        return 'aspect-[4/5] h-[30vh] sm:h-[40vh] md:h-[440px] max-w-full';
       case '16:9':
-        return 'aspect-video w-[640px]';
+        return 'aspect-video w-[92vw] sm:w-[80vw] md:w-[600px] max-h-[26vh] sm:max-h-[36vh] md:max-h-none';
       default:
-        return 'aspect-[9/16] h-[460px]';
+        return 'aspect-[9/16] h-[30vh] sm:h-[40vh] md:h-[440px] max-w-full';
     }
   };
 
@@ -536,7 +555,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
       {/* 2. MAIN WORKSPACE (Preview + Inspector) */}
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* Left: Video Canvas Preview */}
-        <div className="flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-4 relative min-h-0">
+        <div className="shrink-0 md:flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 relative min-h-0 sticky top-0 z-20 border-b md:border-b-0 md:border-r border-slate-800">
           <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-slate-800 bg-black flex items-center justify-center max-w-full max-h-full">
             <div className={`${getAspectClasses(aspectRatio)} relative overflow-hidden flex items-center justify-center bg-black`}>
               {/* Preview Live Badge in Canvas */}
@@ -578,6 +597,10 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     const { naturalWidth, naturalHeight } = e.currentTarget;
                     if (naturalWidth && naturalHeight) setNaturalAspect(naturalWidth / naturalHeight);
                   }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80';
+                  }}
                   style={{
                     filter: getFilterStyle(currentClip?.filter),
                     WebkitFilter: getFilterStyle(currentClip?.filter),
@@ -615,7 +638,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
           </div>
 
           {/* Canvas Floating Transport Controls */}
-          <div className="absolute bottom-6 flex items-center gap-3 bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-700 shadow-xl">
+          <div className="mt-2 md:mt-0 md:absolute md:bottom-6 flex items-center gap-2 sm:gap-3 bg-slate-900/95 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border border-slate-700 shadow-xl z-20">
             <button
               onClick={() => {
                 setCurrentTime(0);
@@ -656,7 +679,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         </div>
 
         {/* Right: Pro Inspector Panel */}
-        <div className="w-full md:w-80 max-h-56 md:max-h-none border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900/95 flex flex-col shrink-0">
+        <div className="w-full md:w-80 flex-1 min-h-0 overflow-y-auto border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900/95 flex flex-col">
           {/* Inspector Tabs */}
           <div className="grid grid-cols-5 p-1.5 bg-slate-950 border-b border-slate-800 text-[11px] font-bold">
             {[

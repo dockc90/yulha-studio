@@ -345,15 +345,15 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   const getAspectRatioClasses = (ratio: CanvasAspectRatio) => {
     switch (ratio) {
       case '9:16':
-        return 'aspect-[9/16] max-w-[340px]';
+        return 'aspect-[9/16] max-h-[35vh] sm:max-h-[46vh] lg:max-h-[540px] w-auto max-w-[320px]';
       case '1:1':
-        return 'aspect-square max-w-[420px]';
+        return 'aspect-square max-h-[34vh] sm:max-h-[44vh] lg:max-h-[440px] w-auto max-w-[380px]';
       case '4:5':
-        return 'aspect-[4/5] max-w-[380px]';
+        return 'aspect-[4/5] max-h-[35vh] sm:max-h-[46vh] lg:max-h-[480px] w-auto max-w-[360px]';
       case '16:9':
-        return 'aspect-video max-w-[560px]';
+        return 'aspect-video max-h-[28vh] sm:max-h-[38vh] lg:max-h-[400px] w-auto max-w-[540px]';
       default:
-        return 'aspect-[9/16] max-w-[340px]';
+        return 'aspect-[9/16] max-h-[35vh] sm:max-h-[46vh] lg:max-h-[540px] w-auto max-w-[320px]';
     }
   };
 
@@ -366,33 +366,79 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     }));
   };
 
-  // Add new scene via photo/video upload
-  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>, forceType?: 'image' | 'video') => {
+  // Add new scene via photo/video upload (Buffered DataURL prevents broken images)
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>, forceType?: 'image' | 'video') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const newScenes: MediaScene[] = [];
-    Array.from(files).forEach((file, index) => {
-      const isVid = forceType ? forceType === 'video' : file.type.startsWith('video');
-      const url = URL.createObjectURL(file);
-      newScenes.push({
-        id: `scene-${Date.now()}-${index}`,
-        mediaType: isVid ? 'video' : 'image',
-        url: url,
-        title: isVid ? '새로운 영상 클립' : '포근한 일상의 순간',
-        subtitle: isVid ? '생생한 순간을 담았습니다' : '마음이 머무는 따뜻한 기록',
-        callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
-        durationSec: isVid ? 6 : 4,
-        kidsStickers: [],
-        filter: 'none',
-        zoom: 1.0,
-        panX: 0,
-        panY: 0,
-        adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
-        motionEffect: 'zoom_in',
-        typography: { fontFamily: 'Pretendard', fontSizeScale: 1, textAlign: 'center', boxStyle: 'dark', bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
+    const fileList = Array.from(files);
+    const newScenes: MediaScene[] = await Promise.all(fileList.map((file, index) => {
+      const isVid = forceType ? forceType === 'video' : (file.type.startsWith('video/') || /\.(mp4|webm|mov|avi|m4v)$/i.test(file.name));
+      const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
+
+      if (isVid) {
+        return Promise.resolve({
+          id: `scene-${Date.now()}-${index}`,
+          mediaType: 'video' as const,
+          url: URL.createObjectURL(file),
+          title: cleanTitle || '새로운 영상 클립',
+          subtitle: '생생한 순간을 담았습니다',
+          callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
+          durationSec: 6,
+          kidsStickers: [],
+          filter: 'none' as const,
+          zoom: 1.0,
+          panX: 0,
+          panY: 0,
+          adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
+          motionEffect: 'zoom_in' as const,
+          typography: { fontFamily: 'Pretendard' as const, fontSizeScale: 1, textAlign: 'center' as const, boxStyle: 'dark' as const, bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
+        });
+      }
+
+      return new Promise<MediaScene>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            id: `scene-${Date.now()}-${index}`,
+            mediaType: 'image' as const,
+            url: reader.result as string,
+            title: cleanTitle || '포근한 일상의 순간',
+            subtitle: '마음이 머무는 따뜻한 기록',
+            callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
+            durationSec: 4,
+            kidsStickers: [],
+            filter: 'none' as const,
+            zoom: 1.0,
+            panX: 0,
+            panY: 0,
+            adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
+            motionEffect: 'zoom_in' as const,
+            typography: { fontFamily: 'Pretendard' as const, fontSizeScale: 1, textAlign: 'center' as const, boxStyle: 'dark' as const, bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
+          });
+        };
+        reader.onerror = () => {
+          resolve({
+            id: `scene-${Date.now()}-${index}`,
+            mediaType: 'image' as const,
+            url: URL.createObjectURL(file),
+            title: cleanTitle || '포근한 일상의 순간',
+            subtitle: '마음이 머무는 따뜻한 기록',
+            callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
+            durationSec: 4,
+            kidsStickers: [],
+            filter: 'none' as const,
+            zoom: 1.0,
+            panX: 0,
+            panY: 0,
+            adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
+            motionEffect: 'zoom_in' as const,
+            typography: { fontFamily: 'Pretendard' as const, fontSizeScale: 1, textAlign: 'center' as const, boxStyle: 'dark' as const, bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
+          });
+        };
+        reader.readAsDataURL(file);
       });
-    });
+    }));
 
     setProject((prev) => ({
       ...prev,
@@ -1288,7 +1334,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       {/* Main Studio Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Canvas Preview (lg: 7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-4 sm:p-6 border border-slate-100 shadow-sm flex flex-col items-center">
+        <div className="lg:col-span-7 bg-white rounded-3xl p-3 sm:p-5 lg:p-6 border border-slate-100 shadow-sm flex flex-col items-center sticky top-14 sm:top-18 lg:top-20 z-30 bg-white/95 backdrop-blur-md shadow-xs">
           {/* Prominent Preview Section Title */}
           <div className="w-full flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
             <div className="inline-flex items-center gap-2">
@@ -1360,6 +1406,10 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   onLoad={(e) => {
                     const { naturalWidth, naturalHeight } = e.currentTarget;
                     if (naturalWidth && naturalHeight) setNaturalAspect(naturalWidth / naturalHeight);
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80';
                   }}
                   style={{
                     ...getCombinedFilterStyle(),

@@ -80,6 +80,7 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
       if (onStartWithMedia) {
         onStartWithMedia(e.target.files);
       }
+      e.target.value = '';
     }
   };
 
