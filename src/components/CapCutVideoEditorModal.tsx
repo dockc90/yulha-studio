@@ -380,6 +380,39 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     onClose();
   };
 
+  const handleDuplicate = () => {
+    if (!currentClip) return;
+    const newClip: MediaScene = {
+      ...JSON.parse(JSON.stringify(currentClip)),
+      id: `clip-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    };
+    const nextClips = [...clips];
+    nextClips.splice(selectedIdx + 1, 0, newClip);
+    setClips(nextClips);
+    setSelectedIdx(selectedIdx + 1);
+  };
+
+  const handleDelete = () => {
+    if (clips.length <= 1) return;
+    const nextClips = clips.filter((_, idx) => idx !== selectedIdx);
+    setClips(nextClips);
+    setSelectedIdx((prev) => Math.min(prev, nextClips.length - 1));
+  };
+
+  const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!timelineRef.current || totalDuration <= 0) return;
+    const rect = timelineRef.current.getBoundingClientRect();
+    const clickX = e.clientX - rect.left + timelineRef.current.scrollLeft;
+    const progress = Math.max(0, Math.min(1, clickX / rect.width));
+    const targetTime = progress * totalDuration;
+    setCurrentTime(targetTime);
+    const ranges = getClipTimeRanges();
+    const targetIdx = ranges.findIndex((r) => targetTime >= r.start && targetTime <= r.end);
+    if (targetIdx >= 0) {
+      setSelectedIdx(targetIdx);
+    }
+  };
+
   const updateCurrentClipSubtitle = (updates: Partial<CustomSubtitle>) => {
     setClips((prev) => {
       const next = [...prev];

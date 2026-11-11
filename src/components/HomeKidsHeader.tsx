@@ -202,9 +202,9 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
         {onOpenCapCut && (
           <button
             onClick={onOpenCapCut}
-            className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-[#23272A] text-white font-medium border border-[#3F4448] shadow-xs active:scale-95 transition-transform -translate-y-1.5"
+            className="flex flex-col items-center justify-center py-1 px-2.5 rounded-lg transition-all text-[#9B9A97] font-medium hover:text-[#37352F] cursor-pointer"
           >
-            <Scissors className="w-3.5 h-3.5 shrink-0 mb-0.5" />
+            <Scissors className="w-4 h-4 shrink-0 mb-0.5" />
             <span className="text-[10px] leading-none">동영상 컷</span>
           </button>
         )}
