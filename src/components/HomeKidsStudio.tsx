@@ -3373,7 +3373,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                         : 'border-[#2F3437] hover:border-neutral-500 opacity-80 hover:opacity-100'
                     }`}
                   >
-                    <img src={scene.url} alt={scene.title} className="w-full h-full object-cover" />
+                    {scene.mediaType === 'video' ? (
+                      <video
+                        src={scene.url}
+                        muted
+                        playsInline
+                        // @ts-ignore
+                        webkit-playsinline="true"
+                        preload="auto"
+                        className="w-full h-full object-cover pointer-events-none select-none"
+                      />
+                    ) : (
+                      <img src={scene.url} alt={scene.title} className="w-full h-full object-cover pointer-events-none select-none" />
+                    )}
                     
                     {/* Index & Type badge */}
                     <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono leading-none">

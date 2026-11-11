@@ -43,6 +43,116 @@ interface CapCutVideoEditorModalProps {
   onApply: (updatedScenes: MediaScene[]) => void;
 }
 
+// 🎞️ 스마트폰 갤러리 스타일 비디오 필름스트립 썸네일 연속 추출 헬퍼 (캔버스 프레임 캡처)
+const generateVideoThumbnails = (
+  videoUrl: string,
+  startOffset = 0,
+  duration = 4,
+  count = 6
+): Promise<string[]> => {
+  return new Promise((resolve) => {
+    if (!videoUrl) {
+      resolve([]);
+      return;
+    }
+
+    const video = document.createElement('video');
+    video.src = videoUrl;
+    video.muted = true;
+    video.playsInline = true;
+    video.crossOrigin = 'anonymous';
+    // @ts-ignore
+    video.setAttribute('webkit-playsinline', 'true');
+    video.preload = 'auto';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 120;
+    canvas.height = 90;
+    const ctx = canvas.getContext('2d');
+
+    const frames: string[] = [];
+    const baseStart = Math.max(0, startOffset || 0);
+    const dur = Math.max(1, duration || 4);
+    const targetTimes: number[] = [];
+    for (let i = 0; i < count; i++) {
+      targetTimes.push(baseStart + (dur * (i + 0.5)) / count);
+    }
+
+    let currentStep = 0;
+    let isDone = false;
+
+    const cleanup = () => {
+      if (isDone) return;
+      isDone = true;
+      clearTimeout(timeout);
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('seeked', handleSeeked);
+      video.removeEventListener('error', handleError);
+      try {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+      } catch {}
+    };
+
+    const timeout = setTimeout(() => {
+      cleanup();
+      resolve(frames);
+    }, 4000);
+
+    const captureNext = () => {
+      if (currentStep >= targetTimes.length) {
+        cleanup();
+        resolve(frames);
+        return;
+      }
+      try {
+        video.currentTime = targetTimes[currentStep];
+      } catch {
+        cleanup();
+        resolve(frames);
+      }
+    };
+
+    const handleSeeked = () => {
+      if (isDone) return;
+      if (ctx) {
+        try {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          frames.push(canvas.toDataURL('image/jpeg', 0.6));
+        } catch {}
+      }
+      currentStep++;
+      captureNext();
+    };
+
+    const handleError = () => {
+      cleanup();
+      resolve(frames);
+    };
+
+    const handleLoadedData = () => {
+      if (video.videoWidth && video.videoHeight) {
+        const aspect = video.videoWidth / video.videoHeight;
+        canvas.width = 120;
+        canvas.height = Math.round(120 / aspect);
+      }
+      captureNext();
+    };
+
+    video.addEventListener('loadeddata', handleLoadedData, { once: true });
+    video.addEventListener('seeked', handleSeeked);
+    video.addEventListener('error', handleError, { once: true });
+
+    try {
+      video.load();
+    } catch {
+      cleanup();
+      resolve(frames);
+    }
+  });
+};
+
 export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   isOpen,
   onClose,
@@ -58,6 +168,24 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   const [selectedIdx, setSelectedIdx] = useState<number>(() => {
     return initialSceneIndex >= 0 && initialSceneIndex < scenes.length ? initialSceneIndex : 0;
   });
+
+  // 📱 스마트폰 갤러리 비디오 썸네일 캐시 (클립별 프레임 배열)
+  const [clipThumbnails, setClipThumbnails] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    clips.forEach((clip) => {
+      if (clip.mediaType === 'video' && clip.url && !clipThumbnails[clip.id]) {
+        generateVideoThumbnails(clip.url, clip.trimStart || 0, clip.durationSec || 8, 6).then((frames) => {
+          if (frames && frames.length > 0) {
+            setClipThumbnails((prev) => ({
+              ...prev,
+              [clip.id]: frames,
+            }));
+          }
+        });
+      }
+    });
+  }, [clips, clipThumbnails]);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -1493,11 +1621,36 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     style={{ width: `${widthPct}%`, minWidth: '90px' }}
                     className={`h-full relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all group shrink-0 bg-neutral-900 ${
                       isSelected
-                        ? 'border-white ring-1 ring-white/50 shadow-xl scale-102 z-10'
-                        : 'border-[#2F3437] hover:border-neutral-500 opacity-80 hover:opacity-100'
+                        ? 'border-white ring-2 ring-white/60 shadow-xl z-10'
+                        : 'border-[#2F3437] hover:border-neutral-500 opacity-90 hover:opacity-100'
                     }`}
                   >
-                    {clip.url ? (
+                    {/* 📱 스마트폰 갤러리 비디오 필름스트립 / 사진 썸네일 */}
+                    {clip.mediaType === 'video' ? (
+                      <div className="w-full h-full flex items-center overflow-hidden bg-black/80 select-none">
+                        {clipThumbnails[clip.id] && clipThumbnails[clip.id].length > 0 ? (
+                          clipThumbnails[clip.id].map((frame, fIdx) => (
+                            <div key={fIdx} className="h-full flex-1 relative overflow-hidden border-r border-black/40 last:border-r-0">
+                              <img
+                                src={frame}
+                                alt=""
+                                className="w-full h-full object-cover pointer-events-none select-none"
+                              />
+                            </div>
+                          ))
+                        ) : (
+                          <video
+                            src={clip.url}
+                            muted
+                            playsInline
+                            // @ts-ignore
+                            webkit-playsinline="true"
+                            preload="auto"
+                            className="w-full h-full object-cover pointer-events-none select-none opacity-90"
+                          />
+                        )}
+                      </div>
+                    ) : clip.url ? (
                       <img 
                         src={clip.url} 
                         alt="" 
@@ -1513,19 +1666,19 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     )}
                     
                     {/* Clip Header Label */}
-                    <div className="absolute top-1 left-1 max-w-[80%] px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-medium leading-none flex items-center gap-1 shadow-xs truncate pointer-events-none">
+                    <div className="absolute top-1 left-1 max-w-[80%] px-1.5 py-0.5 rounded bg-black/85 text-white text-[9px] font-medium leading-none flex items-center gap-1 shadow-md truncate pointer-events-none z-10">
                       <span className="font-bold shrink-0">#{idx + 1}</span>
                       <span className="shrink-0">{clip.mediaType === 'video' ? '🎬' : '🖼️'}</span>
                     </div>
 
                     {/* Duration Chip */}
-                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-neutral-200 text-[9px] font-mono leading-none shadow-xs pointer-events-none">
+                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/85 text-neutral-200 text-[9px] font-mono leading-none shadow-md pointer-events-none z-10">
                       {clip.durationSec || 4}s
                     </div>
 
                     {/* Speed Badge */}
                     {clip.speed && clip.speed !== 1.0 && (
-                      <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-white text-black text-[8px] font-semibold leading-none shadow-xs pointer-events-none">
+                      <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-white text-black text-[8px] font-semibold leading-none shadow-md pointer-events-none z-10">
                         {clip.speed}x
                       </div>
                     )}
