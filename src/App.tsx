@@ -132,7 +132,7 @@ export default function App() {
         id: `scene-capcut-${Date.now()}`,
         mediaType: 'video',
         url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        title: '캡컷 동영상 컷편집',
+        title: '프로 동영상 컷편집',
         subtitle: '재생바에서 ✂️ 분할 버튼을 눌러보세요',
         durationSec: 15,
         kidsStickers: [],
@@ -147,7 +147,7 @@ export default function App() {
     }
     setInitialOpenCapCut(true);
     setCurrentTab('studio');
-    showToast('캡컷 동영상 편집기를 실행했습니다 🎬');
+    showToast('프로 동영상 편집기를 실행했습니다 🎬');
   };
 
   // Start directly with dropped or selected user media (Canva/CapCut Style)
@@ -218,7 +218,7 @@ export default function App() {
     const isVideoMode = options?.openCapCut;
     const newProj: HomeKidsProject = {
       id: `proj-${Date.now()}`,
-      title: isVideoMode ? '새로운 캡컷 동영상 프로젝트' : '나만의 새로운 감성 미디어',
+      title: isVideoMode ? '새로운 프로 동영상 프로젝트' : '나만의 새로운 감성 미디어',
       description: '소중한 순간을 담은 사진과 영상 기록',
       category: category === 'all' ? 'home' : category,
       targetPlatforms: ['all', 'ohouse', 'instagram', 'youtube'],
@@ -232,7 +232,7 @@ export default function App() {
           url: isVideoMode 
             ? 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
             : 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
-          title: isVideoMode ? '캡컷 영상 컷편집' : '포근한 일상의 순간',
+          title: isVideoMode ? '동영상 컷편집' : '포근한 일상의 순간',
           subtitle: isVideoMode ? '재생바에서 ✂️ 분할을 눌러보세요' : '마음이 머무는 따뜻한 기록',
           callToAction: '궁금하신 정보는 댓글 남겨주시면 알려드릴게요 🤍',
           durationSec: isVideoMode ? 15 : 4,
@@ -265,7 +265,7 @@ export default function App() {
     setCurrentProject(newProj);
     setInitialOpenCapCut(options?.openCapCut || false);
     setCurrentTab('studio');
-    showToast(isVideoMode ? '캡컷 동영상 편집기를 실행했습니다 🎬' : '새 프로젝트가 생성되었습니다.');
+    showToast(isVideoMode ? '프로 동영상 편집기를 실행했습니다 🎬' : '새 프로젝트가 생성되었습니다.');
   };
 
   return (

@@ -4751,7 +4751,7 @@ export const VideoRendererModal: React.FC<VideoRendererModalProps> = ({
                       <div>
                         <label className="text-xs font-black text-slate-800 flex items-center gap-1.5">
                           <Layers className="w-4 h-4 text-indigo-600" />
-                          <span>캡컷 스타일 자유 텍스트 레이어</span>
+                          <span>프로 스타일 자유 텍스트 레이어</span>
                         </label>
                         <p className="text-[10px] text-slate-500 mt-0.5">
                           상단 타이틀 헤드라인이나 강조 문구를 무제한 추가하고 구간을 연장하세요.
@@ -5093,15 +5093,15 @@ export const VideoRendererModal: React.FC<VideoRendererModalProps> = ({
               {/* SECTION 1: Subtitle Customizer */}
             {activeSettingsSection === 'subtitle' && (
               <div className="space-y-4">
-                {/* 0. CapCut Dynamic Subtitle Tempo (캡컷식 한 씬 다분할 자막 전환) */}
+                {/* 0. Dynamic Subtitle Tempo (한 씬 다분할 자막 전환) */}
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 space-y-3 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-black text-amber-950 flex items-center gap-1.5">
                       <Sparkles className="w-4 h-4 text-amber-600 animate-pulse" />
-                      <span>캡컷식 빠른 자막 분할 템포 (시청 유지율 극대화)</span>
+                      <span>다이내믹 빠른 자막 분할 템포 (시청 유지율 극대화)</span>
                     </label>
                     <span className="text-[10px] text-amber-800 font-extrabold bg-amber-200/80 px-2 py-0.5 rounded-full border border-amber-300">
-                      ⚡ 캡컷 몰입형 전환
+                      ⚡ 몰입형 다이내믹 전환
                     </span>
                   </div>
 
@@ -6562,7 +6562,7 @@ export const VideoRendererModal: React.FC<VideoRendererModalProps> = ({
                     <span>유튜브 쇼츠 & 인스타그램 릴스 최적화 완료</span>
                   </div>
                   <p className="leading-relaxed font-medium">
-                    9:16 세로 규격, 상단 워터마크 없는 무결점 비디오, 브라우저 직접 렌더링으로 캡컷(CapCut) 등 외부 프로그램 없이 바로 유튜브에 업로드할 수 있습니다.
+                    9:16 세로 규격, 상단 워터마크 없는 무결점 비디오, 브라우저 직접 렌더링으로 외부 프로그램 없이 바로 유튜브에 업로드할 수 있습니다.
                   </p>
                 </div>
               </div>

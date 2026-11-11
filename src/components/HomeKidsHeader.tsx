@@ -112,10 +112,10 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
                 type="button"
                 onClick={onOpenCapCut}
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-black bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/25 transition-all leading-none whitespace-nowrap cursor-pointer"
-                title="캡컷 스타일 전문 동영상 컷편집기 즉시 실행"
+                title="전문 동영상 컷편집기 즉시 실행"
               >
                 <Scissors className="w-3.5 h-3.5 shrink-0" />
-                <span className="leading-none">캡컷 동영상</span>
+                <span className="leading-none">동영상 컷편집</span>
               </button>
             )}
 

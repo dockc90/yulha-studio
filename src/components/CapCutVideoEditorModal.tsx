@@ -19,7 +19,11 @@ import {
   Clock,
   Film,
   CornerDownRight,
-  Split
+  Split,
+  Plus,
+  Save,
+  Link2,
+  Upload
 } from 'lucide-react';
 import { 
   MediaScene, 
@@ -57,9 +61,11 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [activeInspectorTab, setActiveInspectorTab] = useState<'edit' | 'speed' | 'transition' | 'adjust' | 'audio'>('edit');
+  const [isSavedBadge, setIsSavedBadge] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const currentClip = clips[selectedIdx] || clips[0];
 
@@ -181,6 +187,125 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     setSelectedIdx(selectedIdx + 1);
   };
 
+  // 🔗 컷 합치기 (다음 컷과 병합)
+  const handleMergeNextCut = () => {
+    if (selectedIdx >= clips.length - 1) return;
+    const clipA = clips[selectedIdx];
+    const clipB = clips[selectedIdx + 1];
+
+    const combinedDuration = Number(((clipA.durationSec || 4) + (clipB.durationSec || 4)).toFixed(1));
+    const cleanTitle = clipA.title.replace(/\s*\(Part \d+\)/, '');
+    const mergedClip: MediaScene = {
+      ...clipA,
+      id: `clip-merged-${Date.now()}`,
+      title: `${cleanTitle} (병합)`,
+      durationSec: combinedDuration,
+      trimStart: clipA.trimStart,
+      trimEnd: clipB.trimEnd !== undefined ? clipB.trimEnd : ((clipA.trimStart || 0) + combinedDuration),
+      customSubtitles: [
+        ...(clipA.customSubtitles || []),
+        ...(clipB.customSubtitles || []).map((s, i) => ({
+          ...s,
+          id: `sub-${Date.now()}-${i}`,
+          x: Math.min(90, Math.max(10, s.x + 5)),
+        }))
+      ]
+    };
+
+    const nextClips = [...clips];
+    nextClips.splice(selectedIdx, 2, mergedClip);
+    setClips(nextClips);
+  };
+
+  // 🔗 컷 합치기 (이전 컷과 병합)
+  const handleMergePrevCut = () => {
+    if (selectedIdx <= 0) return;
+    const clipA = clips[selectedIdx - 1];
+    const clipB = clips[selectedIdx];
+
+    const combinedDuration = Number(((clipA.durationSec || 4) + (clipB.durationSec || 4)).toFixed(1));
+    const cleanTitle = clipA.title.replace(/\s*\(Part \d+\)/, '');
+    const mergedClip: MediaScene = {
+      ...clipA,
+      id: `clip-merged-${Date.now()}`,
+      title: `${cleanTitle} (병합)`,
+      durationSec: combinedDuration,
+      trimStart: clipA.trimStart,
+      trimEnd: clipB.trimEnd !== undefined ? clipB.trimEnd : ((clipA.trimStart || 0) + combinedDuration),
+      customSubtitles: [
+        ...(clipA.customSubtitles || []),
+        ...(clipB.customSubtitles || []).map((s, i) => ({
+          ...s,
+          id: `sub-${Date.now()}-${i}`,
+          x: Math.min(90, Math.max(10, s.x + 5)),
+        }))
+      ]
+    };
+
+    const nextClips = [...clips];
+    nextClips.splice(selectedIdx - 1, 2, mergedClip);
+    setClips(nextClips);
+    setSelectedIdx(selectedIdx - 1);
+  };
+
+  // ➕ 편집기 내부에서 동영상/이미지 파일 직접 추가
+  const handleAddMediaFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newClips: MediaScene[] = Array.from(files).map((file, idx) => {
+      const isVideo = file.type.startsWith('video');
+      const objectUrl = URL.createObjectURL(file);
+      const cleanName = file.name.replace(/\.[^/.]+$/, "");
+      return {
+        id: `clip-upload-${Date.now()}-${idx}`,
+        title: cleanName,
+        mediaType: isVideo ? 'video' : 'image',
+        url: objectUrl,
+        durationSec: isVideo ? 8 : 4,
+        speed: 1.0,
+        rotation: 0,
+        filter: 'none',
+        transition: 'none',
+        isMuted: false,
+        volume: 100,
+        customSubtitles: [
+          {
+            id: `sub-${Date.now()}-${idx}`,
+            text: cleanName,
+            x: 50,
+            y: 82,
+            fontSizeScale: 1.0,
+            textColor: '#FFFFFF',
+            bgColor: '#0F172A',
+            boxStyle: 'pill',
+            fontFamily: 'Pretendard',
+            rotation: 0,
+          }
+        ]
+      };
+    });
+
+    const nextClips = [...clips];
+    const insertIndex = selectedIdx >= 0 ? selectedIdx + 1 : nextClips.length;
+    nextClips.splice(insertIndex, 0, ...newClips);
+    setClips(nextClips);
+    setSelectedIdx(insertIndex);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // 💾 편집 내용 중간 저장 (모달 닫지 않고 상태 동기화)
+  const handleSave = () => {
+    onApply(clips);
+    setIsSavedBadge(true);
+    setTimeout(() => {
+      setIsSavedBadge(false);
+    }, 2500);
+  };
+
   // Duplicate current clip
   const handleDuplicate = () => {
     const clone: MediaScene = {
@@ -262,6 +387,16 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col select-none text-slate-100 animate-in fade-in duration-200">
+      {/* Hidden File Input for uploading videos/images inside editor */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleAddMediaFiles}
+        multiple
+        accept="video/*,image/*"
+        className="hidden"
+      />
+
       {/* 1. TOP HEADER */}
       <header className="h-14 border-b border-slate-800 bg-slate-950/80 px-5 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
@@ -271,31 +406,48 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-extrabold text-white leading-none">
-                캡컷 프로 비디오 에디터 (CapCut Video Studio)
+                프로 비디오 에디터 (Pro Video Studio)
               </h2>
               <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded leading-none">
-                PRO 100%
+                PRO STUDIO
               </span>
             </div>
             <p className="text-[10px] text-slate-400 mt-0.5 leading-none">
-              재생바 위치에서 [✂️ 분할] 클릭 시 캡컷처럼 즉시 컷분할됩니다 · 단축키 [Ctrl+B / Space]
+              재생바 위치에서 [✂️ 분할] 클릭 시 즉시 컷분할 · [🔗 컷 합치기] 클립 병합 · [➕ 미디어 추가] · 단축키 [Ctrl+B / Space]
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5">
+          {isSavedBadge && (
+            <span className="text-emerald-400 font-bold text-xs animate-in fade-in flex items-center gap-1 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-lg">
+              <Check className="w-3.5 h-3.5" />
+              <span>저장 완료 ✨</span>
+            </span>
+          )}
+
+          <button
+            onClick={handleSave}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 shadow-sm transition-all cursor-pointer leading-none"
+            title="현재까지 편집한 내용을 프로젝트에 저장합니다"
+          >
+            <Save className="w-3.5 h-3.5 text-emerald-400" />
+            <span>저장하기</span>
+          </button>
+
           <button
             onClick={onClose}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer leading-none"
+            className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer leading-none"
           >
-            취소
+            닫기
           </button>
+
           <button
             onClick={handleCommit}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-black text-xs shadow-md shadow-rose-500/30 transition-all cursor-pointer leading-none"
           >
             <Check className="w-3.5 h-3.5" />
-            <span>편집 완료 및 적용</span>
+            <span>적용 및 닫기</span>
           </button>
         </div>
       </header>
@@ -433,20 +585,60 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   </div>
                 </div>
 
-                {/* Quick Split & Actions */}
+                {/* Quick Split, Merge & Actions */}
                 <div className="space-y-2">
-                  <label className="font-bold text-slate-300 block">클립 분할 & 복제</label>
+                  <label className="font-bold text-slate-300 block">클립 분할 & 합치기</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={handleSplitAtPlayhead}
                       className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black cursor-pointer shadow-md leading-none"
+                      title="재생바 위치에서 컷을 둘로 나눕니다 (단축키: Ctrl+B)"
                     >
                       <Scissors className="w-3.5 h-3.5" />
                       <span>재생바 분할</span>
                     </button>
                     <button
+                      onClick={handleMergeNextCut}
+                      disabled={selectedIdx >= clips.length - 1}
+                      className={`inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl font-black leading-none ${
+                        selectedIdx < clips.length - 1
+                          ? 'bg-sky-600 hover:bg-sky-500 text-white cursor-pointer shadow-md'
+                          : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                      }`}
+                      title="선택된 클립과 다음 클립을 하나로 합칩니다"
+                    >
+                      <Link2 className="w-3.5 h-3.5" />
+                      <span>다음 컷 합치기</span>
+                    </button>
+                  </div>
+
+                  {selectedIdx > 0 && (
+                    <button
+                      onClick={handleMergePrevCut}
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold border border-slate-700 cursor-pointer text-xs"
+                      title="선택된 클립과 이전 클립을 하나로 합칩니다"
+                    >
+                      <Link2 className="w-3.5 h-3.5" />
+                      <span>이전 컷과 합치기 (앞쪽 클립과 병합)</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Add Media Files & Duplicate */}
+                <div className="space-y-2">
+                  <label className="font-bold text-slate-300 block">미디어 추가 및 관리</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold cursor-pointer leading-none shadow-sm"
+                      title="컴퓨터에서 새로운 동영상이나 사진을 타임라인에 추가합니다"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>영상/사진 추가</span>
+                    </button>
+                    <button
                       onClick={handleDuplicate}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer leading-none"
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer leading-none border border-slate-700"
                     >
                       <Copy className="w-3.5 h-3.5" />
                       <span>클립 복제</span>
@@ -609,7 +801,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         </div>
       </div>
 
-      {/* 3. CAPCUT BOTTOM MULTI-TRACK TIMELINE */}
+      {/* 3. MULTI-TRACK TIMELINE */}
       <div className="h-64 border-t border-slate-800 bg-slate-950 flex flex-col shrink-0 select-none">
         {/* Timeline Top Control Strip */}
         <div className="h-10 px-5 border-b border-slate-800/80 flex items-center justify-between text-xs">
@@ -623,10 +815,35 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             <button
               onClick={handleSplitAtPlayhead}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs cursor-pointer shadow-sm shadow-amber-500/20"
-              title="재생바 위치에서 클립 분할"
+              title="재생바 위치에서 클립 분할 (Ctrl+B)"
             >
               <Scissors className="w-3.5 h-3.5" />
               <span>✂️ 분할</span>
+            </button>
+
+            {/* Merge Cut Button */}
+            <button
+              onClick={selectedIdx < clips.length - 1 ? handleMergeNextCut : handleMergePrevCut}
+              disabled={clips.length <= 1}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black shadow-sm transition-all ${
+                clips.length > 1
+                  ? 'bg-sky-600 hover:bg-sky-500 text-white cursor-pointer shadow-sky-600/20'
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+              }`}
+              title={selectedIdx < clips.length - 1 ? "선택된 클립과 다음 클립 합치기" : "선택된 클립과 이전 클립 합치기"}
+            >
+              <Link2 className="w-3.5 h-3.5" />
+              <span>🔗 컷 합치기</span>
+            </button>
+
+            {/* Add Media Button */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-black text-xs cursor-pointer shadow-sm shadow-rose-600/20"
+              title="동영상/사진 파일 직접 추가하기"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>➕ 영상 추가</span>
             </button>
 
             <button

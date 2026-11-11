@@ -1115,7 +1115,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                     className="flex items-center space-x-1 text-indigo-600 hover:text-indigo-700 font-bold text-xs"
                   >
                     {copiedKey === 'capcut-all' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>캡컷/브루 전체 포맷 복사</span>
+                    <span>대본/자막 전체 포맷 복사</span>
                   </button>
                 </div>
 
@@ -1283,7 +1283,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                                     type="button"
                                     onClick={() => handleOpenVideoEditor(idx)}
                                     className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-extrabold text-[11px] shadow-xs transition cursor-pointer"
-                                    title="캡컷 스타일 동영상 편집기 (구간 자르기, 줌, 배속, 볼륨)"
+                                    title="프로 동영상 편집기 (구간 자르기, 줌, 배속, 볼륨)"
                                   >
                                     <Scissors className="w-3 h-3" />
                                     <span>동영상 편집</span>
@@ -1335,7 +1335,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                                     type="button"
                                     onClick={() => videoFileInputRefs.current[idx]?.click()}
                                     className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100 text-cyan-800 font-extrabold text-[11px] border border-cyan-300 shadow-2xs transition cursor-pointer"
-                                    title="이 씬에 동영상 클립 첨부하기 (캡컷 스타일 편집)"
+                                    title="이 씬에 동영상 클립 첨부하기 (프로 비디오 편집)"
                                   >
                                     <Video className="w-3 h-3 text-cyan-600" />
                                     <span>동영상 첨부</span>

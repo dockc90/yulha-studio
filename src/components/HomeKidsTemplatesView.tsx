@@ -112,7 +112,7 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            사진 보정, 캡컷 스타일 컷분할, 화면 직접 회전 자막, 인기 버터 필터, 저작권 안심 36곡 BGM까지!
+            사진 보정, 타임라인 정밀 컷분할 & 병합, 화면 직접 회전 자막, 인기 버터 필터, 저작권 안심 36곡 BGM까지!
             <br className="hidden md:inline" />
             복잡한 툴 없이 <strong>인스타그램 릴스 · 오늘의집 스토리 · 유튜브 쇼츠</strong>를 3분 만에 완성하세요.
           </p>
@@ -179,22 +179,22 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
                   <Scissors className="w-6 h-6 text-white" />
                 </div>
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
-                  ✂️ 캡컷 에디터
+                  ✂️ 프로 에디터
                 </span>
               </div>
 
               <div>
                 <h3 className="font-extrabold text-base text-white group-hover:text-indigo-200 transition-colors">
-                  동영상 컷분할 & 편집
+                  동영상 컷분할 & 합치기
                 </h3>
                 <p className="text-xs text-indigo-200/80 mt-1 leading-relaxed">
-                  재생바에서 즉시 <strong>✂️ 분할</strong>, 0.5x~4.0x 배속, 화면 회전, 페이드 전환 효과까지 한 번에!
+                  재생바에서 즉시 <strong>✂️ 분할</strong> 및 <strong>🔗 합치기</strong>, 0.5x~4.0x 배속, 화면 회전, 페이드 전환 효과까지 한 번에!
                 </p>
               </div>
             </div>
 
             <div className="pt-4 mt-3 border-t border-indigo-800/60 flex items-center justify-between text-xs font-bold text-indigo-300 group-hover:text-white">
-              <span>캡컷 편집기 열기</span>
+              <span>동영상 편집기 열기</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -346,9 +346,9 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
             <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
               <Scissors className="w-5 h-5" />
             </div>
-            <h4 className="font-black text-sm text-white">1. 캡컷 컷분할 에디터</h4>
+            <h4 className="font-black text-sm text-white">1. 타임라인 컷분할 & 합치기</h4>
             <p className="text-xs text-slate-400 leading-relaxed">
-              재생 헤드를 원하는 지점에 두고 <strong>✂️ 분할</strong> 클릭 한 번으로 손쉽게 클립을 분리하고 배속 조절.
+              재생 헤드를 원하는 지점에 두고 <strong>✂️ 분할</strong> 및 <strong>🔗 합치기</strong> 클릭 한 번으로 손쉽게 클립을 편집하고 배속 조절.
             </p>
           </div>
 

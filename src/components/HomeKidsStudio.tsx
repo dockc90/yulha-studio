@@ -1019,14 +1019,14 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             <span className="leading-none">SNS 가이드</span>
           </button>
 
-          {/* 100% CapCut Video Editor Launcher Button */}
+          {/* Pro Video Editor Launcher Button */}
           <button
             onClick={() => setIsCapCutModalOpen(true)}
             className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-extrabold text-xs shadow-md border border-amber-500/30 transition-all leading-none cursor-pointer"
-            title="100% 캡컷 스타일 전문 동영상 편집기 열기"
+            title="전문 동영상 편집기 열기"
           >
             <Scissors className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="leading-none">🎬 캡컷 전문 편집</span>
+            <span className="leading-none">🎬 동영상 컷편집</span>
           </button>
 
           {onClose && (
@@ -1504,14 +1504,14 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                  <h3 className="font-extrabold text-sm text-slate-900 leading-none">동영상 편집 (CapCut Pro)</h3>
+                  <h3 className="font-extrabold text-sm text-slate-900 leading-none">동영상 편집 (Pro Studio)</h3>
                 </div>
                 <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full leading-none">
                   {currentScene?.mediaType === 'video' ? '🎬 비디오 클립' : '🖼️ 사진 클립'}
                 </span>
               </div>
 
-              {/* CapCut Dedicated Studio Full Launch Banner */}
+              {/* Dedicated Studio Full Launch Banner */}
               <button
                 onClick={() => setIsCapCutModalOpen(true)}
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 hover:from-black hover:to-slate-950 text-white font-extrabold text-xs shadow-lg border border-amber-500/40 flex items-center justify-between cursor-pointer transition-transform hover:scale-[1.01]"
@@ -1521,7 +1521,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                     <Scissors className="w-4 h-4" />
                   </div>
                   <div className="text-left">
-                    <div className="text-amber-300 font-black text-xs leading-none">100% 캡컷 전문 편집기로 열기</div>
+                    <div className="text-amber-300 font-black text-xs leading-none">전문 비디오 편집기로 열기</div>
                     <div className="text-[10px] text-slate-300 mt-1 leading-none">재생바 위치에서 즉시 컷분할 & 타임라인 정밀 편집</div>
                   </div>
                 </div>
