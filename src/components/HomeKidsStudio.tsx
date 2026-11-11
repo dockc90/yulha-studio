@@ -279,18 +279,76 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       objectFit: 'contain',
       maxWidth: '100%',
       maxHeight: '100%',
-      backgroundColor: '#000000',
     };
   };
 
-    // Original view toggle (Press & Hold or Click to compare)
+  // 사진 채우기: 원본 사진 비율은 100% 무왜곡으로 유지하면서 검정 여백 없이 프레임에 꽉 차게 자동 확대
+  const handleFillFrame = () => {
+    const boxRatio = getBoxAspectRatio(project.aspectRatio);
+    const aspect = naturalAspect || 1.0;
+    
+    // 계산: aspect가 boxRatio보다 크면 (가로가 더 긴 사진) 높이를 채우기 위해 aspect / boxRatio 배 확대
+    // aspect가 boxRatio보다 작으면 (세로가 더 긴 사진) 너비를 채우기 위해 boxRatio / aspect 배 확대
+    const fillZoom = aspect >= boxRatio
+      ? Number((aspect / boxRatio).toFixed(2))
+      : Number((boxRatio / aspect).toFixed(2));
+      
+    // 최소 1.0배, 최대 3.5배로 안전 클램핑
+    const targetZoom = Math.max(1.0, Math.min(3.5, fillZoom));
+    updateCurrentScene({ zoom: targetZoom, panX: 0, panY: 0 });
+  };
+
+  // 전체 맞춤: 여백이 생기더라도 원본 사진 전체가 온전히 보이도록 맞춤 (zoom 1.0)
+  const handleFitEntire = () => {
+    updateCurrentScene({ zoom: 1.0, panX: 0, panY: 0 });
+  };
+
+  // Original view toggle (Press & Hold or Click to compare)
   const [showOriginal, setShowOriginal] = useState(false);
 
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Floating Live Preview tracking (스크롤 내려도 미리보기 창이 계속 떠있도록 지원)
+  // Floating Live Preview tracking & controls (스크롤 내려도 미리보기 유지 & 크기조절 & 드래그 위치 이동)
   const [isMainPreviewVisible, setIsMainPreviewVisible] = useState(true);
   const [isFloatingDismissed, setIsFloatingDismissed] = useState(false);
+  const [floatingPos, setFloatingPos] = useState<{ x: number; y: number } | null>(null);
+  const [floatingSize, setFloatingSize] = useState<'sm' | 'md' | 'lg'>('md');
+  const [isDraggingFloating, setIsDraggingFloating] = useState(false);
+  const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
+
+  const handleFloatingPointerDown = (e: React.PointerEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) return;
+    e.preventDefault();
+    const floatingEl = (e.currentTarget as HTMLElement).closest('.floating-preview-root') as HTMLElement;
+    if (!floatingEl) return;
+    const rect = floatingEl.getBoundingClientRect();
+    dragOffsetRef.current = {
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+    };
+    setIsDraggingFloating(true);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handleFloatingPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingFloating) return;
+    e.preventDefault();
+    const newX = e.clientX - dragOffsetRef.current.offsetX;
+    const newY = e.clientY - dragOffsetRef.current.offsetY;
+    const clampedX = Math.max(8, Math.min(window.innerWidth - 110, newX));
+    const clampedY = Math.max(50, Math.min(window.innerHeight - 100, newY));
+    setFloatingPos({ x: clampedX, y: clampedY });
+  };
+
+  const handleFloatingPointerUp = (e: React.PointerEvent) => {
+    if (isDraggingFloating) {
+      setIsDraggingFloating(false);
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+    }
+  };
 
   useEffect(() => {
     const target = previewContainerRef.current;
@@ -317,18 +375,32 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     }
   };
 
-  const getMiniAspectClasses = (ratio: CanvasAspectRatio) => {
+  const getMiniAspectClasses = (ratio: CanvasAspectRatio, size: 'sm' | 'md' | 'lg' = 'md') => {
+    if (size === 'sm') {
+      switch (ratio) {
+        case '9:16': return 'w-20 h-[142px]';
+        case '1:1': return 'w-24 h-24';
+        case '4:5': return 'w-[90px] h-[112px]';
+        case '16:9': return 'w-32 h-[72px]';
+        default: return 'w-20 h-[142px]';
+      }
+    }
+    if (size === 'lg') {
+      switch (ratio) {
+        case '9:16': return 'w-36 h-[256px]';
+        case '1:1': return 'w-48 h-48';
+        case '4:5': return 'w-40 h-[200px]';
+        case '16:9': return 'w-64 h-[144px]';
+        default: return 'w-36 h-[256px]';
+      }
+    }
+    // 'md' (default)
     switch (ratio) {
-      case '9:16':
-        return 'w-24 h-40 sm:w-28 sm:h-48';
-      case '1:1':
-        return 'w-28 h-28 sm:w-34 sm:h-34';
-      case '4:5':
-        return 'w-26 h-32 sm:w-30 sm:h-38';
-      case '16:9':
-        return 'w-38 h-22 sm:w-46 sm:h-26';
-      default:
-        return 'w-24 h-40 sm:w-28 sm:h-48';
+      case '9:16': return 'w-28 h-[198px]';
+      case '1:1': return 'w-36 h-36';
+      case '4:5': return 'w-32 h-[160px]';
+      case '16:9': return 'w-48 h-[108px]';
+      default: return 'w-28 h-[198px]';
     }
   };
   const photoInputRef = useRef<HTMLInputElement | null>(null);
@@ -363,19 +435,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   const currentFont: SubtitleFont = typography.fontFamily;
   const currentBoxStyle = typography.boxStyle;
 
-  // Aspect ratio dimension styling
+  // Aspect ratio dimension styling (각 비율마다 왜곡 없이 명확한 비율의 캔버스 규격 제공)
   const getAspectRatioClasses = (ratio: CanvasAspectRatio) => {
     switch (ratio) {
       case '9:16':
-        return 'aspect-[9/16] max-h-[35vh] sm:max-h-[46vh] lg:max-h-[540px] w-auto max-w-[320px]';
+        return 'w-[230px] sm:w-[280px] md:w-[310px] aspect-[9/16]';
       case '1:1':
-        return 'aspect-square max-h-[34vh] sm:max-h-[44vh] lg:max-h-[440px] w-auto max-w-[380px]';
+        return 'w-[290px] sm:w-[350px] md:w-[390px] aspect-square';
       case '4:5':
-        return 'aspect-[4/5] max-h-[35vh] sm:max-h-[46vh] lg:max-h-[480px] w-auto max-w-[360px]';
+        return 'w-[260px] sm:w-[310px] md:w-[350px] aspect-[4/5]';
       case '16:9':
-        return 'aspect-video max-h-[28vh] sm:max-h-[38vh] lg:max-h-[400px] w-auto max-w-[540px]';
+        return 'w-full max-w-[340px] sm:max-w-[480px] md:max-w-[540px] aspect-video';
       default:
-        return 'aspect-[9/16] max-h-[35vh] sm:max-h-[46vh] lg:max-h-[540px] w-auto max-w-[320px]';
+        return 'w-[230px] sm:w-[280px] md:w-[310px] aspect-[9/16]';
     }
   };
 
@@ -1394,13 +1466,27 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               onWheel={handleCanvasWheel}
               className={`relative overflow-hidden rounded-2xl shadow-xl border-4 border-slate-100 bg-slate-950 select-none touch-none ${
                 isDraggingMedia ? 'cursor-grabbing' : 'cursor-grab'
-              } ${getAspectRatioClasses(project.aspectRatio)} w-full`}
+              } ${getAspectRatioClasses(project.aspectRatio)}`}
             >
               {/* Preview Live Badge in Canvas */}
               <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md z-30 pointer-events-none flex items-center gap-1.5 border border-white/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span>미리보기</span>
               </div>
+
+              {/* Direct On-Canvas '사진 채우기' Button (우측 하단 빠른 채우기) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFillFrame();
+                }}
+                className="absolute bottom-3 right-3 z-30 bg-slate-900/85 hover:bg-rose-600 text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-lg border border-white/20 backdrop-blur-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                title="원본 비율 유지하며 검정 여백 없이 꽉 채우기"
+              >
+                <span>🖼️</span>
+                <span>사진 채우기</span>
+              </button>
 
               {/* Media Element with Filter, Pan & Zoom, and Adjustments (Preserves original aspect ratio and fits width/height) */}
               {currentScene?.mediaType === 'video' ? (
@@ -1802,33 +1888,27 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               )}
             </div>
 
-            {/* Quick Presets: Frame Fit & Full Cover */}
+            {/* Quick Presets: Frame Fill & Full Fit */}
             <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-200/60 text-[11px]">
-              <span className="text-slate-400 font-medium whitespace-nowrap">빠른 맞춤:</span>
+              <span className="text-slate-500 font-bold whitespace-nowrap">화면 맞춤:</span>
               <button
                 type="button"
-                onClick={() => updateCurrentScene({ zoom: 1.0, panX: 0, panY: 0 })}
-                className={`px-2 py-0.5 rounded-md font-bold transition-all cursor-pointer ${
-                  (currentScene?.zoom || 1.0) === 1.0
-                    ? 'bg-rose-500 text-white shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                }`}
-                title="프레임에 맞춰 꽉 채우기"
+                onClick={handleFillFrame}
+                className="px-2.5 py-1 rounded-lg font-bold bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-xs transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                title="원본 사진 비율을 100% 유지하면서 검정 여백 없이 꽉 채웁니다"
               >
-                프레임 채우기
+                <span>🖼️</span>
+                <span>사진 채우기</span>
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const boxRatio = getBoxAspectRatio(project.aspectRatio);
-                  const aspect = naturalAspect || 1.0;
-                  const fitZoom = aspect >= boxRatio
-                    ? Number((boxRatio / aspect).toFixed(2))
-                    : Number((aspect / boxRatio).toFixed(2));
-                  updateCurrentScene({ zoom: Math.max(0.5, Math.min(1.0, fitZoom)), panX: 0, panY: 0 });
-                }}
-                className="px-2 py-0.5 rounded-md font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all cursor-pointer"
-                title="여백이 생기더라도 사진 전체가 보이도록 맞춤"
+                onClick={handleFitEntire}
+                className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer border ${
+                  (currentScene?.zoom || 1.0) === 1.0 && (!currentScene?.panX && !currentScene?.panY)
+                    ? 'bg-slate-200 text-slate-800 border-slate-300 font-extrabold'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+                title="여백이 생기더라도 원본 사진 전체가 온전히 보이도록 맞춤"
               >
                 전체 맞춤
               </button>
@@ -3381,19 +3461,79 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         </div>
       </div>
 
-      {/* Floating Live Preview Window (스크롤을 내려도 미리보기 창이 계속 떠있도록 지원) */}
+      {/* Floating Live Preview Window (스크롤을 내려도 미리보기 창이 계속 떠있도록 지원 & 위치 드래그 이동 & 소/중/대 크기 조절) */}
       {!isMainPreviewVisible && !isFloatingDismissed && (
         <div
-          className="fixed top-20 right-3 sm:right-6 z-40 bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl shadow-2xl border-2 border-rose-500/90 animate-in fade-in slide-in-from-top-4 duration-200 transition-all group"
-          title="스크롤 시 계속 떠있는 실시간 미리보기"
+          className="floating-preview-root fixed z-50 bg-slate-900/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl shadow-2xl border-2 border-rose-500/90 animate-in fade-in slide-in-from-top-4 duration-200 select-none group"
+          style={{
+            touchAction: 'none',
+            ...(floatingPos
+              ? { left: `${floatingPos.x}px`, top: `${floatingPos.y}px` }
+              : { right: '16px', top: '80px' }),
+          }}
+          title="스크롤 시 계속 떠있는 실시간 미리보기 (헤더를 드래그하여 원하는 위치로 자유롭게 이동)"
         >
-          <div className="flex items-center justify-between gap-2 pb-1.5 px-0.5 border-b border-slate-700/80 text-[10px] text-white font-extrabold">
-            <span className="flex items-center gap-1 text-rose-400">
+          {/* Draggable Header with Size Switcher */}
+          <div 
+            onPointerDown={handleFloatingPointerDown}
+            onPointerMove={handleFloatingPointerMove}
+            onPointerUp={handleFloatingPointerUp}
+            onPointerCancel={handleFloatingPointerUp}
+            className={`flex items-center justify-between gap-1.5 pb-1.5 px-0.5 border-b border-slate-700/80 text-[10px] text-white font-extrabold select-none ${
+              isDraggingFloating ? 'cursor-grabbing' : 'cursor-grab'
+            }`}
+          >
+            <div className="flex items-center gap-1 text-rose-400">
+              <span className="text-slate-400 hover:text-white font-mono text-xs cursor-grab" title="드래그하여 위치 이동">⠿</span>
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-              실시간 미리보기
-            </span>
+              <span className="text-[10px] hidden sm:inline">미리보기</span>
+            </div>
+
+            {/* Size Switcher: 소 / 중 / 대 */}
+            <div className="flex items-center gap-0.5 bg-slate-800 p-0.5 rounded-md border border-slate-700">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFloatingSize('sm');
+                }}
+                className={`px-1.5 py-0.5 rounded text-[9px] font-bold leading-none cursor-pointer transition-colors ${
+                  floatingSize === 'sm' ? 'bg-rose-500 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+                title="작은 크기"
+              >
+                소
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFloatingSize('md');
+                }}
+                className={`px-1.5 py-0.5 rounded text-[9px] font-bold leading-none cursor-pointer transition-colors ${
+                  floatingSize === 'md' ? 'bg-rose-500 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+                title="중간 크기"
+              >
+                중
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFloatingSize('lg');
+                }}
+                className={`px-1.5 py-0.5 rounded text-[9px] font-bold leading-none cursor-pointer transition-colors ${
+                  floatingSize === 'lg' ? 'bg-rose-500 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+                title="큰 크기"
+              >
+                대
+              </button>
+            </div>
+
             <div className="flex items-center gap-1">
-              <span className="text-[9px] text-slate-400 bg-slate-800 px-1 py-0.2 rounded font-mono">
+              <span className="text-[9px] text-slate-400 bg-slate-800 px-1 py-0.5 rounded font-mono">
                 {project.aspectRatio}
               </span>
               <button
@@ -3402,7 +3542,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   e.stopPropagation();
                   setIsFloatingDismissed(true);
                 }}
-                className="w-4 h-4 rounded text-slate-400 hover:text-white flex items-center justify-center cursor-pointer text-xs"
+                className="w-4 h-4 rounded text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center cursor-pointer text-xs"
                 title="미리보기 닫기"
               >
                 ✕
@@ -3412,7 +3552,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
           <div
             onClick={scrollToMainPreview}
-            className={`relative overflow-hidden rounded-xl bg-black mt-1.5 ${getMiniAspectClasses(project.aspectRatio)} shadow-inner cursor-pointer hover:opacity-95 transition-opacity`}
+            className={`relative overflow-hidden rounded-xl bg-black mt-1.5 ${getMiniAspectClasses(project.aspectRatio, floatingSize)} shadow-inner cursor-pointer hover:opacity-95 transition-opacity`}
           >
             {/* Live Media with Filter & Zoom */}
             {currentScene?.mediaType === 'video' ? (
@@ -3425,7 +3565,6 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  backgroundColor: '#000000',
                   transform: `scale(${currentScene.zoom || 1.0})`,
                 }}
                 className="pointer-events-none"
@@ -3443,7 +3582,6 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  backgroundColor: '#000000',
                   transform: `scale(${currentScene.zoom || 1.0})`,
                 }}
                 className="pointer-events-none select-none"
@@ -3458,7 +3596,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   left: `${sub.x}%`,
                   top: `${sub.y}%`,
                   transform: 'translate(-50%, -50%)',
-                  fontSize: '8px',
+                  fontSize: floatingSize === 'sm' ? '7px' : floatingSize === 'lg' ? '10px' : '8px',
                   color: sub.textColor,
                   backgroundColor: sub.bgColor || 'rgba(0,0,0,0.7)',
                   borderRadius: '4px',
@@ -3476,14 +3614,28 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={scrollToMainPreview}
-            className="w-full pt-1.5 text-center text-[9px] text-slate-300 font-bold hover:text-rose-300 flex items-center justify-center gap-1 cursor-pointer"
-          >
-            <span>본문 위치로 이동</span>
-            <span>↑</span>
-          </button>
+          <div className="flex items-center justify-between gap-1 pt-1.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFillFrame();
+              }}
+              className="text-[9px] text-rose-400 font-extrabold hover:text-rose-300 flex items-center gap-0.5 cursor-pointer bg-slate-800/80 px-1.5 py-0.5 rounded"
+              title="검정 여백 없이 꽉 채우기"
+            >
+              <span>🖼️</span>
+              <span>채우기</span>
+            </button>
+            <button
+              type="button"
+              onClick={scrollToMainPreview}
+              className="text-[9px] text-slate-300 font-bold hover:text-white flex items-center justify-center gap-0.5 cursor-pointer"
+            >
+              <span>본문으로</span>
+              <span>↑</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -3499,7 +3651,6 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         </button>
       )}
 
-      {`/* 100% CapCut Video Editor Dedicated Modal */`}
       <CapCutVideoEditorModal
         isOpen={isCapCutModalOpen}
         onClose={() => setIsCapCutModalOpen(false)}
