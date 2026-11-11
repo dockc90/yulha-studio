@@ -3381,6 +3381,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                         // @ts-ignore
                         webkit-playsinline="true"
                         preload="auto"
+                        onLoadedData={(e) => {
+                          try {
+                            if (e.currentTarget.currentTime === 0) {
+                              e.currentTarget.currentTime = 0.05;
+                            }
+                          } catch {}
+                        }}
                         className="w-full h-full object-cover pointer-events-none select-none"
                       />
                     ) : (

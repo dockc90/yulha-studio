@@ -43,7 +43,7 @@ interface CapCutVideoEditorModalProps {
   onApply: (updatedScenes: MediaScene[]) => void;
 }
 
-// 🎞️ 스마트폰 갤러리 스타일 비디오 필름스트립 썸네일 연속 추출 헬퍼 (캔버스 프레임 캡처)
+// 🎞️ 스마트폰 갤러리 스타일 비디오 썸네일 스트립 생성 (검정 화면 완전 방지)
 const generateVideoThumbnails = (
   videoUrl: string,
   startOffset = 0,
@@ -68,18 +68,46 @@ const generateVideoThumbnails = (
     const canvas = document.createElement('canvas');
     canvas.width = 120;
     canvas.height = 90;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     const frames: string[] = [];
+    const isFrameBlackList: boolean[] = [];
     const baseStart = Math.max(0, startOffset || 0);
     const dur = Math.max(1, duration || 4);
     const targetTimes: number[] = [];
+
+    // 0.0s 미디코딩 검정화면 방지: 시작점을 0.35초 이후로 잡아 안정적인 I-Frame 확보
+    const startSec = baseStart + Math.min(0.35, dur * 0.08);
+    const endSec = baseStart + Math.max(startSec + 0.5, dur - Math.min(0.3, dur * 0.05));
     for (let i = 0; i < count; i++) {
-      targetTimes.push(baseStart + (dur * (i + 0.5)) / count);
+      targetTimes.push(count === 1 ? startSec : (startSec + ((endSec - startSec) * i) / (count - 1)));
     }
 
     let currentStep = 0;
     let isDone = false;
+
+    // 프레임의 실제 픽셀 평균 밝기(Luminance)를 정밀 측정하여 검정 화면 판별
+    const isCanvasBlackOrDark = (): boolean => {
+      if (!ctx) return false;
+      try {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let totalLuma = 0;
+        let sampleCount = 0;
+        const step = Math.max(4, Math.floor(imgData.length / 400)) * 4;
+        for (let i = 0; i < imgData.length; i += step) {
+          const r = imgData[i];
+          const g = imgData[i + 1];
+          const b = imgData[i + 2];
+          totalLuma += (r * 0.299 + g * 0.587 + b * 0.114);
+          sampleCount++;
+        }
+        const avgLuma = sampleCount > 0 ? totalLuma / sampleCount : 0;
+        // 완전 검정 또는 미디코딩 검정화면은 평균 밝기 15 미만
+        return avgLuma < 15;
+      } catch {
+        return false;
+      }
+    };
 
     const cleanup = () => {
       if (isDone) return;
@@ -95,40 +123,66 @@ const generateVideoThumbnails = (
       } catch {}
     };
 
-    const timeout = setTimeout(() => {
+    const postProcessAndResolve = () => {
       cleanup();
+      // 🌟 앞쪽 검정 프레임 제거 보정: 첫 번째(또는 앞쪽) 프레임이 검정이면 뒤쪽의 정상 영상 프레임으로 완전 대체
+      if (frames.length > 0) {
+        const firstGoodIdx = isFrameBlackList.findIndex((isBlack, idx) => !isBlack && frames[idx]);
+        if (firstGoodIdx > 0 && frames[firstGoodIdx]) {
+          const goodFrame = frames[firstGoodIdx];
+          for (let i = 0; i < firstGoodIdx; i++) {
+            frames[i] = goodFrame;
+          }
+        }
+      }
       resolve(frames);
-    }, 4000);
+    };
+
+    const timeout = setTimeout(() => {
+      postProcessAndResolve();
+    }, 4500);
 
     const captureNext = () => {
       if (currentStep >= targetTimes.length) {
-        cleanup();
-        resolve(frames);
+        postProcessAndResolve();
         return;
       }
       try {
         video.currentTime = targetTimes[currentStep];
       } catch {
-        cleanup();
-        resolve(frames);
+        postProcessAndResolve();
       }
     };
+
+    let retriedFirstFrame = false;
 
     const handleSeeked = () => {
       if (isDone) return;
       if (ctx) {
         try {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          frames.push(canvas.toDataURL('image/jpeg', 0.6));
-        } catch {}
+          const isBlack = isCanvasBlackOrDark();
+
+          // 첫 프레임이 검정 화면인 경우: 약간 뒤(+0.35s)로 한 번 재탐색하여 선명한 영상 프레임 확보
+          if (currentStep === 0 && isBlack && !retriedFirstFrame && dur > 1) {
+            retriedFirstFrame = true;
+            video.currentTime = Math.min(baseStart + dur - 0.2, targetTimes[0] + 0.35);
+            return;
+          }
+
+          isFrameBlackList.push(isBlack);
+          frames.push(canvas.toDataURL('image/jpeg', 0.7));
+        } catch {
+          isFrameBlackList.push(false);
+          frames.push('');
+        }
       }
       currentStep++;
       captureNext();
     };
 
     const handleError = () => {
-      cleanup();
-      resolve(frames);
+      postProcessAndResolve();
     };
 
     const handleLoadedData = () => {
@@ -147,8 +201,7 @@ const generateVideoThumbnails = (
     try {
       video.load();
     } catch {
-      cleanup();
-      resolve(frames);
+      postProcessAndResolve();
     }
   });
 };
@@ -203,11 +256,19 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
   const currentClip = clips[selectedIdx] || clips[0];
 
-  // Calculate cumulative start time for each clip in total timeline
+  // ⏱️ 클립 배속이 적용된 실제 화면 재생 시간 계산 (예: 8초 영상에 2배속 적용 시 4초)
+  const getClipEffectiveDuration = (clip?: MediaScene | null) => {
+    if (!clip) return 4;
+    const baseDur = clip.durationSec || 4;
+    const speed = clip.speed || 1.0;
+    return Number((baseDur / speed).toFixed(1));
+  };
+
+  // Calculate cumulative start time for each clip in total timeline (배속 반영)
   const getClipTimeRanges = () => {
     let accumulated = 0;
     return clips.map((clip) => {
-      const duration = clip.durationSec || 4;
+      const duration = getClipEffectiveDuration(clip);
       const start = accumulated;
       const end = accumulated + duration;
       accumulated = end;
@@ -225,14 +286,15 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     }
   }, [currentClip?.speed]);
 
-  // Sync video time when selected clip changes during scrubbing or navigation
+  // Sync video time when selected clip changes during scrubbing or navigation (배속 반영)
   useEffect(() => {
     if (videoRef.current && currentClip?.mediaType === 'video') {
       const ranges = getClipTimeRanges();
       const range = ranges[selectedIdx];
       if (range) {
-        const localOffset = Math.max(0, currentTime - range.start);
-        const targetVideoTime = (currentClip.trimStart || 0) + localOffset;
+        const speed = currentClip.speed || 1.0;
+        const localEffectiveOffset = Math.max(0, currentTime - range.start);
+        const targetVideoTime = (currentClip.trimStart || 0) + (localEffectiveOffset * speed);
         if (!isNaN(targetVideoTime) && isFinite(targetVideoTime)) {
           try {
             videoRef.current.currentTime = targetVideoTime;
@@ -242,12 +304,15 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     }
   }, [selectedIdx]);
 
-  // Video time update handler
+  // Video time update handler (실제 재생 경과 시간에 배속 반영)
   const handleTimeUpdate = () => {
     if (isScrubbingRef.current || !videoRef.current) return;
-    const clipStart = clipRanges[selectedIdx]?.start || 0;
-    const currentVideoTime = videoRef.current.currentTime;
-    setCurrentTime(clipStart + currentVideoTime);
+    const range = clipRanges[selectedIdx];
+    if (!range) return;
+    const speed = currentClip?.speed || 1.0;
+    const currentVideoFileTime = Math.max(0, videoRef.current.currentTime - (currentClip?.trimStart || 0));
+    const currentEffectiveTime = currentVideoFileTime / speed;
+    setCurrentTime(Number((range.start + currentEffectiveTime).toFixed(1)));
   };
 
   // Video ended -> advance to next clip
@@ -505,7 +570,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     setSelectedIdx((prev) => Math.min(prev, nextClips.length - 1));
   };
 
-  // 🎯 하단 영상 바 실시간 탐색 & 재생 위치 정밀 조절 (Scrubbing / Seeking)
+  // 🎯 하단 영상 바 실시간 탐색 & 재생 위치 정밀 조절 (배속 반영 Scrubbing / Seeking)
   const seekToTime = (targetTime: number) => {
     if (totalDuration <= 0) return;
     const clampedTime = Math.max(0, Math.min(totalDuration, targetTime));
@@ -524,8 +589,9 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     const activeClip = clips[targetIdx];
     const range = ranges[targetIdx];
     if (videoRef.current && activeClip?.mediaType === 'video' && range) {
-      const localOffset = Math.max(0, clampedTime - range.start);
-      const targetVideoTime = (activeClip.trimStart || 0) + localOffset;
+      const speed = activeClip.speed || 1.0;
+      const localEffectiveOffset = Math.max(0, clampedTime - range.start);
+      const targetVideoTime = (activeClip.trimStart || 0) + (localEffectiveOffset * speed);
       if (!isNaN(targetVideoTime) && isFinite(targetVideoTime)) {
         try {
           videoRef.current.currentTime = targetVideoTime;
@@ -872,12 +938,20 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                 <video
                   ref={videoRef}
                   src={currentClip.url}
+                  poster={clipThumbnails[currentClip?.id]?.[0] || undefined}
                   muted={currentClip.isMuted}
                   playsInline
                   // @ts-ignore
                   webkit-playsinline="true"
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={handleVideoEnded}
+                  onLoadedData={(e) => {
+                    try {
+                      if (e.currentTarget.currentTime === 0) {
+                        e.currentTarget.currentTime = (currentClip?.trimStart || 0) + 0.05;
+                      }
+                    } catch {}
+                  }}
                   onLoadedMetadata={(e) => {
                     const { videoWidth, videoHeight } = e.currentTarget;
                     if (videoWidth && videoHeight) setNaturalAspect(videoWidth / videoHeight);
@@ -1033,8 +1107,15 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                 <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-1.5">
                   <span className="text-neutral-400 font-medium block">선택된 클립 정보</span>
                   <div className="font-semibold text-sm text-white">{currentClip?.title}</div>
-                  <div className="text-[11px] text-neutral-300 font-mono">
-                    길이: {currentClip?.durationSec || 4}초 · 배속: {currentClip?.speed || 1.0}x
+                  <div className="flex items-center gap-1.5 text-[11px] text-neutral-300 font-mono flex-wrap">
+                    <span>길이: {getClipEffectiveDuration(currentClip)}초</span>
+                    {currentClip?.speed && currentClip.speed !== 1.0 && (
+                      <span className="text-neutral-400 font-sans text-[10px]">
+                        (원본 {currentClip.durationSec || 4}초)
+                      </span>
+                    )}
+                    <span>·</span>
+                    <span>배속: {currentClip?.speed || 1.0}x</span>
                   </div>
                 </div>
 
@@ -1372,6 +1453,18 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   </span>
                 </div>
 
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#23272A] border border-[#2F3437] text-xs">
+                  <span className="text-neutral-400">배속 적용 재생 시간</span>
+                  <span className="font-mono text-white font-semibold">
+                    {getClipEffectiveDuration(currentClip)}초
+                    {currentClip?.speed && currentClip.speed !== 1.0 && (
+                      <span className="text-neutral-400 font-sans font-normal ml-1">
+                        (원본 {currentClip.durationSec || 4}초)
+                      </span>
+                    )}
+                  </span>
+                </div>
+
                 <div className="grid grid-cols-4 gap-1.5 font-medium">
                   {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0].map((spd) => (
                     <button
@@ -1627,7 +1720,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   >
                     {/* 📱 스마트폰 갤러리 비디오 필름스트립 / 사진 썸네일 */}
                     {clip.mediaType === 'video' ? (
-                      <div className="w-full h-full flex items-center overflow-hidden bg-black/80 select-none">
+                      <div className="w-full h-full flex items-center overflow-hidden bg-black/90 select-none">
                         {clipThumbnails[clip.id] && clipThumbnails[clip.id].length > 0 ? (
                           clipThumbnails[clip.id].map((frame, fIdx) => (
                             <div key={fIdx} className="h-full flex-1 relative overflow-hidden border-r border-black/40 last:border-r-0">
@@ -1639,15 +1732,17 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                             </div>
                           ))
                         ) : (
-                          <video
-                            src={clip.url}
-                            muted
-                            playsInline
-                            // @ts-ignore
-                            webkit-playsinline="true"
-                            preload="auto"
-                            className="w-full h-full object-cover pointer-events-none select-none opacity-90"
-                          />
+                          <div className="w-full h-full flex items-center justify-center bg-[#181B1E] text-neutral-400 relative overflow-hidden">
+                            <div className="absolute inset-0 flex divide-x divide-neutral-800/60 opacity-30">
+                              {[...Array(6)].map((_, i) => (
+                                <div key={i} className="flex-1 bg-neutral-800/40 animate-pulse" />
+                              ))}
+                            </div>
+                            <div className="relative z-10 flex items-center gap-1.5 text-[10px] text-neutral-400 font-medium px-2">
+                              <Film className="w-3.5 h-3.5 animate-spin text-neutral-300 shrink-0" style={{ animationDuration: '3s' }} />
+                              <span className="truncate">프레임 로딩 중...</span>
+                            </div>
+                          </div>
                         )}
                       </div>
                     ) : clip.url ? (
@@ -1673,7 +1768,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
                     {/* Duration Chip */}
                     <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/85 text-neutral-200 text-[9px] font-mono leading-none shadow-md pointer-events-none z-10">
-                      {clip.durationSec || 4}s
+                      {getClipEffectiveDuration(clip)}s
                     </div>
 
                     {/* Speed Badge */}

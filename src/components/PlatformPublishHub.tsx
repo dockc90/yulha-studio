@@ -409,7 +409,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
               </button>
             </div>
             <textarea
-              rows={5}
+              rows={8}
               value={project.snsMetadata.instagram.caption}
               onChange={(e) =>
                 setProject((prev) => ({
@@ -420,7 +420,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                   }
                 }))
               }
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#EDEDEB] focus:outline-none focus:border-[#37352F] text-xs text-[#37352F] leading-relaxed resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#EDEDEB] focus:outline-none focus:border-[#37352F] text-xs text-[#37352F] leading-relaxed resize-y min-h-[160px]"
             />
           </div>
 
@@ -670,7 +670,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
               </button>
             </div>
             <textarea
-              rows={2}
+              rows={3}
               value={project.snsMetadata.youtube.commentQuestionPrompt}
               onChange={(e) =>
                 setProject((prev) => ({
@@ -682,194 +682,6 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                 }))
               }
               className="w-full px-3 py-2 rounded-lg bg-white border border-[#EDEDEB] focus:outline-none focus:border-[#37352F] text-xs text-[#37352F] leading-relaxed resize-none"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Platform 2: 오늘의집 */}
-      {selectedPlatform === 'ohouse' && (
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <h3 className="font-bold text-base text-slate-900">
-                오늘의집 온라인 집들이 / 사진 업로드
-              </h3>
-              <p className="text-xs text-slate-500">
-                질문과 댓글을 유도하여 스크랩과 인기 피드 노출을 극대화합니다.
-              </p>
-            </div>
-
-            <a
-              href="https://ohou.se/community/projects/new"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500 text-white font-bold text-xs shadow-xs leading-none"
-            >
-              <span className="leading-none">오늘의집 글쓰기</span>
-              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-            </a>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="font-bold text-xs text-slate-800 leading-none">게시글 제목</label>
-              <button
-                onClick={() => handleCopyText('ohouse-title', project.snsMetadata.ohouse.title)}
-                className="text-xs text-sky-600 hover:text-sky-700 font-bold cursor-pointer leading-none"
-              >
-                {copiedKey === 'ohouse-title' ? '복사 완료!' : '제목 복사'}
-              </button>
-            </div>
-            <input
-              type="text"
-              value={project.snsMetadata.ohouse.title}
-              onChange={(e) =>
-                setProject((prev) => ({
-                  ...prev,
-                  snsMetadata: {
-                    ...prev.snsMetadata,
-                    ohouse: { ...prev.snsMetadata.ohouse, title: e.target.value }
-                  }
-                }))
-              }
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
-            />
-          </div>
-
-          <div className="bg-sky-50/50 p-4 rounded-2xl border border-sky-100 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-sky-800 inline-flex items-center gap-1.5 leading-none">
-                <HelpCircle className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                <span className="leading-none">댓글 문의 유도 문구</span>
-              </span>
-              <button
-                onClick={() => handleCopyText('ohouse-notice', project.snsMetadata.ohouse.commentNotice)}
-                className="text-xs text-sky-600 hover:text-sky-700 font-bold cursor-pointer leading-none"
-              >
-                {copiedKey === 'ohouse-notice' ? '복사 완료!' : '문구 복사'}
-              </button>
-            </div>
-            <input
-              type="text"
-              value={project.snsMetadata.ohouse.commentNotice}
-              onChange={(e) =>
-                setProject((prev) => ({
-                  ...prev,
-                  snsMetadata: {
-                    ...prev.snsMetadata,
-                    ohouse: { ...prev.snsMetadata.ohouse, commentNotice: e.target.value }
-                  }
-                }))
-              }
-              className="w-full px-3.5 py-2 rounded-xl bg-white border border-sky-200 text-xs font-bold text-slate-800"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="font-bold text-xs text-slate-800 leading-none">스타일링 노하우 팁 본문</label>
-              <button
-                onClick={() => handleCopyText('ohouse-tip', project.snsMetadata.ohouse.stylingTip)}
-                className="text-xs text-sky-600 hover:text-sky-700 font-bold cursor-pointer leading-none"
-              >
-                {copiedKey === 'ohouse-tip' ? '복사 완료!' : '팁 본문 복사'}
-              </button>
-            </div>
-            <textarea
-              rows={3}
-              value={project.snsMetadata.ohouse.stylingTip}
-              onChange={(e) =>
-                setProject((prev) => ({
-                  ...prev,
-                  snsMetadata: {
-                    ...prev.snsMetadata,
-                    ohouse: { ...prev.snsMetadata.ohouse, stylingTip: e.target.value }
-                  }
-                }))
-              }
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs leading-relaxed resize-none font-medium"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Platform 3: 유튜브 */}
-      {selectedPlatform === 'youtube' && (
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <h3 className="font-bold text-base text-slate-900">
-                유튜브 쇼츠 제목 & 고정 댓글 질문
-              </h3>
-              <p className="text-xs text-slate-500">
-                시청자들의 댓글 참여를 유도하는 질문형 고정 댓글 템플릿을 제공합니다.
-              </p>
-            </div>
-
-            <a
-              href="https://studio.youtube.com"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 text-white font-bold text-xs shadow-xs leading-none"
-            >
-              <span className="leading-none">유튜브 스튜디오</span>
-              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-            </a>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="font-bold text-xs text-slate-800 leading-none">쇼츠 제목</label>
-              <button
-                onClick={() => handleCopyText('yt-title', project.snsMetadata.youtube.title)}
-                className="text-xs text-red-600 hover:text-red-700 font-bold cursor-pointer leading-none"
-              >
-                {copiedKey === 'yt-title' ? '복사 완료!' : '제목 복사'}
-              </button>
-            </div>
-            <input
-              type="text"
-              value={project.snsMetadata.youtube.title}
-              onChange={(e) =>
-                setProject((prev) => ({
-                  ...prev,
-                  snsMetadata: {
-                    ...prev.snsMetadata,
-                    youtube: { ...prev.snsMetadata.youtube, title: e.target.value }
-                  }
-                }))
-              }
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
-            />
-          </div>
-
-          <div className="bg-red-50/50 p-4 rounded-2xl border border-red-100 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-red-700 inline-flex items-center gap-1.5 leading-none">
-                <MessageSquare className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                <span className="leading-none">유튜브 고정 댓글 (시청자 질문 유도용)</span>
-              </span>
-              <button
-                onClick={() => handleCopyText('yt-prompt', project.snsMetadata.youtube.commentQuestionPrompt)}
-                className="text-xs text-red-600 hover:text-red-700 font-bold cursor-pointer leading-none"
-              >
-                {copiedKey === 'yt-prompt' ? '복사 완료!' : '고정 댓글 복사'}
-              </button>
-            </div>
-            <textarea
-              rows={2}
-              value={project.snsMetadata.youtube.commentQuestionPrompt}
-              onChange={(e) =>
-                setProject((prev) => ({
-                  ...prev,
-                  snsMetadata: {
-                    ...prev.snsMetadata,
-                    youtube: { ...prev.snsMetadata.youtube, commentQuestionPrompt: e.target.value }
-                  }
-                }))
-              }
-              className="w-full px-3 py-2 rounded-xl bg-white border border-red-200 text-xs font-bold text-slate-800 leading-relaxed resize-none"
             />
           </div>
         </div>
