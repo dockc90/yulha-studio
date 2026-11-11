@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HomeKidsHeader, StudioTab } from './components/HomeKidsHeader';
 import { HomeKidsTemplatesView } from './components/HomeKidsTemplatesView';
 import { HomeKidsStudio } from './components/HomeKidsStudio';
@@ -21,6 +21,45 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<UniversalCategory>('all');
   const [currentProject, setCurrentProject] = useState<HomeKidsProject>(SAMPLE_HOME_KIDS_PROJECTS[0]);
   const [initialOpenCapCut, setInitialOpenCapCut] = useState(false);
+
+  // Browser History & Hardware/Gesture Back Button handling (모바일/PC 자체 뒤로가기 연동)
+  useEffect(() => {
+    // Initialize base history state
+    if (!window.history.state || !window.history.state.tab) {
+      window.history.replaceState({ tab: 'templates' }, '');
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (state && state.tab) {
+        setCurrentTab(state.tab);
+        setInitialOpenCapCut(false);
+      } else {
+        setCurrentTab('templates');
+        setInitialOpenCapCut(false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  const navigateToTab = (newTab: StudioTab) => {
+    if (newTab === currentTab) return;
+    try {
+      window.history.pushState({ tab: newTab }, '');
+    } catch (e) {}
+    setCurrentTab(newTab);
+    if (newTab !== 'studio') setInitialOpenCapCut(false);
+  };
+
+  const handleGoBack = () => {
+    if (currentTab !== 'templates') {
+      window.history.back();
+    }
+  };
   const [savedProjects, setSavedProjects] = useState<HomeKidsProject[]>(() => {
     try {
       const stored = localStorage.getItem(YULHA_STORAGE_KEY);
@@ -119,7 +158,7 @@ export default function App() {
     };
 
     setCurrentProject(newProj);
-    setCurrentTab('studio');
+    navigateToTab('studio');
     showToast(`'${template.title}' 템플릿이 적용되었습니다.`);
   };
 
@@ -146,7 +185,7 @@ export default function App() {
       }));
     }
     setInitialOpenCapCut(true);
-    setCurrentTab('studio');
+    navigateToTab('studio');
     showToast('프로 동영상 편집기를 실행했습니다 🎬');
   };
 
@@ -209,7 +248,7 @@ export default function App() {
 
     setCurrentProject(newProj);
     setInitialOpenCapCut(shouldOpenCapCut);
-    setCurrentTab('studio');
+    navigateToTab('studio');
     showToast(`${fileList.length}개의 미디어를 불러와 에디터를 열었습니다 ✨`);
   };
 
@@ -264,7 +303,7 @@ export default function App() {
 
     setCurrentProject(newProj);
     setInitialOpenCapCut(options?.openCapCut || false);
-    setCurrentTab('studio');
+    navigateToTab('studio');
     showToast(isVideoMode ? '프로 동영상 편집기를 실행했습니다 🎬' : '새 프로젝트가 생성되었습니다.');
   };
 
@@ -275,8 +314,7 @@ export default function App() {
         <HomeKidsHeader
           currentTab={currentTab}
           setCurrentTab={(tab) => {
-            if (tab !== 'studio') setInitialOpenCapCut(false);
-            setCurrentTab(tab);
+            navigateToTab(tab);
           }}
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
@@ -294,7 +332,7 @@ export default function App() {
               onLoadProject={(proj) => {
                 setCurrentProject(proj);
                 setInitialOpenCapCut(false);
-                setCurrentTab('studio');
+                navigateToTab('studio');
                 showToast(`'${proj.title}' 프로젝트를 불러왔습니다.`);
               }}
               onCreateNewProject={handleCreateNewProject}
@@ -307,16 +345,10 @@ export default function App() {
             <HomeKidsStudio
               project={currentProject}
               setProject={setCurrentProject}
-              onGoToPublish={() => setCurrentTab('publish')}
+              onGoToPublish={() => navigateToTab('publish')}
               onSaveProject={handleSaveCurrentProject}
-              onBack={() => {
-                setInitialOpenCapCut(false);
-                setCurrentTab('templates');
-              }}
-              onClose={() => {
-                setInitialOpenCapCut(false);
-                setCurrentTab('templates');
-              }}
+              onBack={() => handleGoBack()}
+              onClose={() => handleGoBack()}
               initialOpenCapCut={initialOpenCapCut}
             />
           )}
@@ -325,8 +357,8 @@ export default function App() {
             <PlatformPublishHub
               project={currentProject}
               setProject={setCurrentProject}
-              onBackToStudio={() => setCurrentTab('studio')}
-              onClose={() => setCurrentTab('templates')}
+              onBackToStudio={() => handleGoBack()}
+              onClose={() => handleGoBack()}
             />
           )}
 
@@ -335,13 +367,13 @@ export default function App() {
               savedProjects={savedProjects}
               onSelectProject={(proj) => {
                 setCurrentProject(proj);
-                setCurrentTab('studio');
+                navigateToTab('studio');
                 showToast(`'${proj.title}' 프로젝트를 불러왔습니다.`);
               }}
               onDeleteProject={handleDeleteSavedProject}
               onCreateNew={() => handleCreateNewProject(activeCategory)}
-              onBack={() => setCurrentTab('templates')}
-              onClose={() => setCurrentTab('templates')}
+              onBack={() => handleGoBack()}
+              onClose={() => handleGoBack()}
             />
           )}
         </main>

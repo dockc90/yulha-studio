@@ -66,6 +66,8 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
 
   const currentClip = clips[selectedIdx] || clips[0];
 
@@ -248,13 +250,13 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     setSelectedIdx(selectedIdx - 1);
   };
 
-  // ➕ 편집기 내부에서 동영상/이미지 파일 직접 추가
-  const handleAddMediaFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ➕ 편집기 내부에서 사진/동영상 파일 직접 추가
+  const handleAddMediaFiles = (e: React.ChangeEvent<HTMLInputElement>, forceType?: 'image' | 'video') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const newClips: MediaScene[] = Array.from(files).map((file, idx) => {
-      const isVideo = file.type.startsWith('video');
+      const isVideo = forceType ? forceType === 'video' : file.type.startsWith('video');
       const objectUrl = URL.createObjectURL(file);
       const cleanName = file.name.replace(/\.[^/.]+$/, "");
       return {
@@ -265,7 +267,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         durationSec: isVideo ? 8 : 4,
         speed: 1.0,
         rotation: 0,
-        filter: 'none',
+        filter: 'butter_warm',
         transition: 'none',
         isMuted: false,
         volume: 100,
@@ -292,9 +294,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     setClips(nextClips);
     setSelectedIdx(insertIndex);
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    e.target.value = '';
   };
 
   // 💾 편집 내용 중간 저장 (모달 닫지 않고 상태 동기화)
@@ -352,19 +352,25 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     onClose();
   };
 
-  // Filter style helper
+  // Filter style helper (Mobile WebKit & Canvas compatible)
   const getFilterStyle = (filter?: AestheticFilter) => {
     switch (filter) {
       case 'butter_warm':
-        return 'sepia(0.32) brightness(1.06) saturate(1.22) hue-rotate(-6deg)';
+        return 'sepia(0.35) brightness(1.08) saturate(1.25) hue-rotate(-6deg) contrast(1.04)';
       case 'golden_hour':
-        return 'sepia(0.38) brightness(1.06) saturate(1.32) hue-rotate(-12deg)';
+        return 'sepia(0.42) brightness(1.08) saturate(1.35) hue-rotate(-12deg) contrast(1.06)';
       case 'soft_milk':
-        return 'brightness(1.08) saturate(0.94) contrast(0.93) sepia(0.06)';
+        return 'brightness(1.12) saturate(0.92) contrast(0.92) sepia(0.08)';
       case 'tokyo_mood':
-        return 'sepia(0.14) saturate(0.82) contrast(0.98) brightness(1.02)';
+        return 'sepia(0.18) saturate(0.80) contrast(0.98) brightness(1.04) hue-rotate(5deg)';
       case 'vintage_film':
-        return 'sepia(0.35) contrast(1.12) brightness(0.95) saturate(1.15)';
+        return 'sepia(0.40) contrast(1.15) brightness(0.95) saturate(1.18)';
+      case 'natural_clean':
+        return 'contrast(1.06) saturate(1.08) brightness(1.05)';
+      case 'vivid_glow':
+        return 'saturate(1.40) brightness(1.08) contrast(1.08)';
+      case 'pure_minimal':
+        return 'brightness(1.12) contrast(0.95) saturate(0.85)';
       default:
         return 'none';
     }
@@ -387,13 +393,21 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col select-none text-slate-100 animate-in fade-in duration-200">
-      {/* Hidden File Input for uploading videos/images inside editor */}
+      {/* Hidden File Inputs for uploading photo & video inside editor */}
       <input
         type="file"
-        ref={fileInputRef}
-        onChange={handleAddMediaFiles}
+        ref={photoInputRef}
+        onChange={(e) => handleAddMediaFiles(e, 'image')}
         multiple
-        accept="video/*,image/*"
+        accept="image/*"
+        className="hidden"
+      />
+      <input
+        type="file"
+        ref={videoInputRef}
+        onChange={(e) => handleAddMediaFiles(e, 'video')}
+        multiple
+        accept="video/*"
         className="hidden"
       />
 
@@ -413,7 +427,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
               </span>
             </div>
             <p className="hidden md:block text-[10px] text-slate-400 mt-0.5 leading-none">
-              재생바 위치에서 [✂️ 분할] 클릭 시 즉시 컷분할 · [🔗 컷 합치기] 클립 병합 · [➕ 미디어 추가] · 단축키 [Ctrl+B / Space]
+              재생바 위치에서 [✂️ 분할] 클릭 시 즉시 컷분할 · [🔗 컷 합치기] 클립 병합 · [📷 사진 추가] · [🎬 동영상 추가]
             </p>
           </div>
         </div>
@@ -461,15 +475,25 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         <div className="flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-4 relative min-h-0">
           <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-slate-800 bg-black flex items-center justify-center max-w-full max-h-full">
             <div className={`${getAspectClasses(aspectRatio)} relative overflow-hidden flex items-center justify-center bg-black`}>
+              {/* Preview Live Badge in Canvas */}
+              <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md z-30 pointer-events-none flex items-center gap-1.5 border border-white/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>미리보기</span>
+              </div>
+
               {currentClip?.mediaType === 'video' ? (
                 <video
                   ref={videoRef}
                   src={currentClip.url}
                   muted={currentClip.isMuted}
+                  playsInline
+                  // @ts-ignore
+                  webkit-playsinline="true"
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={handleVideoEnded}
                   style={{
                     filter: getFilterStyle(currentClip.filter),
+                    WebkitFilter: getFilterStyle(currentClip.filter),
                     transform: `rotate(${currentClip.rotation || 0}deg)`,
                   }}
                   className="w-full h-full object-cover"
@@ -480,6 +504,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   alt={currentClip?.title}
                   style={{
                     filter: getFilterStyle(currentClip?.filter),
+                    WebkitFilter: getFilterStyle(currentClip?.filter),
                     transform: `rotate(${currentClip?.rotation || 0}deg)`,
                   }}
                   className="w-full h-full object-cover"
@@ -632,21 +657,29 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   <label className="font-bold text-slate-300 block">미디어 추가 및 관리</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold cursor-pointer leading-none shadow-sm"
-                      title="컴퓨터에서 새로운 동영상이나 사진을 타임라인에 추가합니다"
+                      onClick={() => photoInputRef.current?.click()}
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold cursor-pointer leading-none shadow-sm text-xs"
+                      title="사진 파일을 타임라인에 추가합니다"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>영상/사진 추가</span>
+                      <span>📷 사진 추가</span>
                     </button>
                     <button
-                      onClick={handleDuplicate}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer leading-none border border-slate-700"
+                      onClick={() => videoInputRef.current?.click()}
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold cursor-pointer leading-none border border-amber-500/30 text-xs"
+                      title="동영상 파일을 타임라인에 추가합니다"
                     >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>클립 복제</span>
+                      <Plus className="w-3.5 h-3.5 text-amber-400" />
+                      <span>🎬 동영상 추가</span>
                     </button>
                   </div>
+                  <button
+                    onClick={handleDuplicate}
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold cursor-pointer leading-none border border-slate-700 text-xs"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>클립 복제</span>
+                  </button>
                 </div>
 
                 {/* Rotation */}
@@ -839,14 +872,23 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
               <span>🔗 컷 합치기</span>
             </button>
 
-            {/* Add Media Button */}
+            {/* Add Photo & Video Buttons */}
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => photoInputRef.current?.click()}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-black text-xs cursor-pointer shadow-sm shadow-rose-600/20"
-              title="동영상/사진 파일 직접 추가하기"
+              title="사진 파일 직접 추가하기"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>➕ 영상 추가</span>
+              <span>📷 사진 추가</span>
+            </button>
+
+            <button
+              onClick={() => videoInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-black text-xs cursor-pointer border border-amber-500/30"
+              title="동영상 파일 직접 추가하기"
+            >
+              <Plus className="w-3.5 h-3.5 text-amber-400" />
+              <span>🎬 동영상 추가</span>
             </button>
 
             <button

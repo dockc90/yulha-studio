@@ -161,7 +161,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   
-  // CapCut Pro Dedicated Editor Modal State
+  // CapCut Pro Dedicated Editor Modal State & Browser Back navigation
   const [isCapCutModalOpen, setIsCapCutModalOpen] = useState(initialOpenCapCut || false);
 
   useEffect(() => {
@@ -169,6 +169,31 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       setIsCapCutModalOpen(true);
     }
   }, [initialOpenCapCut]);
+
+  // Handle phone/browser back button for modal without closing the window
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (isCapCutModalOpen && (!e.state || e.state.modal !== 'capcut')) {
+        setIsCapCutModalOpen(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isCapCutModalOpen]);
+
+  const openCapCutEditor = () => {
+    try {
+      window.history.pushState({ modal: 'capcut' }, '');
+    } catch (e) {}
+    setIsCapCutModalOpen(true);
+  };
+
+  const closeCapCutEditor = () => {
+    setIsCapCutModalOpen(false);
+    if (window.history.state?.modal === 'capcut') {
+      window.history.back();
+    }
+  };
 
   // Active editing tab
   const [activeTool, setActiveTool] = useState<'filter' | 'adjust' | 'motion' | 'video_edit' | 'stickers' | 'text' | 'bgm'>('filter');
@@ -179,23 +204,26 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   const [isRotatingSubtitle, setIsRotatingSubtitle] = useState(false);
   const subtitleCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // Sticker interaction & rotation
+  const [activeStickerCategory, setActiveStickerCategory] = useState<'face_mask' | 'deco' | 'milestone' | 'bubble'>('face_mask');
+  const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
+  const [isDraggingSticker, setIsDraggingSticker] = useState(false);
+  const [isRotatingSticker, setIsRotatingSticker] = useState(false);
+  const stickerCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   // BGM Active Category & Preview State
   const [selectedBgmCategory, setSelectedBgmCategory] = useState<string>('all');
   const [playingBgmId, setPlayingBgmId] = useState<string | null>(null);
 
   // Timeline Scrubber state
   const [timelinePlayhead, setTimelinePlayhead] = useState(0); // in seconds
-  
-  // Sticker category & interaction
-  const [activeStickerCategory, setActiveStickerCategory] = useState<'face_mask' | 'deco' | 'milestone' | 'bubble'>('face_mask');
-  const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
-  const [isDraggingSticker, setIsDraggingSticker] = useState(false);
 
   // Original view toggle (Press & Hold or Click to compare)
   const [showOriginal, setShowOriginal] = useState(false);
 
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
 
   const currentScene = project.scenes[currentSceneIdx] || project.scenes[0];
 
@@ -251,28 +279,28 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     }));
   };
 
-  // Add new scene via upload
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Add new scene via photo/video upload
+  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>, forceType?: 'image' | 'video') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const newScenes: MediaScene[] = [];
     Array.from(files).forEach((file, index) => {
-      const isVid = file.type.startsWith('video');
+      const isVid = forceType ? forceType === 'video' : file.type.startsWith('video');
       const url = URL.createObjectURL(file);
       newScenes.push({
         id: `scene-${Date.now()}-${index}`,
         mediaType: isVid ? 'video' : 'image',
         url: url,
-        title: '포근한 일상의 순간',
-        subtitle: '마음이 머무는 따뜻한 기록',
+        title: isVid ? '새로운 영상 클립' : '포근한 일상의 순간',
+        subtitle: isVid ? '생생한 순간을 담았습니다' : '마음이 머무는 따뜻한 기록',
         callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
         durationSec: isVid ? 6 : 4,
         kidsStickers: [],
         filter: 'butter_warm',
         adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
         motionEffect: 'zoom_in',
-        typography: { fontFamily: 'Pretendard', fontSize: 1, textAlign: 'center', boxStyle: 'dark' }
+        typography: { fontFamily: 'Pretendard', fontSizeScale: 1, textAlign: 'center', boxStyle: 'dark', bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
       });
     });
 
@@ -283,6 +311,12 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     }));
 
     setCurrentSceneIdx(project.scenes.length);
+    e.target.value = '';
+  };
+
+  // Backwards compatibility
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleMediaUpload(e);
   };
 
   // Update current scene field
@@ -313,10 +347,10 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     });
   };
 
-  // Helper to retrieve scene's subtitles (fallback from title/subtitle/CTA if customSubtitles is empty)
+  // Helper to retrieve scene's subtitles (fallback from title/subtitle/CTA if customSubtitles is undefined)
   const getSceneSubtitles = (scene?: MediaScene): CustomSubtitle[] => {
     if (!scene) return [];
-    if (scene.customSubtitles && scene.customSubtitles.length > 0) {
+    if (scene.customSubtitles !== undefined) {
       return scene.customSubtitles;
     }
     const typo = scene.typography || typography;
@@ -404,14 +438,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     updateCurrentScene({ customSubtitles: updated });
   };
 
-  // Delete a subtitle
-  const handleDeleteSubtitle = (subId: string, e?: React.MouseEvent) => {
+  // Delete a subtitle (supports deleting even when 1 subtitle remains)
+  const handleDeleteSubtitle = (subId: string, e?: React.MouseEvent | React.TouchEvent) => {
     e?.stopPropagation();
-    const currentSubs = currentScene?.customSubtitles && currentScene.customSubtitles.length > 0
+    const currentSubs = currentScene?.customSubtitles !== undefined
       ? currentScene.customSubtitles
       : activeSubtitles;
     const updated = currentSubs.filter((s) => s.id !== subId);
-    updateCurrentScene({ customSubtitles: updated });
+    updateCurrentScene({
+      customSubtitles: updated,
+      title: updated.length === 0 ? '' : currentScene.title,
+      subtitle: updated.length === 0 ? '' : currentScene.subtitle,
+      callToAction: updated.length === 0 ? '' : currentScene.callToAction
+    });
     if (selectedSubtitleId === subId) {
       setSelectedSubtitleId(updated[0]?.id || null);
     }
@@ -611,7 +650,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   // Interactive Drag & Drop Sticker or Subtitle & Direct Rotation on Canvas (Mouse & Mobile Touch)
   const handleCanvasPointerMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!previewContainerRef.current) return;
-    if (!isDraggingSticker && !isDraggingSubtitle && !isRotatingSubtitle) return;
+    if (!isDraggingSticker && !isDraggingSubtitle && !isRotatingSubtitle && !isRotatingSticker) return;
 
     const { clientX, clientY } = getPointerCoords(e);
     const rect = previewContainerRef.current.getBoundingClientRect();
@@ -628,7 +667,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       return;
     }
 
-    // 2. Drag & Move Subtitle or Sticker
+    // 2. Direct On-Canvas Sticker Rotation
+    if (isRotatingSticker && selectedStickerId) {
+      const centerX = stickerCenterRef.current.x;
+      const centerY = stickerCenterRef.current.y;
+      const radians = Math.atan2(clientY - centerY, clientX - centerX);
+      let degrees = Math.round((radians * (180 / Math.PI)) - 90);
+      if (degrees > 180) degrees -= 360;
+      if (degrees < -180) degrees += 360;
+      updateSelectedSticker({ rotation: degrees });
+      return;
+    }
+
+    // 3. Drag & Move Subtitle or Sticker
     const x = Math.max(5, Math.min(95, Math.round(((clientX - rect.left) / rect.width) * 100)));
     const y = Math.max(5, Math.min(95, Math.round(((clientY - rect.top) / rect.height) * 100)));
 
@@ -643,47 +694,69 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     setIsDraggingSticker(false);
     setIsDraggingSubtitle(false);
     setIsRotatingSubtitle(false);
+    setIsRotatingSticker(false);
   };
 
-  // Filter CSS class helper (인스타그램 & 숏폼 인기 필터)
-  const getFilterClass = (filter: AestheticFilter) => {
-    if (showOriginal) return '';
+  // Canvas API & CSS filter string helper (모바일 & PC 전체 일치)
+  const getFilterString = (filter: AestheticFilter, adj: ColorAdjustments) => {
+    const b = 1 + adj.brightness / 100;
+    const c = 1 + adj.contrast / 100;
+    const s = 1 + adj.saturation / 100;
+    const blur = adj.blur > 0 ? `blur(${adj.blur / 5}px)` : '';
+    const warmth = adj.warmth !== 0 
+      ? adj.warmth > 0 ? `sepia(${adj.warmth / 100}) hue-rotate(-${adj.warmth / 15}deg)` : `hue-rotate(${-adj.warmth / 10}deg)`
+      : '';
+
+    let baseFilter = '';
     switch (filter) {
       case 'butter_warm':
-        return 'sepia-[0.32] brightness-[1.06] saturate-[1.22] hue-rotate-[-6deg] contrast-[1.02]';
+        baseFilter = 'sepia(0.35) brightness(1.08) saturate(1.25) hue-rotate(-6deg) contrast(1.04)';
+        break;
       case 'golden_hour':
-        return 'sepia-[0.38] brightness-[1.06] saturate-[1.32] hue-rotate-[-12deg] contrast-[1.04]';
+        baseFilter = 'sepia(0.42) brightness(1.08) saturate(1.35) hue-rotate(-12deg) contrast(1.06)';
+        break;
       case 'soft_milk':
-        return 'brightness-[1.08] saturate-[0.94] contrast-[0.93] sepia-[0.06]';
+        baseFilter = 'brightness(1.12) saturate(0.92) contrast(0.92) sepia(0.08)';
+        break;
       case 'tokyo_mood':
-        return 'sepia-[0.14] saturate-[0.82] contrast-[0.98] brightness-[1.02]';
+        baseFilter = 'sepia(0.18) saturate(0.80) contrast(0.98) brightness(1.04) hue-rotate(5deg)';
+        break;
       case 'vintage_film':
-        return 'sepia-[0.35] contrast-[1.12] brightness-[0.95] saturate-[1.15]';
+        baseFilter = 'sepia(0.40) contrast(1.15) brightness(0.95) saturate(1.18)';
+        break;
       case 'natural_clean':
-        return 'contrast-[1.04] saturate-[1.06] brightness-[1.04]';
+        baseFilter = 'contrast(1.06) saturate(1.08) brightness(1.05)';
+        break;
       case 'vivid_glow':
-        return 'saturate-[1.32] brightness-[1.06] contrast-[1.05]';
+        baseFilter = 'saturate(1.40) brightness(1.08) contrast(1.08)';
+        break;
       case 'pure_minimal':
-        return 'brightness-[1.1] contrast-[0.95] saturate-[0.88]';
+        baseFilter = 'brightness(1.12) contrast(0.95) saturate(0.85)';
+        break;
       default:
-        return '';
+        baseFilter = '';
     }
+
+    const res = `${baseFilter} brightness(${b}) contrast(${c}) saturate(${s}) ${warmth} ${blur}`.trim();
+    return res || 'none';
   };
 
-  // Fine Adjustment Style helper (CSS inline filter)
-  const getAdjustStyle = (): React.CSSProperties => {
+  // Backwards compatibility alias
+  const getCanvasFilterString = (filter: AestheticFilter, adj: ColorAdjustments) => getFilterString(filter, adj);
+  const getFilterClass = (_filter: AestheticFilter) => '';
+
+  // Unified Fine Adjustment & Preset Style helper (Mobile Safari & Chrome WebKit Compatible)
+  const getCombinedFilterStyle = (): React.CSSProperties => {
     if (showOriginal) return {};
-    const b = 1 + adjustments.brightness / 100;
-    const c = 1 + adjustments.contrast / 100;
-    const s = 1 + adjustments.saturation / 100;
-    const blur = adjustments.blur > 0 ? `blur(${adjustments.blur / 5}px)` : '';
-    const warmth = adjustments.warmth !== 0 
-      ? adjustments.warmth > 0 ? `sepia(${adjustments.warmth / 100}) hue-rotate(-${adjustments.warmth / 15}deg)` : `hue-rotate(${-adjustments.warmth / 10}deg)`
-      : '';
+    const filterStr = getFilterString(currentScene?.filter || 'none', adjustments);
+    if (!filterStr || filterStr === 'none') return {};
     return {
-      filter: `brightness(${b}) contrast(${c}) saturate(${s}) ${warmth} ${blur}`.trim()
+      filter: filterStr,
+      WebkitFilter: filterStr,
     };
   };
+
+  const getAdjustStyle = (): React.CSSProperties => getCombinedFilterStyle();
 
   // Motion class for Preview
   const getMotionAnimationClass = (motion: MotionEffect) => {
@@ -702,46 +775,6 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       default:
         return '';
     }
-  };
-
-  // Canvas API filter string helper for snapshot export
-  const getCanvasFilterString = (filter: AestheticFilter, adj: ColorAdjustments) => {
-    const b = 1 + adj.brightness / 100;
-    const c = 1 + adj.contrast / 100;
-    const s = 1 + adj.saturation / 100;
-    const blur = adj.blur > 0 ? `blur(${adj.blur / 5}px)` : '';
-
-    let baseFilter = '';
-    switch (filter) {
-      case 'butter_warm':
-        baseFilter = 'sepia(0.32) brightness(1.06) saturate(1.22) hue-rotate(-6deg) contrast(1.02)';
-        break;
-      case 'golden_hour':
-        baseFilter = 'sepia(0.38) brightness(1.06) saturate(1.32) hue-rotate(-12deg) contrast(1.04)';
-        break;
-      case 'soft_milk':
-        baseFilter = 'brightness(1.08) saturate(0.94) contrast(0.93) sepia(0.06)';
-        break;
-      case 'tokyo_mood':
-        baseFilter = 'sepia(0.14) saturate(0.82) contrast(0.98) brightness(1.02)';
-        break;
-      case 'vintage_film':
-        baseFilter = 'sepia(0.35) contrast(1.12) brightness(0.95) saturate(1.15)';
-        break;
-      case 'natural_clean':
-        baseFilter = 'contrast(1.04) saturate(1.06) brightness(1.04)';
-        break;
-      case 'vivid_glow':
-        baseFilter = 'saturate(1.32) brightness(1.06) contrast(1.05)';
-        break;
-      case 'pure_minimal':
-        baseFilter = 'brightness(1.1) contrast(0.95) saturate(0.88)';
-        break;
-      default:
-        baseFilter = '';
-    }
-
-    return `${baseFilter} brightness(${b}) contrast(${c}) saturate(${s}) ${blur}`.trim() || 'none';
   };
 
   // Export frame as High-Quality PNG using Canvas
@@ -1054,7 +1087,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
           {/* Pro Video Editor Launcher Button */}
           <button
-            onClick={() => setIsCapCutModalOpen(true)}
+            onClick={openCapCutEditor}
             className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-extrabold text-[11px] sm:text-xs shadow-md border border-amber-500/30 transition-all leading-none cursor-pointer"
             title="전문 동영상 편집기 열기"
           >
@@ -1077,7 +1110,25 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       {/* Main Studio Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Canvas Preview (lg: 7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col items-center">
+        <div className="lg:col-span-7 bg-white rounded-3xl p-4 sm:p-6 border border-slate-100 shadow-sm flex flex-col items-center">
+          {/* Prominent Preview Section Title */}
+          <div className="w-full flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+            <div className="inline-flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+              <h3 className="font-black text-sm sm:text-base text-slate-900 tracking-tight leading-none">
+                미리보기
+              </h3>
+              <span className="text-[10px] sm:text-[11px] font-extrabold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md leading-none">
+                {project.aspectRatio}
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400">
+              <span className="text-slate-700">{currentSceneIdx + 1}</span>
+              <span>/</span>
+              <span>{project.scenes.length}</span>
+            </div>
+          </div>
+
           <div className="w-full flex justify-center py-2">
             <div
               ref={previewContainerRef}
@@ -1091,22 +1142,29 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 project.aspectRatio
               )} w-full`}
             >
+              {/* Preview Live Badge in Canvas */}
+              <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md z-30 pointer-events-none flex items-center gap-1.5 border border-white/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>미리보기</span>
+              </div>
+
               {/* Media Element with Filter, Adjustments & Motion Animation */}
               {currentScene?.mediaType === 'video' ? (
                 <video
                   src={currentScene.url}
                   controls
-                  style={getAdjustStyle()}
-                  className={`w-full h-full object-cover ${getFilterClass(currentScene.filter)}`}
+                  playsInline
+                  // @ts-ignore
+                  webkit-playsinline="true"
+                  style={getCombinedFilterStyle()}
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <img
                   src={currentScene?.url}
                   alt={currentScene?.title}
-                  style={getAdjustStyle()}
-                  className={`w-full h-full object-cover pointer-events-none transition-all duration-300 ${getFilterClass(
-                    currentScene?.filter
-                  )} ${getMotionAnimationClass(currentMotion)}`}
+                  style={getCombinedFilterStyle()}
+                  className={`w-full h-full object-cover pointer-events-none transition-all duration-300 ${getMotionAnimationClass(currentMotion)}`}
                 />
               )}
 
@@ -1197,13 +1255,23 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                       {sub.text}
                     </span>
 
-                    {/* Direct On-Canvas Controls: Drag tooltip & Rotation Handle */}
+                    {/* Direct On-Canvas Controls: Drag tooltip, Delete & Rotation Handle */}
                     {isSelected && (
                       <>
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md whitespace-nowrap pointer-events-none leading-none z-30">
                           <Move className="w-2.5 h-2.5" />
                           <span>터치/드래그 이동</span>
                         </div>
+
+                        {/* On-Canvas Delete Button for Subtitle */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteSubtitle(sub.id, e)}
+                          className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer border border-white z-40"
+                          title="자막 삭제"
+                        >
+                          <X className="w-3.5 h-3.5 pointer-events-none" />
+                        </button>
 
                         {/* Direct Rotation Stem & Handle on Canvas */}
                         <div 
@@ -1268,69 +1336,131 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 );
               })}
 
-              {/* Stickers with Drag & Interactive Move */}
-              {currentScene?.kidsStickers?.map((stk) => (
-                <div
-                  key={stk.id}
-                  style={{ 
-                    left: `${stk.x}%`, 
-                    top: `${stk.y}%`,
-                    transform: `translate(-50%, -50%) rotate(${stk.rotation || 0}deg)`
-                  }}
-                  className={`absolute z-20 cursor-move group select-none ${
-                    selectedStickerId === stk.id ? 'ring-2 ring-rose-500 rounded-2xl scale-105' : ''
-                  }`}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    setSelectedStickerId(stk.id);
-                    setIsDraggingSticker(true);
-                  }}
-                  onTouchStart={(e) => {
-                    e.stopPropagation();
-                    setSelectedStickerId(stk.id);
-                    setIsDraggingSticker(true);
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedStickerId(stk.id);
-                  }}
-                >
-                  {stk.type === 'face_mask' ? (
-                    <div
-                      style={{ fontSize: `${stk.size}px` }}
-                      className="drop-shadow-lg flex items-center justify-center leading-none"
-                    >
-                      <span className="leading-none">{stk.icon || '🐻'}</span>
-                      <button
-                        onClick={(e) => handleRemoveSticker(stk.id, e)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="스티커 삭제"
+              {/* Stickers with Drag, On-Canvas Delete & Rotation Controls */}
+              {currentScene?.kidsStickers?.map((stk) => {
+                const isSelected = selectedStickerId === stk.id;
+                return (
+                  <div
+                    key={stk.id}
+                    style={{ 
+                      left: `${stk.x}%`, 
+                      top: `${stk.y}%`,
+                      transform: `translate(-50%, -50%) rotate(${stk.rotation || 0}deg)`
+                    }}
+                    className={`absolute z-20 cursor-move select-none ${
+                      isSelected ? 'ring-2 ring-rose-500 rounded-2xl scale-105' : ''
+                    }`}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      setSelectedStickerId(stk.id);
+                      setIsDraggingSticker(true);
+                    }}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                      setSelectedStickerId(stk.id);
+                      setIsDraggingSticker(true);
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedStickerId(stk.id);
+                    }}
+                  >
+                    {stk.type === 'face_mask' ? (
+                      <div
+                        style={{ fontSize: `${stk.size}px` }}
+                        className="drop-shadow-lg flex items-center justify-center leading-none relative"
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        backgroundColor: stk.bgBubbleColor || '#FFFFFF',
-                        color: stk.textColor || '#0F172A',
-                        fontSize: `${Math.round(stk.size / 4)}px`
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold shadow-md border border-slate-200 whitespace-nowrap leading-none"
-                    >
-                      {stk.icon && <span className="leading-none">{stk.icon}</span>}
-                      <span className="leading-none">{stk.text}</span>
-                      <button
-                        onClick={(e) => handleRemoveSticker(stk.id, e)}
-                        className="ml-1 text-slate-400 hover:text-red-500"
-                        title="스티커 삭제"
+                        <span className="leading-none">{stk.icon || '🐻'}</span>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          backgroundColor: stk.bgBubbleColor || '#FFFFFF',
+                          color: stk.textColor || '#0F172A',
+                          fontSize: `${Math.round(stk.size / 4)}px`
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold shadow-md border border-slate-200 whitespace-nowrap leading-none relative"
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                        {stk.icon && <span className="leading-none">{stk.icon}</span>}
+                        <span className="leading-none">{stk.text}</span>
+                      </div>
+                    )}
+
+                    {/* Selected Sticker On-Canvas Controls (Delete & Rotation Handle) */}
+                    {isSelected && (
+                      <>
+                        {/* Direct On-Canvas Delete Button (Top Right) */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveSticker(stk.id, e)}
+                          className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer border border-white z-40"
+                          title="스티커 삭제"
+                        >
+                          <X className="w-3.5 h-3.5 pointer-events-none" />
+                        </button>
+
+                        {/* Direct Rotation Stem & Handle on Canvas (Bottom) */}
+                        <div 
+                          className="absolute -bottom-9 left-1/2 -translate-x-1/2 flex items-center gap-1 z-40 pointer-events-auto"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {/* Quick Rotate -15° Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateSelectedSticker({ rotation: ((stk.rotation || 0) - 15) });
+                            }}
+                            className="w-6 h-6 rounded-full bg-slate-900/90 hover:bg-slate-800 text-white flex items-center justify-center text-[10px] font-black shadow-md active:scale-90 transition-transform cursor-pointer border border-white/20"
+                            title="-15° 회전"
+                          >
+                            ↺
+                          </button>
+
+                          {/* Interactive Rotation Knob (Drag to Spin) */}
+                          <div
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              const targetEl = e.currentTarget.closest('.cursor-move') as HTMLElement;
+                              if (targetEl) {
+                                const r = targetEl.getBoundingClientRect();
+                                stickerCenterRef.current = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+                              }
+                              setIsRotatingSticker(true);
+                            }}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                              const targetEl = e.currentTarget.closest('.cursor-move') as HTMLElement;
+                              if (targetEl) {
+                                const r = targetEl.getBoundingClientRect();
+                                stickerCenterRef.current = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+                              }
+                              setIsRotatingSticker(true);
+                            }}
+                            className="w-7 h-7 rounded-full bg-white border-2 border-rose-500 text-rose-600 flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing hover:scale-110 active:scale-95 transition-transform"
+                            title="돌려서 직접 회전"
+                          >
+                            <RotateCw className="w-3.5 h-3.5 pointer-events-none" />
+                          </div>
+
+                          {/* Quick Rotate +15° Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateSelectedSticker({ rotation: ((stk.rotation || 0) + 15) });
+                            }}
+                            className="w-6 h-6 rounded-full bg-slate-900/90 hover:bg-slate-800 text-white flex items-center justify-center text-[10px] font-black shadow-md active:scale-90 transition-transform cursor-pointer border border-white/20"
+                            title="+15° 회전"
+                          >
+                            ↻
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -2055,15 +2185,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                         >
                           <Copy className="w-2.5 h-2.5" />
                         </button>
-                        {activeSubtitles.length > 1 && (
-                          <button
-                            onClick={(e) => handleDeleteSubtitle(sub.id, e)}
-                            title="자막 삭제"
-                            className="hover:text-red-600 text-slate-400 p-0.5 cursor-pointer"
-                          >
-                            <X className="w-2.5 h-2.5" />
-                          </button>
-                        )}
+                        <button
+                          onClick={(e) => handleDeleteSubtitle(sub.id, e)}
+                          title="자막 삭제"
+                          className="hover:text-red-600 text-slate-400 p-0.5 cursor-pointer ml-0.5"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
                       </div>
                     );
                   })}
@@ -2080,9 +2208,20 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 <>
                   {/* Text Input for selected subtitle */}
                   <div>
-                    <label className="font-bold text-xs text-slate-700 block mb-1">
-                      선택된 자막 내용 수정
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-xs text-slate-700 block">
+                        선택된 자막 내용 수정
+                      </label>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteSubtitle(selectedSubtitle.id, e)}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-0.5 rounded-lg transition-colors cursor-pointer border border-red-200/60"
+                        title="현재 자막을 삭제합니다"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                        <span>자막 삭제</span>
+                      </button>
+                    </div>
                     <input
                       type="text"
                       value={selectedSubtitle.text}
@@ -2664,20 +2803,39 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               </button>
             )}
 
+            {/* Dedicated Photo & Video Addition Buttons */}
             <button
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer leading-none ml-1"
+              onClick={() => photoInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer leading-none ml-1"
+              title="새로운 사진 파일을 타임라인에 추가합니다"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>+ 클립 추가</span>
+              <span>📷 사진 추가</span>
             </button>
             <input
               type="file"
-              ref={fileInputRef}
+              ref={photoInputRef}
               multiple
-              accept="image/*,video/*"
+              accept="image/*"
               className="hidden"
-              onChange={handleFileUpload}
+              onChange={(e) => handleMediaUpload(e, 'image')}
+            />
+
+            <button
+              onClick={() => videoInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-extrabold shadow-sm transition-all cursor-pointer leading-none border border-amber-500/30"
+              title="새로운 동영상 파일을 타임라인에 추가합니다"
+            >
+              <Film className="w-3.5 h-3.5 text-amber-400" />
+              <span>🎬 동영상 추가</span>
+            </button>
+            <input
+              type="file"
+              ref={videoInputRef}
+              multiple
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => handleMediaUpload(e, 'video')}
             />
           </div>
         </div>
@@ -2742,13 +2900,24 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               );
             })}
 
-            {/* Quick add clip tile */}
+            {/* Quick add photo tile */}
             <button
-              onClick={() => fileInputRef.current?.click()}
-              className="shrink-0 w-24 aspect-video rounded-2xl border-2 border-dashed border-slate-700 hover:border-rose-500 bg-slate-800/50 flex flex-col items-center justify-center text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
+              onClick={() => photoInputRef.current?.click()}
+              className="shrink-0 w-24 aspect-video rounded-2xl border-2 border-dashed border-slate-700 hover:border-rose-500 bg-slate-800/50 flex flex-col items-center justify-center text-slate-300 hover:text-rose-400 transition-all cursor-pointer"
+              title="새 사진 추가"
             >
-              <Plus className="w-4 h-4 mb-0.5" />
-              <span className="text-[10px] font-bold leading-none">클립 추가</span>
+              <Plus className="w-4 h-4 mb-0.5 text-rose-400" />
+              <span className="text-[10px] font-bold leading-none">사진 추가</span>
+            </button>
+
+            {/* Quick add video tile */}
+            <button
+              onClick={() => videoInputRef.current?.click()}
+              className="shrink-0 w-24 aspect-video rounded-2xl border-2 border-dashed border-slate-700 hover:border-amber-500 bg-slate-800/50 flex flex-col items-center justify-center text-slate-300 hover:text-amber-400 transition-all cursor-pointer"
+              title="새 동영상 추가"
+            >
+              <Film className="w-4 h-4 mb-0.5 text-amber-400" />
+              <span className="text-[10px] font-bold leading-none">동영상 추가</span>
             </button>
           </div>
         </div>
