@@ -5,7 +5,8 @@ import {
   FolderHeart, 
   LayoutGrid, 
   Wand2,
-  Compass
+  Compass,
+  Scissors
 } from 'lucide-react';
 
 export type StudioTab = 'templates' | 'studio' | 'publish' | 'saved';
@@ -18,6 +19,7 @@ interface StudioHeaderProps {
   activeCategory: UniversalCategory;
   setActiveCategory: (cat: UniversalCategory) => void;
   savedCount: number;
+  onOpenCapCut?: () => void;
 }
 
 export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
@@ -26,6 +28,7 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
   activeCategory,
   setActiveCategory,
   savedCount,
+  onOpenCapCut,
 }) => {
   return (
     <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)]">
@@ -89,7 +92,7 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span className="leading-none">템플릿</span>
+              <span className="leading-none">홈 (시작)</span>
             </button>
 
             <button
@@ -101,8 +104,20 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
               }`}
             >
               <Wand2 className="w-3.5 h-3.5 shrink-0" />
-              <span className="leading-none">에디터</span>
+              <span className="leading-none">스튜디오</span>
             </button>
+
+            {onOpenCapCut && (
+              <button
+                type="button"
+                onClick={onOpenCapCut}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-black bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/25 transition-all leading-none whitespace-nowrap cursor-pointer"
+                title="캡컷 스타일 전문 동영상 컷편집기 즉시 실행"
+              >
+                <Scissors className="w-3.5 h-3.5 shrink-0" />
+                <span className="leading-none">캡컷 동영상</span>
+              </button>
+            )}
 
             <button
               onClick={() => setCurrentTab('publish')}
@@ -113,7 +128,7 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
               }`}
             >
               <Share2 className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-              <span className="hidden sm:inline leading-none">SNS 가이드</span>
+              <span className="hidden sm:inline leading-none">SNS 발행</span>
               <span className="sm:hidden leading-none">SNS</span>
             </button>
 

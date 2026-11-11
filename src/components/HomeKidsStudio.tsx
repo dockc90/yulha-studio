@@ -146,6 +146,7 @@ interface StudioProps {
   onSaveProject: () => void;
   onBack?: () => void;
   onClose?: () => void;
+  initialOpenCapCut?: boolean;
 }
 
 export const HomeKidsStudio: React.FC<StudioProps> = ({
@@ -155,12 +156,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   onSaveProject,
   onBack,
   onClose,
+  initialOpenCapCut,
 }) => {
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   
   // CapCut Pro Dedicated Editor Modal State
-  const [isCapCutModalOpen, setIsCapCutModalOpen] = useState(false);
+  const [isCapCutModalOpen, setIsCapCutModalOpen] = useState(initialOpenCapCut || false);
+
+  useEffect(() => {
+    if (initialOpenCapCut) {
+      setIsCapCutModalOpen(true);
+    }
+  }, [initialOpenCapCut]);
 
   // Active editing tab
   const [activeTool, setActiveTool] = useState<'filter' | 'adjust' | 'motion' | 'video_edit' | 'stickers' | 'text' | 'bgm'>('filter');
