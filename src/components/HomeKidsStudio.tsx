@@ -872,7 +872,25 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     img.src = sceneToExport.url;
 
     img.onload = () => {
-      // 1. Draw Image with Filter, Adjustments, and Pan & Zoom
+      // 1. Calculate true cover dimensions preserving image original aspect ratio
+      const imgWidth = img.naturalWidth || width;
+      const imgHeight = img.naturalHeight || height;
+      const imgRatio = imgWidth / imgHeight;
+      const canvasRatio = width / height;
+
+      let drawWidth = width;
+      let drawHeight = height;
+
+      if (imgRatio > canvasRatio) {
+        // Image is wider than canvas (landscape in 1:1, 9:16, 4:5): match height, expand width
+        drawHeight = height;
+        drawWidth = height * imgRatio;
+      } else {
+        // Image is taller than canvas (portrait in 1:1, 16:9): match width, expand height
+        drawWidth = width;
+        drawHeight = width / imgRatio;
+      }
+
       ctx.save();
       const adj = sceneToExport.adjustments || adjustments;
       ctx.filter = getCanvasFilterString(sceneToExport.filter, adj);
@@ -881,12 +899,14 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       const panX = sceneToExport.panX || 0;
       const panY = sceneToExport.panY || 0;
 
+      // Translate to canvas center
       ctx.translate(width / 2, height / 2);
-      ctx.translate((panX / 100) * width, (panY / 100) * height);
+      // Pan offset based on actual drawWidth and drawHeight
+      ctx.translate((panX / 100) * drawWidth, (panY / 100) * drawHeight);
       ctx.scale(zoom, zoom);
-      ctx.translate(-width / 2, -height / 2);
 
-      ctx.drawImage(img, 0, 0, width, height);
+      // Draw centered with true aspect-ratio cover
+      ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
       ctx.restore();
 
       // 2. Vignette Layer if enabled
@@ -1229,7 +1249,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 <span>미리보기</span>
               </div>
 
-              {/* Media Element with Filter, Pan & Zoom, and Adjustments */}
+              {/* Media Element with Filter, Pan & Zoom, and Adjustments (Preserves original aspect ratio and enables panning outer areas) */}
               {currentScene?.mediaType === 'video' ? (
                 <video
                   src={currentScene.url}
@@ -1239,11 +1259,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   webkit-playsinline="true"
                   style={{
                     ...getCombinedFilterStyle(),
-                    transform: `translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
                     transformOrigin: 'center center',
                     transition: isDraggingMedia ? 'none' : 'transform 0.1s ease-out',
                   }}
-                  className="w-full h-full object-cover pointer-events-none"
+                  className="absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none"
                 />
               ) : (
                 <img
@@ -1251,11 +1273,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   alt={currentScene?.title}
                   style={{
                     ...getCombinedFilterStyle(),
-                    transform: `translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
                     transformOrigin: 'center center',
                     transition: isDraggingMedia ? 'none' : 'transform 0.1s ease-out',
                   }}
-                  className={`w-full h-full object-cover pointer-events-none select-none ${getMotionAnimationClass(currentMotion)}`}
+                  className={`absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none ${getMotionAnimationClass(currentMotion)}`}
                 />
               )}
 

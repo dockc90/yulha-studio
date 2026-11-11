@@ -494,9 +494,11 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   style={{
                     filter: getFilterStyle(currentClip.filter),
                     WebkitFilter: getFilterStyle(currentClip.filter),
-                    transform: `rotate(${currentClip.rotation || 0}deg)`,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) translate(${currentClip?.panX || 0}%, ${currentClip?.panY || 0}%) scale(${currentClip?.zoom || 1.0}) rotate(${currentClip.rotation || 0}deg)`,
                   }}
-                  className="w-full h-full object-cover"
+                  className="absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none"
                 />
               ) : (
                 <img
@@ -505,9 +507,11 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   style={{
                     filter: getFilterStyle(currentClip?.filter),
                     WebkitFilter: getFilterStyle(currentClip?.filter),
-                    transform: `rotate(${currentClip?.rotation || 0}deg)`,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) translate(${currentClip?.panX || 0}%, ${currentClip?.panY || 0}%) scale(${currentClip?.zoom || 1.0}) rotate(${currentClip?.rotation || 0}deg)`,
                   }}
-                  className="w-full h-full object-cover"
+                  className="absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none"
                 />
               )}
 
