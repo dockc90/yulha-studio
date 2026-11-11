@@ -1,33 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "app": {
-      "root": ".",
-      "framework": "vite"
-    },
-    "nextjs-project": {
-      "root": "nextjs-project",
-      "framework": "nextjs"
-    }
-  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": {
-        "service": "nextjs-project"
-      }
-    },
-    {
-      "source": "/next/(.*)",
-      "destination": {
-        "service": "nextjs-project"
-      }
+      "destination": "/api"
     },
     {
       "source": "/(.*)",
-      "destination": {
-        "service": "app"
-      }
+      "destination": "/index.html"
     }
   ]
 }
