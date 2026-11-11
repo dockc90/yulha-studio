@@ -82,14 +82,24 @@ export const HomeKidsSavedView: React.FC<SavedViewProps> = ({
               className="bg-white rounded-2xl p-4 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#D3D1CB] transition-all flex flex-col justify-between group"
             >
               <div className="space-y-3">
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-[#F1F1EF]">
-                  <img
-                    src={project.scenes[0]?.url}
-                    alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-200"
-                  />
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-[#F7F6F3] border border-[#EDEDEB] flex items-center justify-center">
+                  {project.scenes[0]?.url ? (
+                    <img
+                      src={project.scenes[0]?.url}
+                      alt={project.title}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-200"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-[#9B9A97] gap-1 select-none">
+                      <FolderHeart className="w-6 h-6 text-[#9B9A97]" />
+                      <span className="text-[11px] font-medium">미디어 없음</span>
+                    </div>
+                  )}
                   <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-[#23272A]/85 backdrop-blur-xs text-white text-[10px] font-medium leading-none">
-                    {project.scenes.length}개 슬라이드
+                    {project.scenes.length}개 컷
                   </div>
                 </div>
 

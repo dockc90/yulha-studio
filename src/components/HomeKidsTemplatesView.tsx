@@ -101,7 +101,7 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
         <div className="max-w-3xl space-y-3.5 sm:space-y-4">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#F1F1EF] text-[#37352F] text-[11px] sm:text-xs font-semibold border border-[#E3E2DE] leading-none">
             <Sparkles className="w-3.5 h-3.5 text-[#37352F] shrink-0" />
-            <span className="leading-none">All-in-One Media Creator Studio</span>
+            <span className="leading-none">Yulha Studio · All-in-One Creator</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#37352F] tracking-tight leading-snug sm:leading-tight break-keep">

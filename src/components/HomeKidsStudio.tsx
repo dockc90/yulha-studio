@@ -3537,10 +3537,9 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               isDraggingFloating ? 'cursor-grabbing' : 'cursor-grab'
             }`}
           >
-            <div className="flex items-center gap-1 text-neutral-300">
-              <span className="text-neutral-400 hover:text-white font-mono text-xs cursor-grab" title="드래그하여 위치 이동">⠿</span>
+            <div className="flex items-center gap-1.5 text-neutral-300">
+              <span className="text-neutral-400 hover:text-white font-mono text-xs cursor-grab px-0.5" title="드래그하여 위치 이동">⠿</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-medium hidden sm:inline">미리보기</span>
             </div>
 
             {/* Size Switcher: 소 / 중 / 대 */}
@@ -3607,6 +3606,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           <div
             onClick={scrollToMainPreview}
             className={`relative overflow-hidden rounded-xl bg-black mt-1.5 ${getMiniAspectClasses(project.aspectRatio, floatingSize)} shadow-inner cursor-pointer hover:opacity-95 transition-opacity`}
+            title="클릭 시 본문 편집 화면으로 이동"
           >
             {/* Live Media with Filter & Zoom */}
             {currentScene?.mediaType === 'video' ? (
@@ -3623,13 +3623,12 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 }}
                 className="pointer-events-none"
               />
-            ) : (
+            ) : currentScene?.url ? (
               <img
-                src={currentScene?.url}
+                src={currentScene.url}
                 alt={currentScene?.title}
                 onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80';
+                  e.currentTarget.style.display = 'none';
                 }}
                 style={{
                   ...getCombinedFilterStyle(),
@@ -3640,6 +3639,11 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 }}
                 className="pointer-events-none select-none"
               />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-neutral-500 text-[10px] gap-1 select-none">
+                <span className="text-xs">📷</span>
+                <span>미디어 없음</span>
+              </div>
             )}
 
             {/* Subtitles Overlay on Mini Preview */}
@@ -3679,28 +3683,6 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 {sub.text}
               </div>
             ))}
-          </div>
-
-          <div className="flex items-center justify-between gap-1 pt-1.5">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFillFrame();
-              }}
-              className="text-[9px] text-neutral-300 font-medium hover:text-white flex items-center gap-1 cursor-pointer bg-[#2B2B2B] hover:bg-[#3F4448] px-2 py-0.5 rounded border border-[#3F4448]"
-              title="검정 여백 없이 꽉 채우기"
-            >
-              <span>채우기</span>
-            </button>
-            <button
-              type="button"
-              onClick={scrollToMainPreview}
-              className="text-[9px] text-neutral-400 font-medium hover:text-white flex items-center justify-center gap-0.5 cursor-pointer"
-            >
-              <span>본문으로</span>
-              <span>↑</span>
-            </button>
           </div>
         </div>
       )}
