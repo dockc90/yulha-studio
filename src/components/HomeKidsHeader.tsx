@@ -1,0 +1,141 @@
+import React from 'react';
+import { 
+  Sparkles, 
+  Share2, 
+  FolderHeart, 
+  LayoutGrid, 
+  Wand2,
+  Compass
+} from 'lucide-react';
+
+export type StudioTab = 'templates' | 'studio' | 'publish' | 'saved';
+
+export type UniversalCategory = 'all' | 'home' | 'daily' | 'kids' | 'cafe_travel';
+
+interface StudioHeaderProps {
+  currentTab: StudioTab;
+  setCurrentTab: (tab: StudioTab) => void;
+  activeCategory: UniversalCategory;
+  setActiveCategory: (cat: UniversalCategory) => void;
+  savedCount: number;
+}
+
+export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
+  currentTab,
+  setCurrentTab,
+  activeCategory,
+  setActiveCategory,
+  savedCount,
+}) => {
+  return (
+    <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="h-16 sm:h-18 flex items-center justify-between gap-4">
+          {/* Logo & Brand: Yulha Studio - Modern Aesthetic */}
+          <button
+            type="button"
+            onClick={() => setCurrentTab('templates')}
+            className="inline-flex items-center gap-3 text-left group transition cursor-pointer focus:outline-none shrink-0"
+          >
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-rose-500 via-rose-400 to-amber-400 flex items-center justify-center text-white shadow-md shadow-rose-500/20 group-hover:scale-102 transition-transform shrink-0">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex flex-col justify-center">
+              <div className="inline-flex items-center gap-2">
+                <span className="font-bold text-lg sm:text-xl tracking-tight text-slate-900 leading-none">
+                  율하스튜디오
+                </span>
+                <span className="inline-flex items-center justify-center text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-50 text-rose-600 border border-rose-100 leading-none">
+                  PRO
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-medium leading-none mt-1">
+                Yulha Media Studio
+              </span>
+            </div>
+          </button>
+
+          {/* Universal Categories Filter (만능 플랫폼 카테고리) */}
+          <div className="hidden lg:flex items-center gap-1 bg-slate-100/80 p-1 rounded-2xl border border-slate-200/60 text-xs">
+            {[
+              { id: 'all', label: '전체 콘텐츠' },
+              { id: 'home', label: '홈 & 리빙' },
+              { id: 'daily', label: '일상 · 브이로그' },
+              { id: 'kids', label: '키즈 · 패밀리' },
+              { id: 'cafe_travel', label: '공간 · 감성' },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id as UniversalCategory)}
+                className={`inline-flex items-center justify-center px-3.5 py-1.5 rounded-xl font-medium transition-all leading-none cursor-pointer ${
+                  activeCategory === cat.id
+                    ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+                }`}
+              >
+                <span>{cat.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Navigation Tabs (완벽한 수직 중앙 정렬 & 감성 스타일) */}
+          <div className="flex items-center gap-1.5 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/80 text-xs">
+            <button
+              onClick={() => setCurrentTab('templates')}
+              className={`inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl font-medium transition-all leading-none whitespace-nowrap cursor-pointer ${
+                currentTab === 'templates'
+                  ? 'bg-white text-slate-900 shadow-sm font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              <span className="leading-none">템플릿</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('studio')}
+              className={`inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-bold transition-all leading-none whitespace-nowrap cursor-pointer ${
+                currentTab === 'studio'
+                  ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-sm shadow-rose-500/25'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <Wand2 className="w-3.5 h-3.5 shrink-0" />
+              <span className="leading-none">에디터</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('publish')}
+              className={`inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl font-medium transition-all leading-none whitespace-nowrap cursor-pointer ${
+                currentTab === 'publish'
+                  ? 'bg-white text-rose-600 shadow-sm font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <Share2 className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+              <span className="hidden sm:inline leading-none">SNS 가이드</span>
+              <span className="sm:hidden leading-none">SNS</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('saved')}
+              className={`inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl font-medium transition-all leading-none whitespace-nowrap cursor-pointer ${
+                currentTab === 'saved'
+                  ? 'bg-white text-slate-900 shadow-sm font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <FolderHeart className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              <span className="hidden md:inline leading-none">보관함</span>
+              {savedCount > 0 && (
+                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] bg-rose-500 text-white font-extrabold rounded-full leading-none ml-0.5">
+                  {savedCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
