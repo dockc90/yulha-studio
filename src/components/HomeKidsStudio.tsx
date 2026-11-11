@@ -225,6 +225,71 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
   const pinchStartDistanceRef = useRef<number>(0);
   const pinchStartZoomRef = useRef<number>(1.0);
 
+  // Track natural aspect ratio of the active media (가로/세로 프레임 맞춤 계산용)
+  const [naturalAspect, setNaturalAspect] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!currentScene?.url) return;
+    if (currentScene.mediaType === 'image') {
+      const img = new Image();
+      img.onload = () => {
+        if (img.naturalWidth && img.naturalHeight) {
+          setNaturalAspect(img.naturalWidth / img.naturalHeight);
+        }
+      };
+      img.src = currentScene.url;
+    }
+  }, [currentScene?.url, currentScene?.mediaType]);
+
+  const getBoxAspectRatio = (ratio: CanvasAspectRatio): number => {
+    switch (ratio) {
+      case '9:16':
+        return 9 / 16;
+      case '1:1':
+        return 1.0;
+      case '4:5':
+        return 4 / 5;
+      case '16:9':
+        return 16 / 9;
+      default:
+        return 9 / 16;
+    }
+  };
+
+  // 가로/세로를 프레임에 맞춰 과도한 확대 없이 자연스럽게 채우는 비율 스타일
+  const getMediaSizeStyle = (): React.CSSProperties => {
+    const boxRatio = getBoxAspectRatio(project.aspectRatio);
+    const aspect = naturalAspect;
+
+    if (!aspect) {
+      return {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      };
+    }
+
+    if (aspect >= boxRatio) {
+      // 가로로 긴 사진: 프레임 높이에 100% 딱 맞추고, 가로는 원본 비율대로 자연스럽게 연장
+      const widthPercent = (aspect / boxRatio) * 100;
+      return {
+        height: '100%',
+        width: `${widthPercent.toFixed(2)}%`,
+        maxWidth: 'none',
+        maxHeight: 'none',
+      };
+    } else {
+      // 세로로 긴 사진: 프레임 너비에 100% 딱 맞추고, 세로는 원본 비율대로 자연스럽게 연장
+      const heightPercent = (boxRatio / aspect) * 100;
+      return {
+        width: '100%',
+        height: `${heightPercent.toFixed(2)}%`,
+        maxWidth: 'none',
+        maxHeight: 'none',
+      };
+    }
+  };
+
   // Original view toggle (Press & Hold or Click to compare)
   const [showOriginal, setShowOriginal] = useState(false);
 
@@ -685,7 +750,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     e.preventDefault();
     const zoomDelta = -e.deltaY * 0.0015;
     const currentZoom = currentScene?.zoom || 1.0;
-    const nextZoom = Math.max(1.0, Math.min(3.0, Number((currentZoom + zoomDelta).toFixed(2))));
+    const nextZoom = Math.max(0.5, Math.min(3.0, Number((currentZoom + zoomDelta).toFixed(2))));
     updateCurrentScene({ zoom: nextZoom });
   };
 
@@ -699,7 +764,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       const t2 = e.touches[1];
       const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
       const ratio = dist / pinchStartDistanceRef.current;
-      const nextZoom = Math.max(1.0, Math.min(3.0, Number((pinchStartZoomRef.current * ratio).toFixed(2))));
+      const nextZoom = Math.max(0.5, Math.min(3.0, Number((pinchStartZoomRef.current * ratio).toFixed(2))));
       updateCurrentScene({ zoom: nextZoom });
       return;
     }
@@ -750,8 +815,8 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     if (isDraggingMedia) {
       const deltaX = ((clientX - mediaDragStartRef.current.x) / rect.width) * 100;
       const deltaY = ((clientY - mediaDragStartRef.current.y) / rect.height) * 100;
-      const nextPanX = Math.max(-60, Math.min(60, Math.round(mediaPanStartRef.current.panX + deltaX)));
-      const nextPanY = Math.max(-60, Math.min(60, Math.round(mediaPanStartRef.current.panY + deltaY)));
+      const nextPanX = Math.max(-100, Math.min(100, Math.round(mediaPanStartRef.current.panX + deltaX)));
+      const nextPanY = Math.max(-100, Math.min(100, Math.round(mediaPanStartRef.current.panY + deltaY)));
       updateCurrentScene({ panX: nextPanX, panY: nextPanY });
     }
   };
@@ -1249,7 +1314,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                 <span>미리보기</span>
               </div>
 
-              {/* Media Element with Filter, Pan & Zoom, and Adjustments (Preserves original aspect ratio and enables panning outer areas) */}
+              {/* Media Element with Filter, Pan & Zoom, and Adjustments (Preserves original aspect ratio and fits width/height) */}
               {currentScene?.mediaType === 'video' ? (
                 <video
                   src={currentScene.url}
@@ -1257,29 +1322,41 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   playsInline
                   // @ts-ignore
                   webkit-playsinline="true"
+                  onLoadedMetadata={(e) => {
+                    const { videoWidth, videoHeight } = e.currentTarget;
+                    if (videoWidth && videoHeight) setNaturalAspect(videoWidth / videoHeight);
+                  }}
                   style={{
                     ...getCombinedFilterStyle(),
+                    ...getMediaSizeStyle(),
+                    position: 'absolute',
                     left: '50%',
                     top: '50%',
                     transform: `translate(-50%, -50%) translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
                     transformOrigin: 'center center',
                     transition: isDraggingMedia ? 'none' : 'transform 0.1s ease-out',
                   }}
-                  className="absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none"
+                  className="pointer-events-none select-none"
                 />
               ) : (
                 <img
                   src={currentScene?.url}
                   alt={currentScene?.title}
+                  onLoad={(e) => {
+                    const { naturalWidth, naturalHeight } = e.currentTarget;
+                    if (naturalWidth && naturalHeight) setNaturalAspect(naturalWidth / naturalHeight);
+                  }}
                   style={{
                     ...getCombinedFilterStyle(),
+                    ...getMediaSizeStyle(),
+                    position: 'absolute',
                     left: '50%',
                     top: '50%',
                     transform: `translate(-50%, -50%) translate(${currentScene.panX || 0}%, ${currentScene.panY || 0}%) scale(${currentScene.zoom || 1.0})`,
                     transformOrigin: 'center center',
                     transition: isDraggingMedia ? 'none' : 'transform 0.1s ease-out',
                   }}
-                  className={`absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none ${getMotionAnimationClass(currentMotion)}`}
+                  className={`pointer-events-none select-none ${getMotionAnimationClass(currentMotion)}`}
                 />
               )}
 
@@ -1580,56 +1657,90 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           </div>
 
           {/* Photo Zoom & Pan Controller Bar */}
-          <div className="w-full max-w-sm mt-3 px-3 py-2 bg-slate-50/90 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-xs">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-              <span className="text-[11px] text-slate-500 whitespace-nowrap">사진 확대</span>
-              <button
-                type="button"
-                onClick={() => {
-                  const z = Math.max(1.0, Number(((currentScene?.zoom || 1.0) - 0.2).toFixed(1)));
-                  updateCurrentScene({ zoom: z });
-                }}
-                className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
-                title="사진 축소"
-              >
-                −
-              </button>
-              <input
-                type="range"
-                min="1.0"
-                max="3.0"
-                step="0.05"
-                value={currentScene?.zoom || 1.0}
-                onChange={(e) => updateCurrentScene({ zoom: parseFloat(e.target.value) })}
-                className="w-20 sm:w-28 accent-rose-600 cursor-pointer"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  const z = Math.min(3.0, Number(((currentScene?.zoom || 1.0) + 0.2).toFixed(1)));
-                  updateCurrentScene({ zoom: z });
-                }}
-                className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
-                title="사진 확대"
-              >
-                +
-              </button>
-              <span className="font-mono text-[11px] text-rose-600 font-extrabold min-w-[36px] text-right">
-                {Math.round((currentScene?.zoom || 1.0) * 100)}%
-              </span>
+          <div className="w-full max-w-sm mt-3 px-3 py-2 bg-slate-50/90 rounded-2xl border border-slate-200/80 flex flex-col gap-2 shadow-xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                <span className="text-[11px] text-slate-500 whitespace-nowrap">사진 확대</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const z = Math.max(0.5, Number(((currentScene?.zoom || 1.0) - 0.1).toFixed(2)));
+                    updateCurrentScene({ zoom: z });
+                  }}
+                  className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
+                  title="사진 축소"
+                >
+                  −
+                </button>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="3.0"
+                  step="0.05"
+                  value={currentScene?.zoom || 1.0}
+                  onChange={(e) => updateCurrentScene({ zoom: parseFloat(e.target.value) })}
+                  className="w-20 sm:w-28 accent-rose-600 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const z = Math.min(3.0, Number(((currentScene?.zoom || 1.0) + 0.1).toFixed(2)));
+                    updateCurrentScene({ zoom: z });
+                  }}
+                  className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer active:scale-95 transition-transform font-bold"
+                  title="사진 확대"
+                >
+                  +
+                </button>
+                <span className="font-mono text-[11px] text-rose-600 font-extrabold min-w-[36px] text-right">
+                  {Math.round((currentScene?.zoom || 1.0) * 100)}%
+                </span>
+              </div>
+
+              {/* Reset Zoom & Pan Position Button */}
+              {((currentScene?.zoom && currentScene.zoom !== 1.0) || currentScene?.panX || currentScene?.panY) && (
+                <button
+                  type="button"
+                  onClick={() => updateCurrentScene({ zoom: 1.0, panX: 0, panY: 0 })}
+                  className="text-[10px] font-extrabold text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 px-2 py-1 rounded-lg border border-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+                  title="사진 위치 및 크기 원위치"
+                >
+                  ↺ 원위치
+                </button>
+              )}
             </div>
 
-            {/* Reset Zoom & Pan Position Button */}
-            {((currentScene?.zoom && currentScene.zoom !== 1.0) || currentScene?.panX || currentScene?.panY) && (
+            {/* Quick Presets: Frame Fit & Full Cover */}
+            <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-200/60 text-[11px]">
+              <span className="text-slate-400 font-medium whitespace-nowrap">빠른 맞춤:</span>
               <button
                 type="button"
                 onClick={() => updateCurrentScene({ zoom: 1.0, panX: 0, panY: 0 })}
-                className="text-[10px] font-extrabold text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 px-2 py-1 rounded-lg border border-slate-200 transition-colors cursor-pointer whitespace-nowrap"
-                title="사진 위치 및 크기 원위치"
+                className={`px-2 py-0.5 rounded-md font-bold transition-all cursor-pointer ${
+                  (currentScene?.zoom || 1.0) === 1.0
+                    ? 'bg-rose-500 text-white shadow-xs'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+                title="프레임에 맞춰 꽉 채우기"
               >
-                ↺ 원위치
+                프레임 채우기
               </button>
-            )}
+              <button
+                type="button"
+                onClick={() => {
+                  const boxRatio = getBoxAspectRatio(project.aspectRatio);
+                  const aspect = naturalAspect || 1.0;
+                  const fitZoom = aspect >= boxRatio
+                    ? Number((boxRatio / aspect).toFixed(2))
+                    : Number((aspect / boxRatio).toFixed(2));
+                  updateCurrentScene({ zoom: Math.max(0.5, Math.min(1.0, fitZoom)), panX: 0, panY: 0 });
+                }}
+                className="px-2 py-0.5 rounded-md font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all cursor-pointer"
+                title="여백이 생기더라도 사진 전체가 보이도록 맞춤"
+              >
+                전체 맞춤
+              </button>
+            </div>
           </div>
 
           <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">

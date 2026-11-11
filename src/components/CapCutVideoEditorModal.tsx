@@ -391,6 +391,68 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     }
   };
 
+  // Track natural aspect ratio of the active media in editor
+  const [naturalAspect, setNaturalAspect] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!currentClip?.url) return;
+    if (currentClip.mediaType === 'image') {
+      const img = new Image();
+      img.onload = () => {
+        if (img.naturalWidth && img.naturalHeight) {
+          setNaturalAspect(img.naturalWidth / img.naturalHeight);
+        }
+      };
+      img.src = currentClip.url;
+    }
+  }, [currentClip?.url, currentClip?.mediaType]);
+
+  const getBoxAspectRatio = (ratio: CanvasAspectRatio): number => {
+    switch (ratio) {
+      case '9:16':
+        return 9 / 16;
+      case '1:1':
+        return 1.0;
+      case '4:5':
+        return 4 / 5;
+      case '16:9':
+        return 16 / 9;
+      default:
+        return 9 / 16;
+    }
+  };
+
+  const getMediaSizeStyle = (): React.CSSProperties => {
+    const boxRatio = getBoxAspectRatio(aspectRatio);
+    const aspect = naturalAspect;
+
+    if (!aspect) {
+      return {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      };
+    }
+
+    if (aspect >= boxRatio) {
+      const widthPercent = (aspect / boxRatio) * 100;
+      return {
+        height: '100%',
+        width: `${widthPercent.toFixed(2)}%`,
+        maxWidth: 'none',
+        maxHeight: 'none',
+      };
+    } else {
+      const heightPercent = (boxRatio / aspect) * 100;
+      return {
+        width: '100%',
+        height: `${heightPercent.toFixed(2)}%`,
+        maxWidth: 'none',
+        maxHeight: 'none',
+      };
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col select-none text-slate-100 animate-in fade-in duration-200">
       {/* Hidden File Inputs for uploading photo & video inside editor */}
@@ -491,27 +553,39 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                   webkit-playsinline="true"
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={handleVideoEnded}
+                  onLoadedMetadata={(e) => {
+                    const { videoWidth, videoHeight } = e.currentTarget;
+                    if (videoWidth && videoHeight) setNaturalAspect(videoWidth / videoHeight);
+                  }}
                   style={{
                     filter: getFilterStyle(currentClip.filter),
                     WebkitFilter: getFilterStyle(currentClip.filter),
+                    ...getMediaSizeStyle(),
+                    position: 'absolute',
                     left: '50%',
                     top: '50%',
                     transform: `translate(-50%, -50%) translate(${currentClip?.panX || 0}%, ${currentClip?.panY || 0}%) scale(${currentClip?.zoom || 1.0}) rotate(${currentClip.rotation || 0}deg)`,
                   }}
-                  className="absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none"
+                  className="pointer-events-none select-none"
                 />
               ) : (
                 <img
                   src={currentClip?.url}
                   alt={currentClip?.title}
+                  onLoad={(e) => {
+                    const { naturalWidth, naturalHeight } = e.currentTarget;
+                    if (naturalWidth && naturalHeight) setNaturalAspect(naturalWidth / naturalHeight);
+                  }}
                   style={{
                     filter: getFilterStyle(currentClip?.filter),
                     WebkitFilter: getFilterStyle(currentClip?.filter),
+                    ...getMediaSizeStyle(),
+                    position: 'absolute',
                     left: '50%',
                     top: '50%',
                     transform: `translate(-50%, -50%) translate(${currentClip?.panX || 0}%, ${currentClip?.panY || 0}%) scale(${currentClip?.zoom || 1.0}) rotate(${currentClip?.rotation || 0}deg)`,
                   }}
-                  className="absolute min-w-full min-h-full w-auto h-auto max-w-none max-h-none pointer-events-none select-none"
+                  className="pointer-events-none select-none"
                 />
               )}
 
