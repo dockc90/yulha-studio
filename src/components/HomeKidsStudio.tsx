@@ -1468,7 +1468,24 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
               } ${getAspectRatioClasses(project.aspectRatio)}`}
             >
               {/* Media Element with Filter, Pan & Zoom, and Adjustments (Preserves original aspect ratio and fits width/height) */}
-              {currentScene?.mediaType === 'video' ? (
+              {!currentScene || !currentScene.url ? (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#191919] select-none cursor-pointer hover:bg-[#202020] transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-[#282828] border border-[#3F4448] flex items-center justify-center mb-3 text-neutral-300">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-white mb-1">사진 또는 동영상 추가</h4>
+                  <p className="text-xs text-neutral-400 mb-4 max-w-[220px] leading-relaxed">
+                    여기를 탭하거나 파일을 선택하여 편집을 시작하세요
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white text-black font-semibold text-xs shadow-xs hover:bg-neutral-200 transition-colors">
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>파일 선택하기</span>
+                  </span>
+                </div>
+              ) : currentScene?.mediaType === 'video' ? (
                 <video
                   src={currentScene.url}
                   controls
@@ -1500,8 +1517,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                     if (naturalWidth && naturalHeight) setNaturalAspect(naturalWidth / naturalHeight);
                   }}
                   onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80';
+                    e.currentTarget.style.display = 'none';
                   }}
                   style={{
                     ...getCombinedFilterStyle(),

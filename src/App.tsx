@@ -16,10 +16,42 @@ import { Sparkles } from 'lucide-react';
 
 const YULHA_STORAGE_KEY = 'yulha_studio_saved_projects_v3';
 
+const createEmptyProject = (title = '새 프로젝트', category: UniversalCategory = 'home', aspectRatio: CanvasAspectRatio = '9:16'): HomeKidsProject => ({
+  id: `proj-${Date.now()}`,
+  title,
+  description: '소중한 순간을 담은 미디어 프로젝트',
+  category: category === 'all' ? 'home' : category,
+  targetPlatforms: ['all', 'ohouse', 'instagram', 'youtube'],
+  aspectRatio,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  scenes: [],
+  snsMetadata: {
+    youtube: {
+      title: '감성 가득한 일상 기록 쇼츠',
+      description: '궁금하신 점은 언제든 댓글로 남겨주세요!',
+      commentQuestionPrompt: '📌 여러분의 소소한 일상 이야기를 댓글로 나눠요!',
+      hashtags: ['일상기록', '브이로그', '쇼츠']
+    },
+    instagram: {
+      caption: `햇살이 길게 머무는 오늘의 순간 ✨\n\n궁금하신 점은 댓글 남겨주세요 🤍`,
+      commentTriggerHook: '💬 궁금하신 점은 댓글로 편하게 물어보세요!',
+      hashtags: ['#일상스타그램', '#감성기록', '#릴스']
+    },
+    ohouse: {
+      title: '따뜻한 온기가 머무는 공간 이야기',
+      spaceType: '거실',
+      stylingTip: '부드러운 조명과 톤온톤 패브릭을 매치했습니다.',
+      commentNotice: '소품이나 공간 질문 환영합니다 :)',
+      hashtags: ['#오늘의집', '#공간기록', '#온라인집들이']
+    }
+  }
+});
+
 export default function App() {
   const [currentTab, setCurrentTab] = useState<StudioTab>('templates');
   const [activeCategory, setActiveCategory] = useState<UniversalCategory>('all');
-  const [currentProject, setCurrentProject] = useState<HomeKidsProject>(SAMPLE_HOME_KIDS_PROJECTS[0]);
+  const [currentProject, setCurrentProject] = useState<HomeKidsProject>(() => createEmptyProject());
   const [initialOpenCapCut, setInitialOpenCapCut] = useState(false);
 
   // Browser History & Hardware/Gesture Back Button handling (모바일/PC 자체 뒤로가기 연동)
@@ -288,62 +320,19 @@ export default function App() {
     showToast(`${fileList.length}개의 미디어를 불러와 에디터를 열었습니다 ✨`);
   };
 
-  // Create empty new project
+  // Create empty new project (Starts completely clean with NO dummy video or photos)
   const handleCreateNewProject = (category: UniversalCategory, options?: { aspectRatio?: CanvasAspectRatio; openCapCut?: boolean }) => {
     const isVideoMode = options?.openCapCut;
-    const newProj: HomeKidsProject = {
-      id: `proj-${Date.now()}`,
-      title: isVideoMode ? '새로운 프로 동영상 프로젝트' : '나만의 새로운 감성 미디어',
-      description: '소중한 순간을 담은 사진과 영상 기록',
-      category: category === 'all' ? 'home' : category,
-      targetPlatforms: ['all', 'ohouse', 'instagram', 'youtube'],
-      aspectRatio: options?.aspectRatio || '9:16',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      scenes: [
-        {
-          id: `scene-${Date.now()}-1`,
-          mediaType: isVideoMode ? 'video' : 'image',
-          url: isVideoMode 
-            ? 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
-            : 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
-          title: isVideoMode ? '동영상 컷편집' : '포근한 일상의 순간',
-          subtitle: isVideoMode ? '재생바에서 ✂️ 분할을 눌러보세요' : '마음이 머무는 따뜻한 기록',
-          callToAction: '궁금하신 정보는 댓글 남겨주시면 알려드릴게요 🤍',
-          durationSec: isVideoMode ? 15 : 4,
-          kidsStickers: [],
-          filter: 'none',
-          zoom: 1.0,
-          panX: 0,
-          panY: 0
-        }
-      ],
-      snsMetadata: {
-        youtube: {
-          title: '감성 가득한 일상 기록 쇼츠',
-          description: '궁금하신 점은 언제든 댓글로 남겨주세요!',
-          commentQuestionPrompt: '📌 여러분의 소소한 일상 이야기를 댓글로 나눠요!',
-          hashtags: ['일상기록', '브이로그', '쇼츠']
-        },
-        instagram: {
-          caption: `햇살이 길게 머무는 오늘의 순간 ✨\n\n궁금하신 점은 댓글 남겨주세요 🤍`,
-          commentTriggerHook: '💬 궁금하신 점은 댓글로 편하게 물어보세요!',
-          hashtags: ['#일상스타그램', '#감성기록', '#릴스']
-        },
-        ohouse: {
-          title: '따뜻한 온기가 머무는 공간 이야기',
-          spaceType: '거실',
-          stylingTip: '부드러운 조명과 톤온톤 패브릭을 매치했습니다.',
-          commentNotice: '소품이나 공간 질문 환영합니다 :)',
-          hashtags: ['#오늘의집', '#공간기록', '#온라인집들이']
-        }
-      }
-    };
+    const newProj = createEmptyProject(
+      isVideoMode ? '새 동영상 프로젝트' : '새 프로젝트',
+      category,
+      options?.aspectRatio || '9:16'
+    );
 
     setCurrentProject(newProj);
     setInitialOpenCapCut(options?.openCapCut || false);
     navigateToTab('studio');
-    showToast(isVideoMode ? '프로 동영상 편집기를 실행했습니다 🎬' : '새 프로젝트가 생성되었습니다.');
+    showToast(isVideoMode ? '동영상 편집기를 실행했습니다 🎬' : '새 프로젝트가 생성되었습니다.');
   };
 
   return (

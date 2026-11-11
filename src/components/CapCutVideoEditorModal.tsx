@@ -625,7 +625,35 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         <div className="shrink-0 md:flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 relative min-h-0 border-b md:border-b-0 md:border-r border-slate-800">
           <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-slate-800 bg-black flex items-center justify-center max-w-full max-h-full">
             <div className={`${getAspectClasses(aspectRatio)} relative overflow-hidden flex items-center justify-center bg-black`}>
-              {currentClip?.mediaType === 'video' ? (
+              {!currentClip || !currentClip.url ? (
+                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-black select-none">
+                  <div className="w-12 h-12 rounded-2xl bg-[#23272A] border border-[#3F4448] flex items-center justify-center mb-3 text-neutral-300">
+                    <Film className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-white mb-1">편집할 클립을 추가하세요</h4>
+                  <p className="text-xs text-neutral-400 mb-4 max-w-[220px] leading-relaxed">
+                    동영상이나 사진을 추가하여 컷편집을 시작할 수 있습니다
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => photoInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448]"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>사진 추가</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => videoInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs cursor-pointer shadow-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>동영상 추가</span>
+                    </button>
+                  </div>
+                </div>
+              ) : currentClip?.mediaType === 'video' ? (
                 <video
                   ref={videoRef}
                   src={currentClip.url}
@@ -659,8 +687,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     if (naturalWidth && naturalHeight) setNaturalAspect(naturalWidth / naturalHeight);
                   }}
                   onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80';
+                    e.currentTarget.style.display = 'none';
                   }}
                   style={{
                     filter: getFilterStyle(currentClip?.filter),
