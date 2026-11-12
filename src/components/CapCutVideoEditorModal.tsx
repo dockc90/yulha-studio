@@ -1155,21 +1155,6 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             {/* TAB 1: Edit & Transform */}
             {activeInspectorTab === 'edit' && (
               <div className="space-y-4">
-                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-1.5">
-                  <span className="text-neutral-400 font-medium block">선택된 클립 정보</span>
-                  <div className="font-semibold text-sm text-white">{currentClip?.title}</div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-neutral-300 font-mono flex-wrap">
-                    <span>길이: {getClipEffectiveDuration(currentClip)}초</span>
-                    {currentClip?.speed && currentClip.speed !== 1.0 && (
-                      <span className="text-neutral-400 font-sans text-[10px]">
-                        (원본 {currentClip.durationSec || 4}초)
-                      </span>
-                    )}
-                    <span>·</span>
-                    <span>배속: {currentClip?.speed || 1.0}x</span>
-                  </div>
-                </div>
-
                 {/* Quick Split, Merge & Actions */}
                 <div className="space-y-2">
                   <label className="font-medium text-neutral-300 block">클립 분할 & 합치기</label>
