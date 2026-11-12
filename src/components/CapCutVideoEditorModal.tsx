@@ -1083,14 +1083,14 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
             </div>
           </div>
 
-          {/* Canvas Floating Transport Controls */}
-          <div className="mt-2 md:mt-0 md:absolute md:bottom-6 flex items-center gap-2 sm:gap-3 bg-slate-900/95 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border border-slate-700 shadow-xl z-20">
+          {/* Canvas Floating Transport Controls (Clean & Centered for Mobile) */}
+          <div className="mt-2 md:mt-0 md:absolute md:bottom-6 flex items-center gap-2.5 sm:gap-3 bg-[#1E2124]/95 backdrop-blur-md px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#3F4448] shadow-xl z-20">
             <button
               onClick={() => {
                 setCurrentTime(0);
                 if (videoRef.current) videoRef.current.currentTime = 0;
               }}
-              className="p-1.5 text-slate-400 hover:text-white cursor-pointer"
+              className="p-1.5 text-neutral-400 hover:text-white cursor-pointer transition-colors"
               title="처음으로"
             >
               <RotateCw className="w-3.5 h-3.5" />
@@ -1098,29 +1098,17 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
             <button
               onClick={togglePlayPause}
-              className="w-8 h-8 rounded-lg bg-white hover:bg-neutral-200 text-black flex items-center justify-center cursor-pointer shadow-sm transition-colors"
+              className="w-8 h-8 rounded-full bg-white hover:bg-neutral-200 text-black flex items-center justify-center cursor-pointer shadow-sm transition-transform active:scale-95"
               title="재생 / 일시정지 (스페이스바)"
             >
               {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
             </button>
 
-            <div className="font-mono text-xs flex items-center gap-1 text-neutral-300">
+            <div className="font-mono text-xs flex items-center gap-1 text-neutral-300 pr-1">
               <span className="text-white font-semibold">{currentTime.toFixed(1)}s</span>
-              <span>/</span>
+              <span className="text-neutral-500">/</span>
               <span>{totalDuration.toFixed(1)}s</span>
             </div>
-
-            <span className="text-[#3F4448]">|</span>
-
-            {/* Split At Playhead Button */}
-            <button
-              onClick={handleSplitAtPlayhead}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium text-xs cursor-pointer border border-[#3F4448]"
-              title="재생바 위치에서 클립 분할 (Ctrl+B)"
-            >
-              <Scissors className="w-3.5 h-3.5" />
-              <span>현재 위치 분할</span>
-            </button>
           </div>
         </div>
 
@@ -1152,106 +1140,71 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
           {/* Inspector Content */}
           <div className="flex-1 p-4 overflow-y-auto space-y-4 text-xs">
-            {/* TAB 1: Edit & Transform */}
+            {/* TAB 1: Transform, Rotate & Scale (모바일 최적화 클립 설정) */}
             {activeInspectorTab === 'edit' && (
               <div className="space-y-4">
-                {/* Quick Split, Merge & Actions */}
-                <div className="space-y-2">
-                  <label className="font-medium text-neutral-300 block">클립 분할 & 합치기</label>
-                  <div className="grid grid-cols-2 gap-2">
+                {/* 1. Rotation Controls */}
+                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-white flex items-center gap-1.5">
+                      <RotateCw className="w-3.5 h-3.5 text-neutral-300" />
+                      <span>화면 회전 & 각도</span>
+                    </span>
+                    <span className="font-mono text-neutral-200 font-semibold px-2 py-0.5 rounded bg-[#191919] border border-[#3F4448]">
+                      {currentClip?.rotation || 0}°
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
                     <button
-                      onClick={handleSplitAtPlayhead}
-                      className="inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer border border-[#3F4448] leading-none"
-                      title="재생바 위치에서 컷을 둘로 나눕니다 (단축키: Ctrl+B)"
+                      onClick={() => updateCurrentClip({ rotation: ((currentClip.rotation || 0) + 90) % 360 })}
+                      className="py-2.5 px-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer border border-[#3F4448] text-xs text-center leading-none"
                     >
-                      <Scissors className="w-3.5 h-3.5" />
-                      <span>재생바 분할</span>
+                      +90° 회전
                     </button>
                     <button
-                      onClick={handleMergeNextCut}
-                      disabled={selectedIdx >= clips.length - 1}
-                      className={`inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg font-medium leading-none ${
-                        selectedIdx < clips.length - 1
-                          ? 'bg-[#2F3437] hover:bg-[#3F4448] text-white cursor-pointer border border-[#3F4448]'
-                          : 'bg-[#1E1E1E] text-neutral-500 cursor-not-allowed border border-[#2F3437]'
-                      }`}
-                      title="선택된 클립과 다음 클립을 하나로 합칩니다"
+                      onClick={() => updateCurrentClip({ rotation: ((currentClip.rotation || 0) + 180) % 360 })}
+                      className="py-2.5 px-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer border border-[#3F4448] text-xs text-center leading-none"
                     >
-                      <Link2 className="w-3.5 h-3.5" />
-                      <span>다음 컷 합치기</span>
+                      180° 반전
+                    </button>
+                    <button
+                      onClick={() => updateCurrentClip({ rotation: 0 })}
+                      className="py-2.5 px-2 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium cursor-pointer border border-[#2F3437] text-xs text-center leading-none"
+                    >
+                      0° 초기화
                     </button>
                   </div>
-
-                  {selectedIdx > 0 && (
-                    <button
-                      onClick={handleMergePrevCut}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium border border-[#2F3437] cursor-pointer text-xs"
-                      title="선택된 클립과 이전 클립을 하나로 합칩니다"
-                    >
-                      <Link2 className="w-3.5 h-3.5" />
-                      <span>이전 컷과 합치기 (앞쪽 클립과 병합)</span>
-                    </button>
-                  )}
                 </div>
 
-                {/* Add Media Files & Duplicate */}
-                <div className="space-y-2">
+                {/* 2. Zoom & Scale Controls */}
+                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <label className="font-semibold text-white block">미디어 추가 및 관리</label>
-                    {clips.length > 1 && (
+                    <span className="font-semibold text-white flex items-center gap-1.5">
+                      <Maximize2 className="w-3.5 h-3.5 text-neutral-300" />
+                      <span>화면 확대 (줌)</span>
+                    </span>
+                    <span className="font-mono text-neutral-200 font-semibold px-2 py-0.5 rounded bg-[#191919] border border-[#3F4448]">
+                      {currentClip?.zoom?.toFixed(1) || '1.0'}x
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1.0, 1.2, 1.5].map((z) => (
                       <button
-                        onClick={handleDelete}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-[11px] font-semibold cursor-pointer transition-colors"
-                        title="현재 선택된 클립을 삭제합니다"
+                        key={z}
+                        onClick={() => updateCurrentClip({ zoom: z })}
+                        className={`py-2 px-2 rounded-lg text-xs font-medium cursor-pointer leading-none border transition-colors ${
+                          (currentClip?.zoom || 1.0) === z
+                            ? 'bg-white text-black font-semibold border-white shadow-xs'
+                            : 'bg-[#2F3437] hover:bg-[#3F4448] text-white border-[#3F4448]'
+                        }`}
                       >
-                        <Trash2 className="w-3 h-3 text-red-400" />
-                        <span>클립 삭제</span>
+                        {z === 1.0 ? '1.0x (기본)' : `${z}x 확대`}
                       </button>
-                    )}
+                    ))}
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => videoInputRef.current?.click()}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold cursor-pointer leading-none text-xs shadow-sm transition-transform active:scale-98"
-                      title="동영상 파일을 타임라인에 추가합니다"
-                    >
-                      <Film className="w-3.5 h-3.5 text-black" />
-                      <span>동영상 추가</span>
-                    </button>
-                    <button
-                      onClick={() => photoInputRef.current?.click()}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer leading-none border border-[#3F4448] text-xs transition-colors"
-                      title="사진 파일을 타임라인에 추가합니다"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>사진 추가</span>
-                    </button>
-                  </div>
-                  <button
-                    onClick={handleDuplicate}
-                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-300 font-medium cursor-pointer leading-none border border-[#2F3437] text-xs"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>클립 복제</span>
-                  </button>
                 </div>
 
-                {/* Rotation */}
-                <div className="p-3 bg-[#23272A] rounded-xl border border-[#2F3437] space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-neutral-300">화면 회전</span>
-                    <span className="font-mono text-neutral-200 font-semibold">{currentClip?.rotation || 0}°</span>
-                  </div>
-                  <button
-                    onClick={() => updateCurrentClip({ rotation: ((currentClip.rotation || 0) + 90) % 360 })}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2 rounded-lg bg-[#2F3437] hover:bg-[#3F4448] text-white font-medium cursor-pointer border border-[#3F4448]"
-                  >
-                    <RotateCw className="w-3.5 h-3.5 text-neutral-300" />
-                    <span>90° 시계방향 회전</span>
-                  </button>
-                </div>
-
-                {/* Delete Clip (Prominent Danger Button) */}
+                {/* 3. Delete Clip (Danger Zone) */}
                 {clips.length > 1 && (
                   <button
                     onClick={handleDelete}

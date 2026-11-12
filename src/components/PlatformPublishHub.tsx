@@ -234,7 +234,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <input
               type="text"
@@ -243,27 +243,29 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleApplyGenerated(customTopic, styleIndex);
               }}
-              placeholder="주제를 입력하세요 (예: 미니멀 주방 정리 꿀팁, 아늑한 거실 룸투어, 신혼집 셀프 인테리어)"
+              placeholder="주제를 입력하세요 (예: 미니멀 주방 정리 꿀팁, 아늑한 거실 룸투어)"
               className="w-full px-3.5 py-2.5 bg-[#F7F6F3] border border-[#EDEDEB] rounded-xl text-xs text-[#23272A] focus:outline-none focus:border-[#23272A]"
             />
           </div>
 
-          <button
-            onClick={() => handleApplyGenerated(customTopic, styleIndex)}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#23272A] hover:bg-[#37352F] text-white font-medium text-xs transition-colors cursor-pointer shadow-xs shrink-0 leading-none"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>내용 생성</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => handleApplyGenerated(customTopic, styleIndex)}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#23272A] hover:bg-[#37352F] text-white font-medium text-xs transition-colors cursor-pointer shadow-xs leading-none"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>내용 생성</span>
+            </button>
 
-          <button
-            onClick={handleRefresh}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs transition-colors cursor-pointer border border-[#EDEDEB] shrink-0 leading-none"
-            title="다른 추천 문구 스타일로 새로고침"
-          >
-            <RotateCw className="w-3.5 h-3.5" />
-            <span>새로고침</span>
-          </button>
+            <button
+              onClick={handleRefresh}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs transition-colors cursor-pointer border border-[#EDEDEB] leading-none shrink-0"
+              title="다른 추천 문구 스타일로 새로고침"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+              <span>새로고침</span>
+            </button>
+          </div>
         </div>
 
         {/* Popular Recommended Topic Chips */}

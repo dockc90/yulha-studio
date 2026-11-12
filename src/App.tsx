@@ -407,9 +407,9 @@ export default function App() {
           )}
         </main>
 
-        {/* Notion-Style Clean Minimalist Toast */}
+        {/* Notion-Style Clean Minimalist Toast (Positioned safely above mobile bottom nav) */}
         {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 bg-[#2F3437] text-white text-xs font-medium px-4 py-3 rounded-xl shadow-xl border border-[#3F4448] leading-none animate-in fade-in slide-in-from-bottom-2">
+          <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 inline-flex items-center gap-2.5 bg-[#2F3437] text-white text-xs font-medium px-4 py-3 rounded-xl shadow-xl border border-[#3F4448] leading-none animate-in fade-in slide-in-from-bottom-2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             <span className="leading-none">{toastMessage}</span>
           </div>

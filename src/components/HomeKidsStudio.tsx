@@ -1414,7 +1414,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
           <button
             onClick={onGoToPublish}
-            className="inline-flex items-center justify-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] text-[11px] sm:text-xs font-medium border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
+            className="hidden sm:inline-flex items-center justify-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] text-[11px] sm:text-xs font-medium border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
           >
             <Share2 className="w-3.5 h-3.5 text-[#787774] shrink-0" />
             <span className="leading-none">SNS 가이드</span>
@@ -1423,7 +1423,7 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
           {/* Pro Video Editor Launcher Button */}
           <button
             onClick={openCapCutEditor}
-            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-[11px] sm:text-xs border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
+            className="hidden sm:inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-[11px] sm:text-xs border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
             title="전문 동영상 편집기 열기"
           >
             <Scissors className="w-3.5 h-3.5 text-[#37352F] shrink-0" />
@@ -3375,24 +3375,6 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
             >
               <Copy className="w-3.5 h-3.5 text-neutral-300" />
               <span>복제</span>
-            </button>
-
-            {/* 6. Speed */}
-            <button
-              onClick={() => setActiveTool('video_edit')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none shrink-0"
-            >
-              <FastForward className="w-3.5 h-3.5 text-neutral-300" />
-              <span>속도 조절</span>
-            </button>
-
-            {/* 7. Transition */}
-            <button
-              onClick={() => setActiveTool('video_edit')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#2F3437] text-neutral-200 text-xs font-medium border border-[#3F4448] transition-colors cursor-pointer leading-none shrink-0"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-neutral-300" />
-              <span>전환 효과</span>
             </button>
           </div>
         </div>

@@ -150,26 +150,18 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
               </button>
             </div>
 
-            {/* Mobile Top Header Quick Action (모바일 전용 우측 바로가기) */}
+            {/* Mobile Header Right: Clean saved count pill */}
             <div className="flex sm:hidden items-center gap-1.5">
-              {onOpenCapCut && (
+              {savedCount > 0 && (
                 <button
                   type="button"
-                  onClick={onOpenCapCut}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-medium bg-[#37352F] text-white text-[11px] shadow-xs"
+                  onClick={() => setCurrentTab('saved')}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#F1F1EF] text-[#37352F] text-[11px] font-medium border border-[#E3E2DE]"
                 >
-                  <Scissors className="w-3 h-3 shrink-0" />
-                  <span>컷편집</span>
+                  <FolderHeart className="w-3 h-3 text-[#787774]" />
+                  <span>보관함 {savedCount}</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => setCurrentTab('studio')}
-                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-medium bg-[#23272A] text-white text-[11px] shadow-xs"
-              >
-                <Wand2 className="w-3 h-3 shrink-0" />
-                <span>편집기</span>
-              </button>
             </div>
           </div>
         </div>
