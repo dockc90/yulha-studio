@@ -471,22 +471,35 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
 
       if (isVid) {
-        return Promise.resolve({
-          id: `scene-${Date.now()}-${index}`,
-          mediaType: 'video' as const,
-          url: URL.createObjectURL(file),
-          title: cleanTitle || '새로운 영상 클립',
-          subtitle: '생생한 순간을 담았습니다',
-          callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
-          durationSec: 6,
-          kidsStickers: [],
-          filter: 'none' as const,
-          zoom: 1.0,
-          panX: 0,
-          panY: 0,
-          adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
-          motionEffect: 'zoom_in' as const,
-          typography: { fontFamily: 'Pretendard' as const, fontSizeScale: 1, textAlign: 'center' as const, boxStyle: 'dark' as const, bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
+        const videoBlobUrl = URL.createObjectURL(file);
+        return new Promise<MediaScene>((resolve) => {
+          const tempV = document.createElement('video');
+          tempV.preload = 'metadata';
+          tempV.src = videoBlobUrl;
+          const onMeta = () => {
+            const dur = tempV.duration;
+            const validDur = isFinite(dur) && dur > 0 ? Number(dur.toFixed(1)) : 8;
+            resolve({
+              id: `scene-${Date.now()}-${index}`,
+              mediaType: 'video' as const,
+              url: videoBlobUrl,
+              title: cleanTitle || '새로운 영상 클립',
+              subtitle: '생생한 순간을 담았습니다',
+              callToAction: '궁금하신 점은 댓글 남겨주시면 알려드릴게요 🤍',
+              durationSec: validDur,
+              kidsStickers: [],
+              filter: 'none' as const,
+              zoom: 1.0,
+              panX: 0,
+              panY: 0,
+              adjustments: { brightness: 0, contrast: 0, saturation: 0, warmth: 0, vignette: 0, blur: 0 },
+              motionEffect: 'zoom_in' as const,
+              typography: { fontFamily: 'Pretendard' as const, fontSizeScale: 1, textAlign: 'center' as const, boxStyle: 'dark' as const, bgColor: '#0F172A', bgOpacity: 75, textColor: '#FFFFFF', positionY: 82 }
+            });
+          };
+          tempV.onloadedmetadata = onMeta;
+          tempV.onerror = () => onMeta();
+          setTimeout(onMeta, 2000);
         });
       }
 
@@ -1506,8 +1519,14 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
                   // @ts-ignore
                   webkit-playsinline="true"
                   onLoadedMetadata={(e) => {
-                    const { videoWidth, videoHeight } = e.currentTarget;
+                    const { videoWidth, videoHeight, duration } = e.currentTarget;
                     if (videoWidth && videoHeight) setNaturalAspect(videoWidth / videoHeight);
+                    if (duration && isFinite(duration) && duration > 0) {
+                      const realDur = Number(duration.toFixed(1));
+                      if (Math.abs((currentScene?.durationSec || 0) - realDur) > 0.2) {
+                        updateCurrentScene({ durationSec: realDur });
+                      }
+                    }
                   }}
                   style={{
                     ...getCombinedFilterStyle(),

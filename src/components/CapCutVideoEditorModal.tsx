@@ -223,20 +223,51 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     return initialSceneIndex >= 0 && initialSceneIndex < scenes.length ? initialSceneIndex : 0;
   });
 
+  // ⏱️ 비디오 실제 재생 길이(duration) 자동 감지 및 동기화 (12초 영상이 8초로 오표시되는 문제 방지)
+  useEffect(() => {
+    clips.forEach((clip, idx) => {
+      if (clip.mediaType === 'video' && clip.url && !clip.trimEnd) {
+        const tempV = document.createElement('video');
+        tempV.preload = 'metadata';
+        tempV.src = clip.url;
+        tempV.onloadedmetadata = () => {
+          const realDur = tempV.duration;
+          if (isFinite(realDur) && realDur > 0) {
+            const formatted = Number(realDur.toFixed(1));
+            if (Math.abs((clip.durationSec || 0) - formatted) > 0.2) {
+              setClips((prev) => {
+                if (prev[idx] && prev[idx].id === clip.id && !prev[idx].trimEnd) {
+                  const next = [...prev];
+                  next[idx] = { ...next[idx], durationSec: formatted };
+                  return next;
+                }
+                return prev;
+              });
+            }
+          }
+        };
+      }
+    });
+  }, [clips.map((c) => c.url).join(',')]);
+
   // 📱 스마트폰 갤러리 비디오 썸네일 캐시 (클립별 프레임 배열)
   const [clipThumbnails, setClipThumbnails] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     clips.forEach((clip) => {
-      if (clip.mediaType === 'video' && clip.url && !clipThumbnails[clip.id]) {
-        generateVideoThumbnails(clip.url, clip.trimStart || 0, clip.durationSec || 8, 6).then((frames) => {
-          if (frames && frames.length > 0) {
-            setClipThumbnails((prev) => ({
-              ...prev,
-              [clip.id]: frames,
-            }));
-          }
-        });
+      if (clip.mediaType === 'video' && clip.url) {
+        const cacheKey = `${clip.id}-${clip.durationSec || 8}-${clip.trimStart || 0}`;
+        if (!clipThumbnails[cacheKey]) {
+          generateVideoThumbnails(clip.url, clip.trimStart || 0, clip.durationSec || 8, 6).then((frames) => {
+            if (frames && frames.length > 0) {
+              setClipThumbnails((prev) => ({
+                ...prev,
+                [clip.id]: frames,
+                [cacheKey]: frames,
+              }));
+            }
+          });
+        }
       }
     });
   }, [clips, clipThumbnails]);
@@ -476,20 +507,33 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
       const cleanName = file.name.replace(/\.[^/.]+$/, "");
 
       if (isVideo) {
-        return Promise.resolve({
-          id: `clip-upload-${Date.now()}-${idx}`,
-          title: cleanName,
-          mediaType: 'video' as const,
-          url: URL.createObjectURL(file),
-          durationSec: 8,
-          speed: 1.0,
-          rotation: 0,
-          filter: 'none' as const,
-          transition: 'none' as const,
-          isMuted: false,
-          volume: 100,
-          kidsStickers: [],
-          customSubtitles: [],
+        const videoBlobUrl = URL.createObjectURL(file);
+        return new Promise<MediaScene>((resolve) => {
+          const tempV = document.createElement('video');
+          tempV.preload = 'metadata';
+          tempV.src = videoBlobUrl;
+          const onMeta = () => {
+            const dur = tempV.duration;
+            const validDur = isFinite(dur) && dur > 0 ? Number(dur.toFixed(1)) : 8;
+            resolve({
+              id: `clip-upload-${Date.now()}-${idx}`,
+              title: cleanName,
+              mediaType: 'video' as const,
+              url: videoBlobUrl,
+              durationSec: validDur,
+              speed: 1.0,
+              rotation: 0,
+              filter: 'none' as const,
+              transition: 'none' as const,
+              isMuted: false,
+              volume: 100,
+              kidsStickers: [],
+              customSubtitles: [],
+            });
+          };
+          tempV.onloadedmetadata = onMeta;
+          tempV.onerror = () => onMeta();
+          setTimeout(onMeta, 2000);
         });
       }
 
@@ -954,8 +998,14 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
                     } catch {}
                   }}
                   onLoadedMetadata={(e) => {
-                    const { videoWidth, videoHeight } = e.currentTarget;
+                    const { videoWidth, videoHeight, duration } = e.currentTarget;
                     if (videoWidth && videoHeight) setNaturalAspect(videoWidth / videoHeight);
+                    if (duration && isFinite(duration) && duration > 0) {
+                      const realDur = Number(duration.toFixed(1));
+                      if (!currentClip?.trimEnd && Math.abs((currentClip?.durationSec || 0) - realDur) > 0.2) {
+                        updateCurrentClip({ durationSec: realDur });
+                      }
+                    }
                   }}
                   style={{
                     filter: getFilterStyle(currentClip.filter),
