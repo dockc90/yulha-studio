@@ -3,16 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { HomeKidsHeader, StudioTab } from './components/HomeKidsHeader';
 import { HomeKidsTemplatesView } from './components/HomeKidsTemplatesView';
-import { HomeKidsStudio } from './components/HomeKidsStudio';
-import { PlatformPublishHub } from './components/PlatformPublishHub';
-import { HomeKidsSavedView } from './components/HomeKidsSavedView';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { UniversalCategory, HomeKidsProject, QuickTemplate, CanvasAspectRatio, MediaScene } from './types/homeAndKids';
 import { SAMPLE_HOME_KIDS_PROJECTS } from './data/homeKidsTemplates';
 import { Sparkles } from 'lucide-react';
+
+// Code Splitting (React.lazy): 무거운 에디터와 퍼블리싱 허브를 지연 로딩하여 첫 페이지 초고속 로딩 보장
+const HomeKidsStudio = lazy(() =>
+  import('./components/HomeKidsStudio').then((m) => ({ default: m.HomeKidsStudio }))
+);
+const PlatformPublishHub = lazy(() =>
+  import('./components/PlatformPublishHub').then((m) => ({ default: m.PlatformPublishHub }))
+);
+const HomeKidsSavedView = lazy(() =>
+  import('./components/HomeKidsSavedView').then((m) => ({ default: m.HomeKidsSavedView }))
+);
+
+const ViewLoadingFallback = () => (
+  <div className="min-h-[50vh] flex flex-col items-center justify-center space-y-3 text-[#787774] animate-in fade-in">
+    <div className="w-6 h-6 border-2 border-[#23272A] border-t-transparent rounded-full animate-spin" />
+    <span className="text-xs font-medium">스튜디오를 불러오는 중입니다...</span>
+  </div>
+);
 
 const YULHA_STORAGE_KEY = 'yulha_studio_saved_projects_v3';
 
@@ -382,42 +397,44 @@ export default function App() {
             />
           )}
 
-          {currentTab === 'studio' && (
-            <HomeKidsStudio
-              key={currentProject.id}
-              project={currentProject}
-              setProject={setCurrentProject}
-              onGoToPublish={() => navigateToTab('publish')}
-              onSaveProject={handleSaveCurrentProject}
-              onBack={() => handleGoBack()}
-              onClose={() => handleGoBack()}
-              initialOpenCapCut={initialOpenCapCut}
-            />
-          )}
+          <Suspense fallback={<ViewLoadingFallback />}>
+            {currentTab === 'studio' && (
+              <HomeKidsStudio
+                key={currentProject.id}
+                project={currentProject}
+                setProject={setCurrentProject}
+                onGoToPublish={() => navigateToTab('publish')}
+                onSaveProject={handleSaveCurrentProject}
+                onBack={() => handleGoBack()}
+                onClose={() => handleGoBack()}
+                initialOpenCapCut={initialOpenCapCut}
+              />
+            )}
 
-          {currentTab === 'publish' && (
-            <PlatformPublishHub
-              project={currentProject}
-              setProject={setCurrentProject}
-              onBackToStudio={() => handleGoBack()}
-              onClose={() => handleGoBack()}
-            />
-          )}
+            {currentTab === 'publish' && (
+              <PlatformPublishHub
+                project={currentProject}
+                setProject={setCurrentProject}
+                onBackToStudio={() => handleGoBack()}
+                onClose={() => handleGoBack()}
+              />
+            )}
 
-          {currentTab === 'saved' && (
-            <HomeKidsSavedView
-              savedProjects={savedProjects}
-              onSelectProject={(proj) => {
-                setCurrentProject(proj);
-                navigateToTab('studio');
-                showToast(`'${proj.title}' 프로젝트를 불러왔습니다.`);
-              }}
-              onDeleteProject={handleDeleteSavedProject}
-              onCreateNew={() => handleCreateNewProject(activeCategory)}
-              onBack={() => handleGoBack()}
-              onClose={() => handleGoBack()}
-            />
-          )}
+            {currentTab === 'saved' && (
+              <HomeKidsSavedView
+                savedProjects={savedProjects}
+                onSelectProject={(proj) => {
+                  setCurrentProject(proj);
+                  navigateToTab('studio');
+                  showToast(`'${proj.title}' 프로젝트를 불러왔습니다.`);
+                }}
+                onDeleteProject={handleDeleteSavedProject}
+                onCreateNew={() => handleCreateNewProject(activeCategory)}
+                onBack={() => handleGoBack()}
+                onClose={() => handleGoBack()}
+              />
+            )}
+          </Suspense>
         </main>
 
         {/* Notion-Style Clean Minimalist Toast (Positioned safely above mobile bottom nav) */}

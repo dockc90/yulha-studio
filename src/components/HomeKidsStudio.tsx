@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { 
   Upload, 
   Plus, 
@@ -60,7 +60,10 @@ import {
   POPULAR_BGM_PRESETS,
   BGM_CATEGORIES
 } from '../data/homeKidsTemplates';
-import { CapCutVideoEditorModal } from './CapCutVideoEditorModal';
+
+const CapCutVideoEditorModal = lazy(() => 
+  import('./CapCutVideoEditorModal').then((m) => ({ default: m.CapCutVideoEditorModal }))
+);
 
 // Web Audio API Synthesizer for copyright-safe BGM Preview
 class BgmSynthPlayer {
@@ -3764,21 +3767,25 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         </button>
       )}
 
-      <CapCutVideoEditorModal
-        isOpen={isCapCutModalOpen}
-        onClose={() => setIsCapCutModalOpen(false)}
-        scenes={project.scenes}
-        initialSceneIndex={currentSceneIdx}
-        aspectRatio={project.aspectRatio}
-        onApply={(updatedScenes) => {
-          setProject((prev) => ({
-            ...prev,
-            scenes: updatedScenes,
-            updatedAt: new Date().toISOString()
-          }));
-          setCurrentSceneIdx(0);
-        }}
-      />
+      {isCapCutModalOpen && (
+        <Suspense fallback={null}>
+          <CapCutVideoEditorModal
+            isOpen={isCapCutModalOpen}
+            onClose={() => setIsCapCutModalOpen(false)}
+            scenes={project.scenes}
+            initialSceneIndex={currentSceneIdx}
+            aspectRatio={project.aspectRatio}
+            onApply={(updatedScenes) => {
+              setProject((prev) => ({
+                ...prev,
+                scenes: updatedScenes,
+                updatedAt: new Date().toISOString()
+              }));
+              setCurrentSceneIdx(0);
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
