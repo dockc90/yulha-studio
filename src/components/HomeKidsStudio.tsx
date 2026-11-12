@@ -71,6 +71,7 @@ class BgmSynthPlayer {
   private isPlaying = false;
   private currentTrackId: string | null = null;
   private timer: any = null;
+  private autoStopTimer: any = null;
 
   play(trackId: string, category: string, onEnd?: () => void) {
     this.stop();
@@ -112,7 +113,7 @@ class BgmSynthPlayer {
       this.timer = setInterval(playTone, 320);
 
       // Auto stop after 10s preview
-      setTimeout(() => {
+      this.autoStopTimer = setTimeout(() => {
         if (this.currentTrackId === trackId) {
           this.stop();
           onEnd?.();
@@ -129,6 +130,10 @@ class BgmSynthPlayer {
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;
+    }
+    if (this.autoStopTimer) {
+      clearTimeout(this.autoStopTimer);
+      this.autoStopTimer = null;
     }
     if (this.ctx) {
       try { this.ctx.close(); } catch (e) {}
@@ -198,6 +203,13 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [isCapCutModalOpen]);
+
+  // Cleanup BGM synth on studio unmount
+  useEffect(() => {
+    return () => {
+      bgmSynth.stop();
+    };
+  }, []);
 
   const openCapCutEditor = () => {
     try {
@@ -1434,20 +1446,21 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
           <button
             onClick={onGoToPublish}
-            className="hidden sm:inline-flex items-center justify-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] text-[11px] sm:text-xs font-medium border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] text-[11px] sm:text-xs font-medium border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
+            title="SNS 발행 가이드 열기"
           >
             <Share2 className="w-3.5 h-3.5 text-[#787774] shrink-0" />
-            <span className="leading-none">SNS 가이드</span>
+            <span className="leading-none hidden xs:inline">SNS 가이드</span>
           </button>
 
           {/* Pro Video Editor Launcher Button */}
           <button
             onClick={openCapCutEditor}
-            className="hidden sm:inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-[11px] sm:text-xs border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-[11px] sm:text-xs border border-[#E3E2DE] transition-colors leading-none cursor-pointer"
             title="전문 동영상 편집기 열기"
           >
             <Scissors className="w-3.5 h-3.5 text-[#37352F] shrink-0" />
-            <span className="leading-none">동영상 컷편집</span>
+            <span className="leading-none hidden xs:inline">동영상 컷편집</span>
           </button>
 
           {onClose && (

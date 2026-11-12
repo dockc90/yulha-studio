@@ -436,7 +436,8 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
           {filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="bg-white rounded-2xl p-4 border border-[#E9E9E7] hover:border-[#D3D1CB] hover:shadow-xs transition-all flex flex-col justify-between group"
+              onClick={() => onSelectTemplate(template)}
+              className="bg-white rounded-2xl p-4 border border-[#E9E9E7] hover:border-[#D3D1CB] hover:shadow-sm transition-all flex flex-col justify-between group cursor-pointer"
             >
               <div className="space-y-3">
                 <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-[#F7F6F3]">
@@ -471,7 +472,10 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => onSelectTemplate(template)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectTemplate(template);
+                  }}
                   className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#23272A] hover:bg-[#37352F] text-white font-medium text-xs transition-colors cursor-pointer"
                 >
                   <span>편집하기</span>
@@ -500,7 +504,8 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
           {SAMPLE_HOME_KIDS_PROJECTS.map((project) => (
             <div
               key={project.id}
-              className="bg-white rounded-2xl p-4 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#D3D1CB] transition-all flex flex-col justify-between group"
+              onClick={() => onLoadProject(project)}
+              className="bg-white rounded-2xl p-4 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#D3D1CB] hover:shadow-sm transition-all flex flex-col justify-between group cursor-pointer"
             >
               <div className="space-y-3">
                 <div className="relative aspect-video rounded-xl overflow-hidden bg-[#F1F1EF]">
@@ -530,7 +535,11 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
                 </span>
 
                 <button
-                  onClick={() => onLoadProject(project)}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLoadProject(project);
+                  }}
                   className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] text-xs font-medium transition-colors cursor-pointer"
                 >
                   <span>프로젝트 열기</span>

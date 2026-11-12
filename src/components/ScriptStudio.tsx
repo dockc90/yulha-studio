@@ -579,8 +579,8 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
         charCount: (editableScript || '').length || 100,
         estimatedSeconds: estimatedSeconds || 45,
         createdAt: new Date().toISOString(),
-        selectedVoiceId: currentProject?.selectedVoiceId || 'JBFqnCBsd6RMkjVDRZzb',
-        voiceSpeedMultiplier: currentProject?.voiceSpeedMultiplier || 1.1,
+        selectedVoiceId: (currentProject as any)?.selectedVoiceId || 'JBFqnCBsd6RMkjVDRZzb',
+        voiceSpeedMultiplier: (currentProject as any)?.voiceSpeedMultiplier || 1.1,
       };
     }
 

@@ -409,17 +409,19 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
     const range = clipRanges[selectedIdx];
     if (!range) return;
 
-    // Relative offset within current clip
-    let localOffset = currentTime - range.start;
+    // Relative offset within current clip (배속 반영)
+    const speed = currentClip.speed || 1.0;
+    const localEffectiveOffset = Math.max(0, currentTime - range.start);
+    let localOriginalOffset = localEffectiveOffset * speed;
     const clipDuration = currentClip.durationSec || 4;
 
     // If playhead is too close to boundaries or at 0, default to half
-    if (localOffset <= 0.6 || localOffset >= clipDuration - 0.6) {
-      localOffset = Number((clipDuration / 2).toFixed(1));
+    if (localOriginalOffset <= 0.6 || localOriginalOffset >= clipDuration - 0.6) {
+      localOriginalOffset = Number((clipDuration / 2).toFixed(1));
     }
 
-    const firstDuration = Number(localOffset.toFixed(1));
-    const secondDuration = Number((clipDuration - localOffset).toFixed(1));
+    const firstDuration = Number(localOriginalOffset.toFixed(1));
+    const secondDuration = Number((clipDuration - localOriginalOffset).toFixed(1));
 
     const clipA: MediaScene = {
       ...currentClip,

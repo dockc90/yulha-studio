@@ -785,7 +785,7 @@ export const VideoRendererModal: React.FC<VideoRendererModalProps> = ({
   }, [channelLogo.imageUrl]);
 
   // Subtitle Customizations (화이트 카드뉴스 프레임 기본값: 86% 최하단, 프리텐다드)
-  const [subtitleFont, setSubtitleFont] = useState<SubtitleFontFamily>(project.subtitleFont || 'Pretendard');
+  const [subtitleFont, setSubtitleFont] = useState<SubtitleFontFamily>((project.subtitleFont as SubtitleFontFamily) || 'Pretendard');
   const [subtitleXPercent, setSubtitleXPercent] = useState<number>(project.subtitleXPercent ?? 50);
   const [subtitleYPercent, setSubtitleYPercent] = useState<number>(() => {
     if (project.subtitleYPercent !== undefined) return project.subtitleYPercent;
@@ -4762,7 +4762,7 @@ export const VideoRendererModal: React.FC<VideoRendererModalProps> = ({
                       </div>
                       <button
                         type="button"
-                        onClick={handleAddCustomTextOverlay}
+                        onClick={() => handleAddCustomTextOverlay()}
                         className="flex items-center gap-1 py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs transition cursor-pointer active:scale-95"
                       >
                         <Plus className="w-3.5 h-3.5" />
@@ -4779,7 +4779,7 @@ export const VideoRendererModal: React.FC<VideoRendererModalProps> = ({
                         </p>
                         <button
                           type="button"
-                          onClick={handleAddCustomTextOverlay}
+                          onClick={() => handleAddCustomTextOverlay()}
                           className="mt-2 py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition inline-flex items-center gap-1 cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5" />

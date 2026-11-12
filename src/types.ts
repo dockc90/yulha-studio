@@ -215,11 +215,17 @@ export interface SceneItem {
   videoFit?: 'cover' | 'contain'; // 9:16 화면 채움 or 비율 유지
   videoCrop?: { xPercent: number; yPercent: number; zoom: number }; // 캡컷식 줌 및 위치 이동
   motionEffect?: MotionEffectType; // 선택된 카메라 무빙 효과
+  userCropUrl?: string; // 사용자 커스텀 크롭 이미지 URL
+  text?: string; // 씬 자막 텍스트
+  imageUrl?: string; // 이미지 URL 별칭
+  image?: string; // 이미지 URL 별칭
 }
 
 export interface ShortsProject {
   id: string;
   figureName: string;
+  topic?: string; // 주제 별칭
+  subtitleFont?: string; // 자막 폰트
   category: CategoryType;
   targetPersona: TargetPersona;
   targetDuration: 45 | 60;
