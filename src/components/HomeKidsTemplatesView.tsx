@@ -24,6 +24,13 @@ import {
 } from 'lucide-react';
 import { QuickTemplate, UniversalCategory, HomeKidsProject, CanvasAspectRatio } from '../types/homeAndKids';
 import { QUICK_TEMPLATES, SAMPLE_HOME_KIDS_PROJECTS } from '../data/homeKidsTemplates';
+import { 
+  InstagramIcon, 
+  InstagramBadge, 
+  YouTubeIcon, 
+  YouTubeBadge, 
+  OHouseBadge 
+} from './BrandIcons';
 
 interface TemplatesViewProps {
   activeCategory: UniversalCategory;
@@ -111,53 +118,53 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
 
           <p className="text-xs sm:text-sm text-[#787774] leading-relaxed font-normal break-keep">
             사진 보정, 타임라인 정밀 컷분할 & 병합, 회전 자막, 스튜디오 필터, 저작권 안심 36곡 BGM까지 —
-            복잡한 툴 없이 <strong>인스타그램 릴스 · 오늘의집 스토리 · 유튜브 쇼츠</strong>를 빠르게 제작할 수 있습니다.
+            복잡한 툴 없이 <strong className="text-[#37352F]">인스타그램 릴스 · 오늘의집 스토리 · 유튜브 쇼츠</strong>를 빠르게 제작할 수 있습니다.
           </p>
 
-          {/* Platform Quick Dimension Buttons */}
+          {/* Platform Quick Dimension Buttons with Official Brand Badges */}
           <div className="pt-1 sm:pt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="text-xs font-medium text-[#787774] mr-0.5">플랫폼 규격:</span>
             <button
               onClick={() => onCreateNewProject('all', { aspectRatio: '9:16' })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50/50 text-[#37352F] hover:text-black text-xs font-medium border border-[#E3E2DE] hover:border-rose-200 transition-all cursor-pointer shadow-2xs group"
             >
-              <Smartphone className="w-3.5 h-3.5 text-[#787774] shrink-0" />
+              <InstagramBadge size="sm" className="group-hover:scale-110 transition-transform" />
               <span>9:16 릴스·쇼츠</span>
             </button>
 
             <button
               onClick={() => onCreateNewProject('home', { aspectRatio: '1:1' })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50/50 text-[#37352F] hover:text-black text-xs font-medium border border-[#E3E2DE] hover:border-sky-200 transition-all cursor-pointer shadow-2xs group"
             >
-              <Square className="w-3.5 h-3.5 text-[#787774] shrink-0" />
-              <span>1:1 피드</span>
+              <OHouseBadge size="sm" className="group-hover:scale-110 transition-transform" />
+              <span>1:1 오늘의집 피드</span>
             </button>
 
             <button
               onClick={() => onCreateNewProject('daily', { aspectRatio: '4:5' })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50/50 text-[#37352F] hover:text-black text-xs font-medium border border-[#E3E2DE] hover:border-rose-200 transition-all cursor-pointer shadow-2xs group"
             >
-              <Maximize2 className="w-3.5 h-3.5 text-[#787774] shrink-0" />
+              <InstagramBadge size="sm" className="group-hover:scale-110 transition-transform" />
               <span>4:5 세로 피드</span>
             </button>
 
             <button
               onClick={() => onCreateNewProject('cafe_travel', { aspectRatio: '16:9' })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F7F6F3] hover:bg-[#EFEFED] text-[#37352F] text-xs font-medium border border-[#E3E2DE] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-red-50/50 text-[#37352F] hover:text-black text-xs font-medium border border-[#E3E2DE] hover:border-red-200 transition-all cursor-pointer shadow-2xs group"
             >
-              <Film className="w-3.5 h-3.5 text-[#787774] shrink-0" />
-              <span>16:9 가로 영상</span>
+              <YouTubeBadge size="sm" className="group-hover:scale-110 transition-transform" />
+              <span>16:9 유튜브 가로</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* 2. 4 SUPERPOWER CARDS: Notion-Style Clean Action Hub */}
+      {/* 2. 4 SUPERPOWER CARDS: Elevated Sensory Action Hub */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-base sm:text-lg font-bold text-[#37352F] flex items-center gap-2">
             <span>작업 시작하기</span>
-            <span className="text-xs text-[#787774] font-medium bg-[#F1F1EF] px-2 py-0.5 rounded border border-[#E3E2DE]">바로가기</span>
+            <span className="text-xs text-[#787774] font-medium bg-[#F1F1EF] px-2 py-0.5 rounded-full border border-[#E3E2DE]">바로가기</span>
           </h2>
         </div>
 
@@ -168,51 +175,51 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
               if (onOpenCapCutDirectly) onOpenCapCutDirectly();
               else onCreateNewProject('all', { openCapCut: true, aspectRatio: '9:16' });
             }}
-            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FDFDFD] transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-indigo-300 hover:shadow-[0_4px_20px_rgba(99,102,241,0.1)] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F]">
-                  <Scissors className="w-4 h-4 text-[#37352F]" />
+                <div className="w-9 h-9 rounded-xl bg-[#191919] flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
+                  <Scissors className="w-4 h-4 text-white" />
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
                   동영상 에디터
                 </span>
               </div>
 
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-[#37352F] group-hover:text-black transition-colors">
+                <h3 className="font-bold text-sm sm:text-base text-[#191919] group-hover:text-indigo-900 transition-colors">
                   동영상 컷분할 & 합치기
                 </h3>
                 <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
-                  재생바에서 <strong>분할</strong> 및 <strong>합치기</strong>, 배속 조절, 화면 회전, 전환 효과를 직관적으로 편집합니다.
+                  재생바에서 <strong className="text-neutral-800">분할</strong> 및 <strong className="text-neutral-800">합치기</strong>, 배속 조절, 화면 회전, 전환 효과를 직관적으로 편집합니다.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F] group-hover:text-indigo-600">
               <span>편집기 열기</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
             </div>
           </div>
 
           {/* Action 2: Photo Polish & Stickers */}
           <div 
             onClick={() => onCreateNewProject('home', { aspectRatio: '1:1' })}
-            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FDFDFD] transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-amber-300 hover:shadow-[0_4px_20px_rgba(245,158,11,0.1)] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F]">
-                  <ImageIcon className="w-4 h-4 text-[#37352F]" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-400 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
+                  <ImageIcon className="w-4 h-4 text-white" />
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-100">
                   감성 필터
                 </span>
               </div>
 
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-[#37352F]">
+                <h3 className="font-bold text-sm sm:text-base text-[#191919] group-hover:text-amber-900 transition-colors">
                   사진 보정 & 스티커
                 </h3>
                 <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
@@ -221,29 +228,27 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
               </div>
             </div>
 
-            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F] group-hover:text-amber-600">
               <span>사진 편집 시작</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
             </div>
           </div>
 
           {/* Action 3: 9:16 Vertical Shorts/Reels */}
           <div 
             onClick={() => onCreateNewProject('daily', { aspectRatio: '9:16' })}
-            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FDFDFD] transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-rose-300 hover:shadow-[0_4px_20px_rgba(220,39,67,0.1)] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F]">
-                  <Instagram className="w-4 h-4 text-[#37352F]" />
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                <InstagramBadge size="md" className="group-hover:scale-105 transition-transform" />
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
                   9:16 숏폼
                 </span>
               </div>
 
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-[#37352F]">
+                <h3 className="font-bold text-sm sm:text-base text-[#191919] group-hover:text-rose-900 transition-colors">
                   인스타 릴스 · 쇼츠
                 </h3>
                 <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
@@ -252,30 +257,28 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
               </div>
             </div>
 
-            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F] group-hover:text-rose-600">
               <span>숏폼 만들기</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all" />
             </div>
           </div>
 
           {/* Action 4: Today's House 1:1 Feed */}
           <div 
             onClick={() => onCreateNewProject('home', { aspectRatio: '1:1' })}
-            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FBFBFA] hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-[#D3D1CB] w-full min-w-0"
+            className="group relative rounded-2xl p-5 bg-white text-[#37352F] hover:bg-[#FDFDFD] transition-all cursor-pointer flex flex-col justify-between border border-[#E9E9E7] hover:border-sky-300 hover:shadow-[0_4px_20px_rgba(53,197,240,0.1)] w-full min-w-0"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#37352F] font-bold text-xs">
-                  오늘
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE]">
+                <OHouseBadge size="md" className="group-hover:scale-105 transition-transform" />
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-100">
                   1:1 피드
                 </span>
               </div>
 
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-[#37352F]">
-                  오늘의집 & 인스타 피드
+                <h3 className="font-bold text-sm sm:text-base text-[#191919] group-hover:text-sky-900 transition-colors">
+                  오늘의집 & 피드
                 </h3>
                 <p className="text-xs text-[#787774] mt-1 leading-relaxed break-keep font-normal">
                   댓글과 스크랩을 유도하는 질문형 자막과 1:1 정방형 컷으로 깔끔하게 기록합니다.
@@ -283,9 +286,9 @@ export const HomeKidsTemplatesView: React.FC<TemplatesViewProps> = ({
               </div>
             </div>
 
-            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F]">
+            <div className="pt-3.5 mt-3 border-t border-[#EDEDEB] flex items-center justify-between text-xs font-semibold text-[#37352F] group-hover:text-sky-600">
               <span>1:1 피드 만들기</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#787774] group-hover:text-sky-600 group-hover:translate-x-0.5 transition-all" />
             </div>
           </div>
         </div>

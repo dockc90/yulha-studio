@@ -12,6 +12,13 @@ import {
   RotateCw
 } from 'lucide-react';
 import { HomeKidsProject } from '../types/homeAndKids';
+import { 
+  InstagramIcon, 
+  InstagramBadge, 
+  YouTubeIcon, 
+  YouTubeBadge, 
+  OHouseBadge 
+} from './BrandIcons';
 
 const VIRAL_STYLES = [
   { id: 'curiosity', name: '호기심 & DM 유도형' },
@@ -295,25 +302,21 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
       </div>
 
       {/* Platform Switcher */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {/* 인스타그램 Tab */}
         <button
           onClick={() => setSelectedPlatform('instagram')}
-          className={`p-3.5 rounded-xl border transition-all flex flex-col items-center justify-center space-y-1 cursor-pointer leading-none ${
+          className={`p-3 sm:p-3.5 rounded-xl border transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none relative group ${
             selectedPlatform === 'instagram'
-              ? 'bg-[#23272A] text-white border-[#23272A] shadow-xs'
-              : 'bg-white border-[#E9E9E7] hover:bg-[#F7F6F3] text-[#37352F]'
+              ? 'bg-[#1E1E1E] text-white border-transparent shadow-[0_4px_20px_rgba(220,39,67,0.22)] ring-2 ring-[#dc2743]'
+              : 'bg-white border-[#E9E9E7] hover:bg-[#F7F6F3] text-[#37352F] hover:border-[#D3D1CB]'
           }`}
         >
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-            selectedPlatform === 'instagram' ? 'bg-white/15 text-white' : 'bg-[#F1F1EF] text-[#37352F]'
-          }`}>
-            <Instagram className="w-4 h-4 shrink-0" />
-          </div>
+          <InstagramBadge size="md" className="group-hover:scale-105 transition-transform" />
           <span className={`font-semibold text-xs sm:text-sm leading-none ${selectedPlatform === 'instagram' ? 'text-white' : 'text-[#37352F]'}`}>
             인스타그램
           </span>
-          <span className={`text-[11px] leading-none ${selectedPlatform === 'instagram' ? 'text-neutral-300' : 'text-[#787774]'}`}>
+          <span className={`text-[11px] leading-none ${selectedPlatform === 'instagram' ? 'text-rose-200' : 'text-[#787774]'}`}>
             릴스 · 피드 캡션
           </span>
         </button>
@@ -321,21 +324,17 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
         {/* 오늘의집 Tab */}
         <button
           onClick={() => setSelectedPlatform('ohouse')}
-          className={`p-3.5 rounded-xl border transition-all flex flex-col items-center justify-center space-y-1 cursor-pointer leading-none ${
+          className={`p-3 sm:p-3.5 rounded-xl border transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none relative group ${
             selectedPlatform === 'ohouse'
-              ? 'bg-[#23272A] text-white border-[#23272A] shadow-xs'
-              : 'bg-white border-[#E9E9E7] hover:bg-[#F7F6F3] text-[#37352F]'
+              ? 'bg-[#1E1E1E] text-white border-transparent shadow-[0_4px_20px_rgba(53,197,240,0.25)] ring-2 ring-[#35C5F0]'
+              : 'bg-white border-[#E9E9E7] hover:bg-[#F7F6F3] text-[#37352F] hover:border-[#D3D1CB]'
           }`}
         >
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-            selectedPlatform === 'ohouse' ? 'bg-white/15 text-white' : 'bg-[#F1F1EF] text-[#37352F]'
-          }`}>
-            집
-          </div>
+          <OHouseBadge size="md" className="group-hover:scale-105 transition-transform" />
           <span className={`font-semibold text-xs sm:text-sm leading-none ${selectedPlatform === 'ohouse' ? 'text-white' : 'text-[#37352F]'}`}>
             오늘의집
           </span>
-          <span className={`text-[11px] leading-none ${selectedPlatform === 'ohouse' ? 'text-neutral-300' : 'text-[#787774]'}`}>
+          <span className={`text-[11px] leading-none ${selectedPlatform === 'ohouse' ? 'text-sky-200' : 'text-[#787774]'}`}>
             소통형 스토리
           </span>
         </button>
@@ -343,21 +342,17 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
         {/* 유튜브 Tab */}
         <button
           onClick={() => setSelectedPlatform('youtube')}
-          className={`p-3.5 rounded-xl border transition-all flex flex-col items-center justify-center space-y-1 cursor-pointer leading-none ${
+          className={`p-3 sm:p-3.5 rounded-xl border transition-all flex flex-col items-center justify-center space-y-1.5 cursor-pointer leading-none relative group ${
             selectedPlatform === 'youtube'
-              ? 'bg-[#23272A] text-white border-[#23272A] shadow-xs'
-              : 'bg-white border-[#E9E9E7] hover:bg-[#F7F6F3] text-[#37352F]'
+              ? 'bg-[#1E1E1E] text-white border-transparent shadow-[0_4px_20px_rgba(255,0,0,0.22)] ring-2 ring-[#FF0000]'
+              : 'bg-white border-[#E9E9E7] hover:bg-[#F7F6F3] text-[#37352F] hover:border-[#D3D1CB]'
           }`}
         >
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-            selectedPlatform === 'youtube' ? 'bg-white/15 text-white' : 'bg-[#F1F1EF] text-[#37352F]'
-          }`}>
-            <Youtube className="w-4 h-4 shrink-0" />
-          </div>
+          <YouTubeBadge size="md" className="group-hover:scale-105 transition-transform" />
           <span className={`font-semibold text-xs sm:text-sm leading-none ${selectedPlatform === 'youtube' ? 'text-white' : 'text-[#37352F]'}`}>
             유튜브 쇼츠
           </span>
-          <span className={`text-[11px] leading-none ${selectedPlatform === 'youtube' ? 'text-neutral-300' : 'text-[#787774]'}`}>
+          <span className={`text-[11px] leading-none ${selectedPlatform === 'youtube' ? 'text-red-200' : 'text-[#787774]'}`}>
             고정 댓글 질문
           </span>
         </button>
@@ -365,22 +360,25 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
 
       {/* Platform 1: 인스타그램 */}
       {selectedPlatform === 'instagram' && (
-        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-5">
-          <div className="flex items-center justify-between border-b border-[#EDEDEB] pb-4">
-            <div>
-              <h3 className="font-semibold text-base text-[#37352F]">
-                인스타그램 소통형 감성 캡션
-              </h3>
-              <p className="text-xs text-[#787774]">
-                질문을 이끌어내는 문장 구성으로 알고리즘 체류 시간과 댓글 수를 극대화합니다.
-              </p>
+        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#E9E9E7] shadow-[0_2px_12px_rgba(220,39,67,0.06)] space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#EDEDEB] pb-4 gap-3">
+            <div className="flex items-center gap-3">
+              <InstagramBadge size="lg" />
+              <div>
+                <h3 className="font-bold text-base text-[#191919] flex items-center gap-1.5">
+                  인스타그램 소통형 감성 캡션
+                </h3>
+                <p className="text-xs text-[#787774] mt-0.5">
+                  질문을 이끌어내는 문장 구성으로 알고리즘 체류 시간과 댓글 수를 극대화합니다.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={handleRefresh}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none cursor-pointer transition-colors"
                 title="다른 추천 문구로 새로고침"
               >
                 <RotateCw className="w-3 h-3 shrink-0" />
@@ -390,10 +388,11 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                 href="https://www.instagram.com"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 text-white font-semibold text-xs shadow-xs transition-opacity leading-none cursor-pointer"
               >
+                <InstagramIcon className="w-3.5 h-3.5 fill-white shrink-0" />
                 <span className="leading-none">인스타그램 열기</span>
-                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-90" />
               </a>
             </div>
           </div>
@@ -481,22 +480,25 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
 
       {/* Platform 2: 오늘의집 */}
       {selectedPlatform === 'ohouse' && (
-        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-5">
-          <div className="flex items-center justify-between border-b border-[#EDEDEB] pb-4">
-            <div>
-              <h3 className="font-semibold text-base text-[#37352F]">
-                오늘의집 온라인 집들이 / 사진 업로드
-              </h3>
-              <p className="text-xs text-[#787774]">
-                질문과 댓글을 유도하여 스크랩과 인기 피드 노출을 극대화합니다.
-              </p>
+        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#E9E9E7] shadow-[0_2px_12px_rgba(53,197,240,0.08)] space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#EDEDEB] pb-4 gap-3">
+            <div className="flex items-center gap-3">
+              <OHouseBadge size="lg" />
+              <div>
+                <h3 className="font-bold text-base text-[#191919] flex items-center gap-1.5">
+                  오늘의집 온라인 집들이 / 사진 업로드
+                </h3>
+                <p className="text-xs text-[#787774] mt-0.5">
+                  질문과 댓글을 유도하여 스크랩과 인기 피드 노출을 극대화합니다.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={handleRefresh}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none cursor-pointer transition-colors"
                 title="다른 추천 문구로 새로고침"
               >
                 <RotateCw className="w-3 h-3 shrink-0" />
@@ -506,10 +508,11 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                 href="https://ohou.se/community/projects/new"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#35C5F0] hover:bg-[#2bb4dc] text-white font-semibold text-xs shadow-xs transition-colors leading-none cursor-pointer"
               >
+                <span className="w-3.5 h-3.5 rounded bg-white text-[#35C5F0] font-black text-[9px] flex items-center justify-center leading-none">집</span>
                 <span className="leading-none">오늘의집 글쓰기</span>
-                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-90" />
               </a>
             </div>
           </div>
@@ -599,22 +602,25 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
 
       {/* Platform 3: 유튜브 */}
       {selectedPlatform === 'youtube' && (
-        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#E9E9E7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-5">
-          <div className="flex items-center justify-between border-b border-[#EDEDEB] pb-4">
-            <div>
-              <h3 className="font-semibold text-base text-[#37352F]">
-                유튜브 쇼츠 제목 & 고정 댓글 질문
-              </h3>
-              <p className="text-xs text-[#787774]">
-                시청자들의 댓글 참여를 유도하는 질문형 고정 댓글 템플릿을 제공합니다.
-              </p>
+        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#E9E9E7] shadow-[0_2px_12px_rgba(255,0,0,0.08)] space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#EDEDEB] pb-4 gap-3">
+            <div className="flex items-center gap-3">
+              <YouTubeBadge size="lg" />
+              <div>
+                <h3 className="font-bold text-base text-[#191919] flex items-center gap-1.5">
+                  유튜브 쇼츠 제목 & 고정 댓글 질문
+                </h3>
+                <p className="text-xs text-[#787774] mt-0.5">
+                  시청자들의 댓글 참여를 유도하는 질문형 고정 댓글 템플릿을 제공합니다.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={handleRefresh}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none cursor-pointer transition-colors"
                 title="다른 추천 문구로 새로고침"
               >
                 <RotateCw className="w-3 h-3 shrink-0" />
@@ -624,10 +630,11 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                 href="https://studio.youtube.com"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F1EF] hover:bg-[#EAE9E5] text-[#37352F] font-medium text-xs border border-[#E3E2DE] leading-none"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FF0000] hover:bg-[#e60000] text-white font-semibold text-xs shadow-xs transition-colors leading-none cursor-pointer"
               >
+                <YouTubeIcon className="w-3.5 h-3.5 shrink-0" />
                 <span className="leading-none">유튜브 스튜디오</span>
-                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-90" />
               </a>
             </div>
           </div>

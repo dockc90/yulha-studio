@@ -35,21 +35,21 @@ export const HomeKidsHeader: React.FC<StudioHeaderProps> = ({
       <header className="sticky top-0 z-40 bg-[#FBFBFA]/95 backdrop-blur-md border-b border-[#EDEDEB] w-full">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
-            {/* Logo & Brand: Notion-Style Clean Minimalist */}
+            {/* Logo & Brand: Sensory Minimalist */}
             <button
               type="button"
               onClick={() => setCurrentTab('templates')}
               className="inline-flex items-center gap-2 sm:gap-2.5 text-left group transition cursor-pointer focus:outline-none shrink-0"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#23272A] flex items-center justify-center text-white text-xs font-black shadow-xs shrink-0 group-hover:bg-[#37352F] transition-colors">
-                <Sparkles className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#1E1E1E] via-[#2A2B32] to-[#4338CA] flex items-center justify-center text-white text-xs font-black shadow-xs shrink-0 group-hover:scale-105 transition-all">
+                <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300/30" />
               </div>
               <div className="flex flex-col justify-center">
                 <div className="inline-flex items-center gap-1.5">
-                  <span className="font-bold text-base sm:text-lg tracking-tight text-[#37352F] leading-none">
+                  <span className="font-bold text-base sm:text-lg tracking-tight text-[#191919] leading-none">
                     율하스튜디오
                   </span>
-                  <span className="inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded font-medium bg-[#F1F1EF] text-[#787774] border border-[#E3E2DE] leading-none">
+                  <span className="inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-700 border border-amber-200/80 leading-none">
                     PRO
                   </span>
                 </div>
