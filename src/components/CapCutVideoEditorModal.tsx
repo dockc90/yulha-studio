@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { 
   Play, 
   Pause, 
@@ -252,12 +252,14 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
 
   // 📱 스마트폰 갤러리 비디오 썸네일 캐시 (클립별 프레임 배열)
   const [clipThumbnails, setClipThumbnails] = useState<Record<string, string[]>>({});
+  const thumbnailRequestedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     clips.forEach((clip) => {
       if (clip.mediaType === 'video' && clip.url) {
         const cacheKey = `${clip.id}-${clip.durationSec || 8}-${clip.trimStart || 0}`;
-        if (!clipThumbnails[cacheKey]) {
+        if (!thumbnailRequestedRef.current.has(cacheKey)) {
+          thumbnailRequestedRef.current.add(cacheKey);
           generateVideoThumbnails(clip.url, clip.trimStart || 0, clip.durationSec || 8, 6).then((frames) => {
             if (frames && frames.length > 0) {
               setClipThumbnails((prev) => ({
@@ -270,7 +272,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
         }
       }
     });
-  }, [clips, clipThumbnails]);
+  }, [clips]);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -281,6 +283,7 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const trackContainerRef = useRef<HTMLDivElement | null>(null);
   const isScrubbingRef = useRef<boolean>(false);
+  const scrubRafRef = useRef<number | null>(null);
   const wasPlayingBeforeScrubRef = useRef<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
@@ -289,27 +292,32 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   const currentClip = clips[selectedIdx] || clips[0];
 
   // ⏱️ 클립 배속이 적용된 실제 화면 재생 시간 계산 (예: 8초 영상에 2배속 적용 시 4초)
-  const getClipEffectiveDuration = (clip?: MediaScene | null) => {
+  const getClipEffectiveDuration = useCallback((clip?: MediaScene | null) => {
     if (!clip) return 4;
     const baseDur = clip.durationSec || 4;
     const speed = clip.speed || 1.0;
     return Number((baseDur / speed).toFixed(1));
-  };
+  }, []);
 
-  // Calculate cumulative start time for each clip in total timeline (배속 반영)
-  const getClipTimeRanges = () => {
+  // Calculate cumulative start time for each clip in total timeline (배속 반영, 메모이제이션으로 렌더링 부하 제거)
+  const clipRanges = useMemo(() => {
     let accumulated = 0;
     return clips.map((clip) => {
-      const duration = getClipEffectiveDuration(clip);
+      const baseDur = clip.durationSec || 4;
+      const speed = clip.speed || 1.0;
+      const duration = Number((baseDur / speed).toFixed(1));
       const start = accumulated;
       const end = accumulated + duration;
       accumulated = end;
       return { start, end, duration };
     });
-  };
+  }, [clips]);
 
-  const clipRanges = getClipTimeRanges();
-  const totalDuration = clipRanges.reduce((acc, c) => acc + c.duration, 0);
+  const totalDuration = useMemo(() => {
+    return Number(clipRanges.reduce((acc, c) => acc + c.duration, 0).toFixed(1));
+  }, [clipRanges]);
+
+  const getClipTimeRanges = useCallback(() => clipRanges, [clipRanges]);
 
   // Sync video time on change
   useEffect(() => {
@@ -670,10 +678,22 @@ export const CapCutVideoEditorModal: React.FC<CapCutVideoEditorModalProps> = ({
   const handleScrubberPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isScrubbingRef.current) return;
     e.preventDefault();
-    seekFromPointerEvent(e);
+    const clientX = e.clientX;
+    if (scrubRafRef.current) cancelAnimationFrame(scrubRafRef.current);
+    scrubRafRef.current = requestAnimationFrame(() => {
+      if (!trackContainerRef.current || totalDuration <= 0) return;
+      const rect = trackContainerRef.current.getBoundingClientRect();
+      const progress = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const targetTime = Number((progress * totalDuration).toFixed(2));
+      seekToTime(targetTime);
+    });
   };
 
   const handleScrubberPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (scrubRafRef.current) {
+      cancelAnimationFrame(scrubRafRef.current);
+      scrubRafRef.current = null;
+    }
     if (isScrubbingRef.current) {
       isScrubbingRef.current = false;
       try {

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { 
   Upload, 
   Plus, 
@@ -245,15 +245,19 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
 
   useEffect(() => {
     if (!currentScene?.url) return;
+    let isCancelled = false;
     if (currentScene.mediaType === 'image') {
       const img = new Image();
       img.onload = () => {
-        if (img.naturalWidth && img.naturalHeight) {
+        if (!isCancelled && img.naturalWidth && img.naturalHeight) {
           setNaturalAspect(img.naturalWidth / img.naturalHeight);
         }
       };
       img.src = currentScene.url;
     }
+    return () => {
+      isCancelled = true;
+    };
   }, [currentScene?.url, currentScene?.mediaType]);
 
   const getBoxAspectRatio = (ratio: CanvasAspectRatio): number => {
@@ -966,16 +970,22 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       return;
     }
 
-    // 4. Drag & Move Subtitle or Sticker
+    // 4. Drag & Move Subtitle or Sticker (좌표 변경 시에만 업데이트하여 불필요한 렌더링 방지)
     if (isDraggingSticker && selectedStickerId) {
       const x = Math.max(5, Math.min(95, Math.round(((clientX - rect.left) / rect.width) * 100)));
       const y = Math.max(5, Math.min(95, Math.round(((clientY - rect.top) / rect.height) * 100)));
-      updateSelectedSticker({ x, y });
+      const curSticker = currentScene?.kidsStickers?.find((s) => s.id === selectedStickerId);
+      if (!curSticker || curSticker.x !== x || curSticker.y !== y) {
+        updateSelectedSticker({ x, y });
+      }
       return;
     } else if (isDraggingSubtitle && selectedSubtitleId) {
       const x = Math.max(5, Math.min(95, Math.round(((clientX - rect.left) / rect.width) * 100)));
       const y = Math.max(5, Math.min(95, Math.round(((clientY - rect.top) / rect.height) * 100)));
-      updateSubtitle(selectedSubtitleId, { x, y });
+      const curSub = currentScene?.customSubtitles?.find((s) => s.id === selectedSubtitleId);
+      if (!curSub || curSub.x !== x || curSub.y !== y) {
+        updateSubtitle(selectedSubtitleId, { x, y });
+      }
       return;
     }
 
@@ -985,7 +995,9 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
       const deltaY = ((clientY - mediaDragStartRef.current.y) / rect.height) * 100;
       const nextPanX = Math.max(-100, Math.min(100, Math.round(mediaPanStartRef.current.panX + deltaX)));
       const nextPanY = Math.max(-100, Math.min(100, Math.round(mediaPanStartRef.current.panY + deltaY)));
-      updateCurrentScene({ panX: nextPanX, panY: nextPanY });
+      if (nextPanX !== (currentScene?.panX || 0) || nextPanY !== (currentScene?.panY || 0)) {
+        updateCurrentScene({ panX: nextPanX, panY: nextPanY });
+      }
     }
   };
 
@@ -1260,10 +1272,15 @@ export const HomeKidsStudio: React.FC<StudioProps> = ({
         });
       }
 
-      const link = document.createElement('a');
-      link.download = `yulha-${project.title.replace(/\s+/g, '_')}${fileNameSuffix}-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `yulha-${(project.title || 'studio').replace(/\s+/g, '_')}${fileNameSuffix}-${Date.now()}.png`;
+        link.href = objectUrl;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
+      }, 'image/png');
     };
   };
 

@@ -146,13 +146,40 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
 }) => {
   const [selectedPlatform, setSelectedPlatform] = useState<'instagram' | 'ohouse' | 'youtube'>('instagram');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [customTopic, setCustomTopic] = useState<string>(project.title || '아늑한 거실 룸투어');
+  const [customTopic, setCustomTopic] = useState<string>(project?.title || '아늑한 거실 룸투어');
   const [styleIndex, setStyleIndex] = useState<number>(0);
 
-  const handleCopyText = (key: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2500);
+  // 모바일 웹뷰 및 비보안 환경 대응 클립보드 복사 유틸
+  const handleCopyText = async (key: string, text: string) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2500);
+    } catch {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey(null), 2500);
+      } catch {}
+    }
   };
 
   const handleApplyGenerated = (topicToUse?: string, nextStyle?: number) => {
@@ -160,21 +187,25 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
     const s = nextStyle !== undefined ? nextStyle : styleIndex;
     const generated = generateViralPlatformContent(t, s);
 
-    setProject((prev) => ({
-      ...prev,
-      title: t.trim() ? t.trim() : prev.title,
-      snsMetadata: {
-        instagram: generated.instagram,
-        ohouse: {
-          ...prev.snsMetadata.ohouse,
-          title: generated.ohouse.title,
-          commentNotice: generated.ohouse.commentNotice,
-          stylingTip: generated.ohouse.stylingTip,
-          hashtags: generated.ohouse.hashtags,
-        },
-        youtube: generated.youtube,
-      }
-    }));
+    setProject((prev) => {
+      const prevMeta = prev?.snsMetadata || {};
+      const prevOhouse = prevMeta.ohouse || {};
+      return {
+        ...prev,
+        title: t.trim() ? t.trim() : prev.title,
+        snsMetadata: {
+          instagram: generated.instagram,
+          ohouse: {
+            ...prevOhouse,
+            title: generated.ohouse.title,
+            commentNotice: generated.ohouse.commentNotice,
+            stylingTip: generated.ohouse.stylingTip,
+            hashtags: generated.ohouse.hashtags,
+          },
+          youtube: generated.youtube,
+        }
+      };
+    });
   };
 
   const handleRefresh = () => {
@@ -182,6 +213,10 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
     setStyleIndex(nextIdx);
     handleApplyGenerated(customTopic, nextIdx);
   };
+
+  const instaMeta = project?.snsMetadata?.instagram || { caption: '', commentTriggerHook: '', hashtags: [] };
+  const ohouseMeta = project?.snsMetadata?.ohouse || { title: '', commentNotice: '', stylingTip: '', hashtags: [] };
+  const ytMeta = project?.snsMetadata?.youtube || { title: '', description: '', commentQuestionPrompt: '', hashtags: [] };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-6">
@@ -402,7 +437,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             <div className="flex items-center justify-between">
               <label className="font-medium text-xs text-[#37352F] leading-none">인스타그램 캡션 본문</label>
               <button
-                onClick={() => handleCopyText('insta-caption', project.snsMetadata.instagram.caption)}
+                onClick={() => handleCopyText('insta-caption', instaMeta.caption)}
                 className="inline-flex items-center gap-1 text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'insta-caption' ? <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <Copy className="w-3.5 h-3.5 shrink-0" />}
@@ -411,13 +446,13 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             </div>
             <textarea
               rows={8}
-              value={project.snsMetadata.instagram.caption}
+              value={instaMeta.caption}
               onChange={(e) =>
                 setProject((prev) => ({
                   ...prev,
                   snsMetadata: {
-                    ...prev.snsMetadata,
-                    instagram: { ...prev.snsMetadata.instagram, caption: e.target.value }
+                    ...prev?.snsMetadata,
+                    instagram: { ...(prev?.snsMetadata?.instagram || instaMeta), caption: e.target.value }
                   }
                 }))
               }
@@ -433,7 +468,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                 <span className="leading-none">댓글 반응 유도 핵심 문구</span>
               </span>
               <button
-                onClick={() => handleCopyText('insta-trigger', project.snsMetadata.instagram.commentTriggerHook)}
+                onClick={() => handleCopyText('insta-trigger', instaMeta.commentTriggerHook)}
                 className="text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'insta-trigger' ? '복사 완료!' : '문구 복사'}
@@ -441,13 +476,13 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             </div>
             <input
               type="text"
-              value={project.snsMetadata.instagram.commentTriggerHook}
+              value={instaMeta.commentTriggerHook}
               onChange={(e) =>
                 setProject((prev) => ({
                   ...prev,
                   snsMetadata: {
-                    ...prev.snsMetadata,
-                    instagram: { ...prev.snsMetadata.instagram, commentTriggerHook: e.target.value }
+                    ...prev?.snsMetadata,
+                    instagram: { ...(prev?.snsMetadata?.instagram || instaMeta), commentTriggerHook: e.target.value }
                   }
                 }))
               }
@@ -460,7 +495,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             <div className="flex items-center justify-between">
               <label className="font-medium text-xs text-[#37352F] leading-none">해시태그 모음</label>
               <button
-                onClick={() => handleCopyText('insta-tags', project.snsMetadata.instagram.hashtags.join(' '))}
+                onClick={() => handleCopyText('insta-tags', (instaMeta.hashtags || []).join(' '))}
                 className="inline-flex items-center gap-1 text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'insta-tags' ? <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <Copy className="w-3.5 h-3.5 shrink-0" />}
@@ -468,7 +503,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
               </button>
             </div>
             <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-[#F7F6F3] border border-[#EDEDEB]">
-              {project.snsMetadata.instagram.hashtags.map((tag, idx) => (
+              {(instaMeta.hashtags || []).map((tag, idx) => (
                 <span key={idx} className="px-2.5 py-1 rounded-md bg-white border border-[#EDEDEB] text-[#37352F] text-xs font-mono">
                   {tag}
                 </span>
@@ -521,7 +556,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             <div className="flex items-center justify-between">
               <label className="font-medium text-xs text-[#37352F] leading-none">게시글 제목</label>
               <button
-                onClick={() => handleCopyText('ohouse-title', project.snsMetadata.ohouse.title)}
+                onClick={() => handleCopyText('ohouse-title', ohouseMeta.title)}
                 className="text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'ohouse-title' ? '복사 완료!' : '제목 복사'}
@@ -529,13 +564,13 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             </div>
             <input
               type="text"
-              value={project.snsMetadata.ohouse.title}
+              value={ohouseMeta.title}
               onChange={(e) =>
                 setProject((prev) => ({
                   ...prev,
                   snsMetadata: {
-                    ...prev.snsMetadata,
-                    ohouse: { ...prev.snsMetadata.ohouse, title: e.target.value }
+                    ...prev?.snsMetadata,
+                    ohouse: { ...(prev?.snsMetadata?.ohouse || ohouseMeta), title: e.target.value }
                   }
                 }))
               }
@@ -550,7 +585,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                 <span className="leading-none">댓글 문의 유도 문구</span>
               </span>
               <button
-                onClick={() => handleCopyText('ohouse-notice', project.snsMetadata.ohouse.commentNotice)}
+                onClick={() => handleCopyText('ohouse-notice', ohouseMeta.commentNotice)}
                 className="text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'ohouse-notice' ? '복사 완료!' : '문구 복사'}
@@ -558,13 +593,13 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             </div>
             <input
               type="text"
-              value={project.snsMetadata.ohouse.commentNotice}
+              value={ohouseMeta.commentNotice}
               onChange={(e) =>
                 setProject((prev) => ({
                   ...prev,
                   snsMetadata: {
-                    ...prev.snsMetadata,
-                    ohouse: { ...prev.snsMetadata.ohouse, commentNotice: e.target.value }
+                    ...prev?.snsMetadata,
+                    ohouse: { ...(prev?.snsMetadata?.ohouse || ohouseMeta), commentNotice: e.target.value }
                   }
                 }))
               }
@@ -576,7 +611,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             <div className="flex items-center justify-between">
               <label className="font-medium text-xs text-[#37352F] leading-none">스타일링 노하우 팁 본문</label>
               <button
-                onClick={() => handleCopyText('ohouse-tip', project.snsMetadata.ohouse.stylingTip)}
+                onClick={() => handleCopyText('ohouse-tip', ohouseMeta.stylingTip)}
                 className="text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'ohouse-tip' ? '복사 완료!' : '팁 본문 복사'}
@@ -584,13 +619,13 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             </div>
             <textarea
               rows={3}
-              value={project.snsMetadata.ohouse.stylingTip}
+              value={ohouseMeta.stylingTip}
               onChange={(e) =>
                 setProject((prev) => ({
                   ...prev,
                   snsMetadata: {
-                    ...prev.snsMetadata,
-                    ohouse: { ...prev.snsMetadata.ohouse, stylingTip: e.target.value }
+                    ...prev?.snsMetadata,
+                    ohouse: { ...(prev?.snsMetadata?.ohouse || ohouseMeta), stylingTip: e.target.value }
                   }
                 }))
               }
@@ -643,7 +678,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             <div className="flex items-center justify-between">
               <label className="font-medium text-xs text-[#37352F] leading-none">쇼츠 제목</label>
               <button
-                onClick={() => handleCopyText('yt-title', project.snsMetadata.youtube.title)}
+                onClick={() => handleCopyText('yt-title', ytMeta.title)}
                 className="text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'yt-title' ? '복사 완료!' : '제목 복사'}
@@ -651,13 +686,13 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             </div>
             <input
               type="text"
-              value={project.snsMetadata.youtube.title}
+              value={ytMeta.title}
               onChange={(e) =>
                 setProject((prev) => ({
                   ...prev,
                   snsMetadata: {
-                    ...prev.snsMetadata,
-                    youtube: { ...prev.snsMetadata.youtube, title: e.target.value }
+                    ...prev?.snsMetadata,
+                    youtube: { ...(prev?.snsMetadata?.youtube || ytMeta), title: e.target.value }
                   }
                 }))
               }
@@ -672,7 +707,7 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
                 <span className="leading-none">유튜브 고정 댓글 (시청자 질문 유도용)</span>
               </span>
               <button
-                onClick={() => handleCopyText('yt-prompt', project.snsMetadata.youtube.commentQuestionPrompt)}
+                onClick={() => handleCopyText('yt-prompt', ytMeta.commentQuestionPrompt)}
                 className="text-xs text-[#787774] hover:text-[#37352F] font-medium cursor-pointer leading-none"
               >
                 {copiedKey === 'yt-prompt' ? '복사 완료!' : '고정 댓글 복사'}
@@ -680,13 +715,13 @@ export const PlatformPublishHub: React.FC<PlatformPublishHubProps> = ({
             </div>
             <textarea
               rows={3}
-              value={project.snsMetadata.youtube.commentQuestionPrompt}
+              value={ytMeta.commentQuestionPrompt}
               onChange={(e) =>
                 setProject((prev) => ({
                   ...prev,
                   snsMetadata: {
-                    ...prev.snsMetadata,
-                    youtube: { ...prev.snsMetadata.youtube, commentQuestionPrompt: e.target.value }
+                    ...prev?.snsMetadata,
+                    youtube: { ...(prev?.snsMetadata?.youtube || ytMeta), commentQuestionPrompt: e.target.value }
                   }
                 }))
               }

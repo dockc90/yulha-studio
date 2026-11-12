@@ -3672,6 +3672,9 @@ export const VideoRendererModal: React.FC<VideoRendererModalProps> = ({
 
     mediaRecorder.onstop = async () => {
       isStopped = true;
+      try {
+        combinedStream.getTracks().forEach((track) => track.stop());
+      } catch {}
       if (renderIntervalId) {
         clearInterval(renderIntervalId);
         renderIntervalId = null;

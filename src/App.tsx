@@ -111,6 +111,25 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // Safe localStorage helper to prevent quota exceeded errors
+  const safeSaveToStorage = (projects: HomeKidsProject[]) => {
+    try {
+      localStorage.setItem(YULHA_STORAGE_KEY, JSON.stringify(projects));
+    } catch (err) {
+      console.warn('Storage quota exceeded, trimming media payloads for backup', err);
+      try {
+        const lightened = projects.slice(0, 15).map((proj) => ({
+          ...proj,
+          scenes: (proj.scenes || []).slice(0, 20).map((s) => ({
+            ...s,
+            url: s.url && s.url.length > 300000 ? '' : s.url,
+          }))
+        }));
+        localStorage.setItem(YULHA_STORAGE_KEY, JSON.stringify(lightened));
+      } catch {}
+    }
+  };
+
   // Sync to local storage
   const handleSaveCurrentProject = () => {
     setSavedProjects((prev) => {
@@ -122,11 +141,7 @@ export default function App() {
       } else {
         updated = [{ ...currentProject, updatedAt: new Date().toISOString() }, ...prev];
       }
-      try {
-        localStorage.setItem(YULHA_STORAGE_KEY, JSON.stringify(updated));
-      } catch (err) {
-        console.error('Storage quota exceeded', err);
-      }
+      safeSaveToStorage(updated);
       return updated;
     });
     showToast('보관함에 저장되었습니다 ✨');
@@ -135,9 +150,7 @@ export default function App() {
   const handleDeleteSavedProject = (projectId: string) => {
     setSavedProjects((prev) => {
       const updated = prev.filter((p) => p.id !== projectId);
-      try {
-        localStorage.setItem(YULHA_STORAGE_KEY, JSON.stringify(updated));
-      } catch (e) {}
+      safeSaveToStorage(updated);
       return updated;
     });
     showToast('프로젝트가 삭제되었습니다.');
